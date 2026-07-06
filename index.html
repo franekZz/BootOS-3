@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<title>NewOS Boot</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cherry+Bomb+One&display=swap" rel="stylesheet">
+
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body { width: 100%; height: 100%; overflow: hidden; }
+
+    body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: #000;
+        position: relative;
+        font-family: 'Segoe UI', Arial, sans-serif;
+    }
+
+    body.animated-bg {
+        background: linear-gradient(135deg, #0a0015 0%, #1a0033 20%, #2d1b69 40%, #6b2fb5 60%, #a855f7 80%, #c084fc 100%);
+        background-size: 400% 400%;
+        animation: gradientShift 12s ease infinite;
+    }
+
+    /* PRZEJŚCIE */
+    #transition-overlay {
+        position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+        z-index: 20; pointer-events: none;
+        background: radial-gradient(circle at center, #c084fc 0%, #a855f7 25%, #6b2fb5 50%, #2d1b69 75%, #0a0015 100%);
+        background-size: 400% 400%;
+        animation: gradientShift 12s ease infinite;
+        clip-path: circle(0% at 50% 50%);
+        opacity: 0;
+    }
+    #transition-overlay.blooming {
+        animation: bloomReveal 2.5s cubic-bezier(0.65, 0, 0.35, 1) forwards, gradientShift 12s ease infinite;
+        opacity: 1;
+    }
+
+    #flash {
+        position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+        z-index: 25; pointer-events: none;
+        background: radial-gradient(circle at center, rgba(255,255,255,0.9) 0%, rgba(192,132,252,0.4) 30%, transparent 70%);
+        opacity: 0;
+    }
+    #flash.flashing { animation: flashPulse 2.5s ease-out forwards; }
+
+    #logo {
+        text-align: center; opacity: 0; transform: scale(0.5);
+        animation: logoAppear 1.5s ease-out forwards;
+        white-space: nowrap;
+        transition: opacity 0.8s ease, transform 0.8s ease;
+        position: relative; z-index: 30;
+    }
+    #logo.fade-out { opacity: 0; transform: scale(1.3); }
+    #logo.hidden { display: none; }
+
+    .metal-nothing { font-family: 'Cherry Bomb One', cursive; color: #fff; font-size: 4vw; display: inline-block; animation: glowPulse 3s ease-in-out infinite; }
+    .new-os { color: #fff; font-size: 4vw; font-weight: 300; letter-spacing: 2px; display: inline-block; }
+
+    #effects {
+        position: absolute; width: 100%; height: 100%; top: 0; left: 0;
+        opacity: 0; transition: opacity 2s ease; z-index: 1; overflow: hidden;
+    }
+    #effects.visible { opacity: 1; }
+
+    .particle {
+        position: absolute; border-radius: 50%;
+        background: radial-gradient(circle, rgba(168,85,247,0.8) 0%, rgba(168,85,247,0) 70%);
+        animation: float-particle linear infinite;
+        box-shadow: 0 0 20px rgba(168,85,247,0.8), 0 0 40px rgba(168,85,247,0.6), 0 0 60px rgba(168,85,247,0.4);
+    }
+
+    .wave {
+        position: absolute; width: 200%; height: 200%; border-radius: 40%;
+        background: radial-gradient(circle, rgba(168,85,247,0.3) 0%, rgba(139,92,246,0.2) 30%, rgba(124,58,237,0.1) 60%, transparent 100%);
+        animation: wave-rotate 20s linear infinite;
+    }
+    .wave:nth-child(1) { top: -50%; left: -50%; animation-duration: 15s; }
+    .wave:nth-child(2) { top: -50%; left: -50%; animation-duration: 20s; animation-direction: reverse; }
+    .wave:nth-child(3) { top: -50%; left: -50%; animation-duration: 25s; }
+
+    /* CHMURKI */
+    .cloud {
+        position: absolute; width: 120px; height: 40px;
+        background: rgba(255,255,255,0.9); border-radius: 100px;
+        cursor: grab; z-index: 5;
+        box-shadow: 0 0 30px rgba(255,255,255,0.5), 0 0 60px rgba(168,85,247,0.3);
+        pointer-events: auto; transition: transform 0.1s ease;
+        animation: cloud-drift linear infinite;
+        will-change: transform, left, top;
+    }
+    .cloud:before, .cloud:after { content: ''; position: absolute; background: rgba(255,255,255,0.9); border-radius: 50%; }
+    .cloud:before { width: 55px; height: 55px; top: -25px; left: 20px; }
+    .cloud:after { width: 70px; height: 70px; top: -35px; right: 20px; }
+    .cloud.dragging {
+        cursor: grabbing; animation: none !important; z-index: 100;
+        box-shadow: 0 0 50px rgba(255,255,255,0.9), 0 0 100px rgba(168,85,247,0.6);
+        transform: scale(1.1);
+    }
+
+    .geo-shape { position: absolute; opacity: 0.3; animation: geo-float linear infinite; }
+    .triangle { width: 0; height: 0; border-left: 30px solid transparent; border-right: 30px solid transparent; border-bottom: 50px solid rgba(192,132,252,0.6); filter: blur(2px); }
+    .square { width: 40px; height: 40px; background: rgba(167,139,250,0.6); transform: rotate(45deg); filter: blur(2px); }
+    .hexagon { width: 50px; height: 30px; background: rgba(196,181,253,0.6); position: relative; filter: blur(2px); }
+    .hexagon:before, .hexagon:after { content: ""; position: absolute; width: 0; border-left: 25px solid transparent; border-right: 25px solid transparent; }
+    .hexagon:before { bottom: 100%; border-bottom: 15px solid rgba(196,181,253,0.6); }
+    .hexagon:after { top: 100%; border-top: 15px solid rgba(196,181,253,0.6); }
+
+    /* OKIENKO WYBORU CZCIONKI */
+    #font-picker {
+        position: absolute; top: 50%; left: 50%;
+        transform: translate(-50%, -50%) scale(0.8);
+        background: rgba(20,5,40,0.85); backdrop-filter: blur(15px);
+        border: 2px solid rgba(168,85,247,0.6); border-radius: 25px;
+        padding: 40px 50px; z-index: 50; opacity: 0; pointer-events: none; text-align: center;
+        box-shadow: 0 0 40px rgba(168,85,247,0.6), 0 0 80px rgba(168,85,247,0.3), inset 0 0 30px rgba(168,85,247,0.1);
+        transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    #font-picker.visible { opacity: 1; pointer-events: auto; transform: translate(-50%, -50%) scale(1); }
+    #font-picker h2 { color: #fff; font-size: 2rem; font-weight: 600; margin-bottom: 30px; text-shadow: 0 0 20px rgba(168,85,247,0.8); }
+    .font-buttons { display: flex; gap: 25px; flex-wrap: wrap; justify-content: center; }
+    .font-btn {
+        padding: 20px 35px; border: 2px solid rgba(168,85,247,0.6); border-radius: 15px;
+        background: rgba(168,85,247,0.15); color: #fff; font-size: 1.5rem; cursor: pointer;
+        transition: all 0.3s ease; min-width: 180px;
+    }
+    .font-btn:hover { background: rgba(168,85,247,0.4); transform: translateY(-5px) scale(1.05); box-shadow: 0 0 30px rgba(168,85,247,0.8); border-color: rgba(255,255,255,0.8); }
+    .font-btn.cherry { font-family: 'Cherry Bomb One', cursive; }
+    .font-btn small { display: block; font-size: 0.8rem; font-weight: 300; opacity: 0.7; margin-top: 8px; }
+
+    #greeting {
+        text-align: center; opacity: 0; color: #fff; font-size: 7vw; font-weight: 600;
+        text-shadow: 0 0 20px rgba(255,255,255,0.8), 0 0 40px rgba(168,85,247,0.8), 0 0 60px rgba(168,85,247,0.6), 0 0 80px rgba(168,85,247,0.4);
+        position: relative; z-index: 10; pointer-events: none;
+    }
+    #greeting.font-cherry { font-family: 'Cherry Bomb One', cursive; font-weight: 400; }
+    #greeting.animate-in { animation: greetingIn 0.7s cubic-bezier(0.34,1.56,0.64,1) forwards, text-glow 3s ease-in-out infinite 0.7s; }
+    #greeting.animate-out { animation: greetingOut 0.5s ease-in forwards; }
+
+    /* PRZYCISK STRZAŁKI (na dole w środku) */
+    #next-btn {
+        position: absolute; bottom: 6%; left: 50%; transform: translateX(-50%) scale(0.5);
+        width: 80px; height: 80px; border-radius: 50%;
+        border: 2px solid rgba(255,255,255,0.7); background: rgba(168,85,247,0.25);
+        backdrop-filter: blur(10px); cursor: pointer; z-index: 40; opacity: 0; pointer-events: none;
+        display: flex; justify-content: center; align-items: center;
+        box-shadow: 0 0 30px rgba(168,85,247,0.6), 0 0 60px rgba(168,85,247,0.3), inset 0 0 20px rgba(255,255,255,0.1);
+        transition: opacity 0.6s ease, transform 0.4s cubic-bezier(0.34,1.56,0.64,1), background 0.3s ease, box-shadow 0.3s ease;
+    }
+    #next-btn.visible { opacity: 1; pointer-events: auto; transform: translateX(-50%) scale(1); animation: nextPulse 2.5s ease-in-out infinite; }
+    #next-btn:hover { background: rgba(168,85,247,0.5); box-shadow: 0 0 40px rgba(168,85,247,1), 0 0 80px rgba(168,85,247,0.5); transform: translateX(-50%) scale(1.15); animation: none; }
+    #next-btn .arrow {
+        width: 24px; height: 24px; border-top: 4px solid #fff; border-right: 4px solid #fff;
+        transform: rotate(45deg); margin-left: -6px; transition: transform 0.3s ease;
+        filter: drop-shadow(0 0 5px rgba(255,255,255,0.8));
+    }
+    #next-btn:hover .arrow { transform: rotate(45deg) translate(3px, -3px); }
+
+    /* ===== EKRAN SUBSKRYPCJI ===== */
+    #subscription-screen {
+        position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+        z-index: 60; display: none; flex-direction: column;
+        padding: 40px 20px; overflow-y: auto; align-items: center;
+        background: rgba(10,0,25,0.6); backdrop-filter: blur(5px);
+    }
+    #subscription-screen.visible { display: flex; animation: fadeInScreen 0.6s ease forwards; }
+    #subscription-screen h1 {
+        color: #fff; font-size: 2.5rem; font-weight: 700; margin-bottom: 8px;
+        text-shadow: 0 0 25px rgba(168,85,247,0.9); text-align: center;
+    }
+    #subscription-screen .subtitle { color: rgba(255,255,255,0.7); margin-bottom: 30px; text-align: center; }
+
+    .sub-grid {
+        display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 20px; max-width: 1400px; width: 100%; padding-bottom: 30px;
+    }
+    .sub-card {
+        background: rgba(30,10,55,0.7); border: 2px solid rgba(168,85,247,0.4);
+        border-radius: 20px; padding: 25px; color: #fff; display: flex; flex-direction: column;
+        transition: all 0.3s ease; position: relative; overflow: hidden;
+    }
+    .sub-card:hover { transform: translateY(-8px); border-color: rgba(255,255,255,0.8); box-shadow: 0 10px 40px rgba(168,85,247,0.6); }
+    .sub-card h2 { font-size: 1.6rem; margin-bottom: 5px; }
+    .sub-card .price { font-size: 1.8rem; font-weight: 700; color: #c084fc; margin-bottom: 15px; text-shadow: 0 0 15px rgba(192,132,252,0.8); }
+    .sub-card .desc { font-size: 0.92rem; line-height: 1.5; opacity: 0.9; margin-bottom: 15px; flex-grow: 1; }
+    .sub-card .desc strong { color: #c084fc; }
+    .sub-card .pros { font-size: 0.85rem; color: #86efac; margin-bottom: 6px; }
+    .sub-card .cons { font-size: 0.85rem; color: #fca5a5; margin-bottom: 6px; }
+    .sub-card .warn { font-size: 0.85rem; color: #fbbf24; margin-bottom: 6px; }
+    .buy-btn {
+        margin-top: auto; padding: 14px; border: none; border-radius: 12px;
+        background: linear-gradient(135deg, #a855f7, #c084fc); color: #fff;
+        font-size: 1.05rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease;
+    }
+    .buy-btn:hover { transform: scale(1.05); box-shadow: 0 0 25px rgba(168,85,247,0.9); }
+
+    .sub-card.highlight { border-color: #fbbf24; box-shadow: 0 0 30px rgba(251,191,36,0.4); }
+    .sub-card .badge {
+        position: absolute; top: 12px; right: -35px; background: #fbbf24; color: #000;
+        font-size: 0.7rem; font-weight: 700; padding: 4px 40px; transform: rotate(45deg);
+    }
+
+    /* ===== MODAL KODU BANKU ===== */
+    #bank-modal {
+        position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+        z-index: 70; display: none; justify-content: center; align-items: center;
+        background: rgba(0,0,0,0.7); backdrop-filter: blur(8px);
+    }
+    #bank-modal.visible { display: flex; animation: fadeInScreen 0.4s ease forwards; }
+    .bank-box {
+        background: rgba(20,5,40,0.95); border: 2px solid rgba(168,85,247,0.7);
+        border-radius: 25px; padding: 40px; text-align: center; max-width: 420px; width: 90%;
+        box-shadow: 0 0 50px rgba(168,85,247,0.7);
+    }
+    .bank-box h2 { color: #fff; margin-bottom: 10px; }
+    .bank-box p { color: rgba(255,255,255,0.7); margin-bottom: 20px; font-size: 0.95rem; }
+    .bank-box .selected-plan { color: #c084fc; font-weight: 700; font-size: 1.2rem; margin-bottom: 20px; }
+    .bank-box input {
+        width: 100%; padding: 15px; border-radius: 12px; border: 2px solid rgba(168,85,247,0.5);
+        background: rgba(0,0,0,0.4); color: #fff; font-size: 1.2rem; text-align: center;
+        letter-spacing: 3px; margin-bottom: 20px; outline: none;
+    }
+    .bank-box input:focus { border-color: #c084fc; }
+    .bank-box .btn-row { display: flex; gap: 12px; }
+    .bank-box button {
+        flex: 1; padding: 14px; border: none; border-radius: 12px; font-size: 1rem;
+        font-weight: 600; cursor: pointer; transition: all 0.3s ease;
+    }
+    .bank-connect { background: linear-gradient(135deg, #22c55e, #16a34a); color: #fff; }
+    .bank-connect:hover { transform: scale(1.05); box-shadow: 0 0 25px rgba(34,197,94,0.7); }
+    .bank-cancel { background: rgba(255,255,255,0.15); color: #fff; }
+    .bank-cancel:hover { background: rgba(255,255,255,0.25); }
+    .bank-hint { font-size: 0.8rem; color: rgba(255,255,255,0.4); margin-top: 15px; }
+
+    /* ===== EKRAN KONFIGURACJI (placeholder) ===== */
+    #config-screen {
+        position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+        z-index: 80; display: none; flex-direction: column; justify-content: center; align-items: center;
+        background: rgba(10,0,25,0.85); backdrop-filter: blur(10px); text-align: center;
+    }
+    #config-screen.visible { display: flex; animation: fadeInScreen 0.6s ease forwards; }
+    #config-screen h1 { color: #fff; font-size: 3rem; text-shadow: 0 0 30px rgba(168,85,247,0.9); margin-bottom: 15px; }
+    #config-screen p { color: rgba(255,255,255,0.8); font-size: 1.2rem; }
+    #config-screen .check {
+        font-size: 5rem; color: #22c55e; margin-bottom: 20px;
+        filter: drop-shadow(0 0 20px rgba(34,197,94,0.8));
+    }
+
+    /* ANIMACJE */
+    @keyframes bloomReveal { 0% { clip-path: circle(0% at 50% 50%); } 100% { clip-path: circle(150% at 50% 50%); } }
+    @keyframes flashPulse { 0% { opacity: 0; transform: scale(0.3); } 30% { opacity: 0.9; transform: scale(1); } 100% { opacity: 0; transform: scale(2); } }
+    @keyframes nextPulse { 0%,100% { box-shadow: 0 0 30px rgba(168,85,247,0.6), 0 0 60px rgba(168,85,247,0.3); } 50% { box-shadow: 0 0 45px rgba(168,85,247,0.9), 0 0 90px rgba(168,85,247,0.5); } }
+    @keyframes fadeInScreen { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes float-particle { 0% { transform: translateY(100vh) translateX(0) rotate(0deg); opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { transform: translateY(-100px) translateX(var(--drift)) rotate(360deg); opacity: 0; } }
+    @keyframes wave-rotate { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    @keyframes cloud-drift { 0% { transform: translateX(-200px); } 100% { transform: translateX(calc(100vw + 200px)); } }
+    @keyframes geo-float { 0% { transform: translateY(100vh) translateX(0) rotate(0deg); opacity: 0; } 10% { opacity: 0.3; } 90% { opacity: 0.3; } 100% { transform: translateY(-100px) translateX(var(--drift)) rotate(var(--rotation)); opacity: 0; } }
+    @keyframes greetingIn { 0% { opacity: 0; transform: scale(0.3) rotate(-10deg); filter: blur(15px); } 60% { transform: scale(1.1) rotate(3deg); } 100% { opacity: 1; transform: scale(1) rotate(0deg); filter: blur(0); } }
+    @keyframes greetingOut { 0% { opacity: 1; transform: scale(1) rotate(0deg); filter: blur(0); } 100% { opacity: 0; transform: scale(0.5) rotate(10deg) translateY(-40px); filter: blur(15px); } }
+    @keyframes text-glow { 0%,100% { text-shadow: 0 0 20px rgba(255,255,255,0.8), 0 0 40px rgba(168,85,247,0.8), 0 0 60px rgba(168,85,247,0.6); } 50% { text-shadow: 0 0 30px rgba(255,255,255,1), 0 0 60px rgba(168,85,247,1), 0 0 90px rgba(168,85,247,0.8), 0 0 120px rgba(168,85,247,0.6); } }
+    @keyframes logoAppear { 0% { opacity: 0; transform: scale(0.5); } 70% { transform: scale(1.05); } 100% { opacity: 1; transform: scale(1); } }
+    @keyframes glowPulse { 0%,100% { text-shadow: 0 0 10px rgba(255,255,255,0.5), 0 0 20px rgba(255,255,255,0.3); } 50% { text-shadow: 0 0 20px rgba(255,255,255,0.8), 0 0 30px rgba(255,255,255,0.6), 0 0 40px rgba(255,255,255,0.4); } }
+    @keyframes gradientShift { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+</style>
+</head>
+<body>
+
+<div id="transition-overlay"></div>
+<div id="flash"></div>
+
+<div id="logo">
+    <span class="metal-nothing">Metal Nothing</span> <span class="new-os">+ NewOS</span>
+</div>
+
+<div id="effects">
+    <div class="wave"></div>
+    <div class="wave"></div>
+    <div class="wave"></div>
+</div>
+
+<div id="font-picker">
+    <h2>Wybierz czcionkę</h2>
+    <div class="font-buttons">
+        <button class="font-btn cherry" data-font="cherry">Metal Nothing<small>Cherry Bomb</small></button>
+        <button class="font-btn normal" data-font="normal">Normal<small>Standardowa</small></button>
+    </div>
+</div>
+
+<div id="greeting"></div>
+
+<div id="next-btn"><div class="arrow"></div></div>
+
+<!-- EKRAN SUBSKRYPCJI -->
+<div id="subscription-screen">
+    <h1>Wybierz subskrypcję</h1>
+    <p class="subtitle">Wybierz plan idealny dla siebie i płać przez Bank ONL</p>
+    <div class="sub-grid">
+
+        <div class="sub-card">
+            <h2>Normal</h2>
+            <div class="price">$20 <span style="font-size:0.9rem;opacity:0.6;">/ start</span></div>
+            <div class="desc">Po roku <strong>$50</strong>. Plan do pracy, grania i wyluzowania się.</div>
+            <div class="warn">⚠️ Haczyk: jeśli temperatura procesora przekroczy <strong>80°C</strong> — system wywali Recovery Screen (ekran odzyskiwania), niby dla bezpieczeństwa.</div>
+            <button class="buy-btn" data-plan="Normal" data-price="20">Kup za $20</button>
+        </div>
+
+        <div class="sub-card">
+            <h2>Pro</h2>
+            <div class="price">$500 <span style="font-size:0.9rem;opacity:0.6;">/ mies.</span></div>
+            <div class="desc">Bezpieczny plan do pracy, programowania i testowania.</div>
+            <div class="pros">✔ Własny, odizolowany sandbox (piaskownica)</div>
+            <div class="pros">✔ Zaawansowany system testowania plików pod kątem wirusów</div>
+            <div class="pros">✔ Idealny do odpalania niepewnego kodu</div>
+            <div class="cons">✘ Całkowicie nie nadaje się do gier — system blokuje wszystkie produkcje gamingowe</div>
+            <button class="buy-btn" data-plan="Pro" data-price="500">Kup za $500</button>
+        </div>
+
+        <div class="sub-card">
+            <h2>Pro+ 🎮</h2>
+            <div class="price">od $700 <span style="font-size:0.9rem;opacity:0.6;">/ mies.</span></div>
+            <div class="desc">Wersja bezkompromisowa — nadaje się do wszystkiego: od zaawansowanego kodu po najnowsze gry.</div>
+            <div class="pros">✔ System lojalnościowy: co miesiąc cena spada o $50, aż zatrzyma się na $100 (niżej nie spadnie)</div>
+            <div class="pros">✔ Brak limitów temperatur z wersji Normal</div>
+            <div class="pros">✔ Pełna swoboda i brak blokad na gry</div>
+            <button class="buy-btn" data-plan="Pro+" data-price="700">Kup za $700</button>
+        </div>
+
+        <div class="sub-card">
+            <h2>Ultimate+ 🚀</h2>
+            <div class="price">$1200 <span style="font-size:0.9rem;opacity:0.6;">/ mies.</span></div>
+            <div class="desc">Kompletny pakiet zoptymalizowany pod maksymalną wydajność i wygodę.</div>
+            <div class="pros">✔ Nadaje się do wszystkiego (praca i gry)</div>
+            <div class="pros">✔ Wbudowany skaner antywirusowy</div>
+            <div class="pros">✔ Automatyczna optymalizacja systemu</div>
+            <div class="pros">✔ Dostęp do wszystkich dobrych programów za darmo — najlepsze aplikacje już zainstalowane. Włączasz i działasz!</div>
+            <button class="buy-btn" data-plan="Ultimate+" data-price="1200">Kup za $1200</button>
+        </div>
+
+        <div class="sub-card highlight">
+            <div class="badge">TOP</div>
+            <h2>Deluxe+ 👑</h2>
+            <div class="price">$2000 <span style="font-size:0.9rem;opacity:0.6;">/ mies.</span></div>
+            <div class="desc">Najwyższy możliwy plan w hierarchii NewOS — łączy potęgę wszystkich poprzednich opcji.</div>
+            <div class="pros">✔ Ma absolutnie wszystko z innych planów (sandboxy, darmowe programy, optymalizacje) i jeszcze więcej</div>
+            <div class="pros">✔ Zawiera wszystko OPRÓCZ funkcji z Normal — czyli wycina błąd 80°C</div>
+            <div class="pros">✔ Możesz kręcić procesor na maksa i grać bez obaw, że system zniszczy Ci skina!</div>
+            <button class="buy-btn" data-plan="Deluxe+" data-price="2000">Kup za $2000</button>
+        </div>
+
+    </div>
+</div>
+
+<!-- MODAL KODU BANKU -->
+<div id="bank-modal">
+    <div class="bank-box">
+        <h2>Płatność przez Bank ONL</h2>
+        <p>Wpisz swój kod dostępu do Banku ONL, aby kontynuować płatność.</p>
+        <div class="selected-plan" id="bank-plan-label">—</div>
+        <input type="text" id="bank-code" placeholder="Kod ONL" maxlength="12">
+        <div class="btn-row">
+            <button class="bank-cancel" id="bank-cancel">Anuluj</button>
+            <button class="bank-connect" id="bank-connect">Połącz z bankiem</button>
+        </div>
+        <div class="bank-hint">Testowy kod: <strong>ONL1234</strong></div>
+    </div>
+</div>
+
+<!-- EKRAN KONFIGURACJI (placeholder) -->
+<div id="config-screen">
+    <div class="check">✔</div>
+    <h1>Płatność zatwierdzona!</h1>
+    <p id="config-info">Trwa uruchamianie konfiguracji systemu...</p>
+</div>
+
+<script>
+const greetings = ["Cześć","Hello","你好","Привет","Привіт","Hola","Bonjour","Hallo","Ciao","こんにちは","안녕하세요","Olá","مرحبا","Merhaba"];
+
+const logoEl = document.getElementById('logo');
+const greetingEl = document.getElementById('greeting');
+const bodyEl = document.body;
+const effectsEl = document.getElementById('effects');
+const fontPickerEl = document.getElementById('font-picker');
+const overlayEl = document.getElementById('transition-overlay');
+const flashEl = document.getElementById('flash');
+const nextBtnEl = document.getElementById('next-btn');
+const subScreenEl = document.getElementById('subscription-screen');
+const bankModalEl = document.getElementById('bank-modal');
+const bankPlanLabel = document.getElementById('bank-plan-label');
+const bankCodeInput = document.getElementById('bank-code');
+const configScreenEl = document.getElementById('config-screen');
+const configInfo = document.getElementById('config-info');
+
+let currentGreetingIndex = 0;
+let selectedPlan = null;
+let selectedPrice = null;
+
+/* --- Sprawdź czy wracamy z banku (płatność zatwierdzona) --- */
+window.addEventListener('load', () => {
+    const paid = localStorage.getItem('onl_paid');
+    if (paid === 'true') {
+        const plan = localStorage.getItem('onl_plan');
+        const price = localStorage.getItem('onl_price');
+        // Wyczyść flagę
+        localStorage.removeItem('onl_paid');
+        // Pomiń boot, pokaż konfigurację od razu
+        skipToConfig(plan, price);
+    }
+});
+
+function skipToConfig(plan, price) {
+    bodyEl.classList.add('animated-bg');
+    logoEl.classList.add('hidden');
+    configInfo.textContent = `Plan: ${plan} ($${price}) • Trwa uruchamianie konfiguracji systemu...`;
+    configScreenEl.classList.add('visible');
+}
+
+/* --- Efekty --- */
+function createParticles() {
+    for (let i = 0; i < 30; i++) {
+        setTimeout(() => {
+            const p = document.createElement('div');
+            p.className = 'particle';
+            const size = Math.random()*15+5;
+            p.style.width = size+'px'; p.style.height = size+'px';
+            p.style.left = Math.random()*100+'%';
+            p.style.setProperty('--drift', (Math.random()-0.5)*400+'px');
+            p.style.animationDuration = (Math.random()*10+15)+'s';
+            p.style.animationDelay = Math.random()*5+'s';
+            effectsEl.appendChild(p);
+        }, i*200);
+    }
+}
+function createGeoShapes() {
+    const shapes = ['triangle','square','hexagon'];
+    for (let i = 0; i < 15; i++) {
+        setTimeout(() => {
+            const s = document.createElement('div');
+            s.className = 'geo-shape ' + shapes[Math.floor(Math.random()*shapes.length)];
+            s.style.left = Math.random()*100+'%';
+            s.style.setProperty('--drift', (Math.random()-0.5)*500+'px');
+            s.style.setProperty('--rotation', Math.random()*720+'deg');
+            s.style.animationDuration = (Math.random()*15+20)+'s';
+            s.style.animationDelay = Math.random()*3+'s';
+            effectsEl.appendChild(s);
+        }, i*300);
+    }
+}
+function createClouds() {
+    for (let i = 0; i < 6; i++) {
+        const c = document.createElement('div');
+        c.className = 'cloud';
+        c.style.top = (Math.random()*70+5)+'%';
+        c.style.animationDuration = (Math.random()*20+25)+'s';
+        c.style.animationDelay = (Math.random()*-30)+'s';
+        c.style.opacity = Math.random()*0.4+0.6;
+        effectsEl.appendChild(c);
+        makeDraggable(c);
+    }
+}
+function makeDraggable(cloud) {
+    let dragging=false, ox=0, oy=0;
+    function start(e){
+        dragging=true; cloud.classList.add('dragging');
+        const r=cloud.getBoundingClientRect();
+        cloud.style.left=r.left+'px'; cloud.style.top=r.top+'px';
+        cloud.style.animation='none'; cloud.style.transform='scale(1.1)';
+        const x=e.clientX||(e.touches&&e.touches[0].clientX);
+        const y=e.clientY||(e.touches&&e.touches[0].clientY);
+        ox=x-r.left; oy=y-r.top; e.preventDefault();
+    }
+    function move(e){
+        if(!dragging)return;
+        const x=e.clientX||(e.touches&&e.touches[0].clientX);
+        const y=e.clientY||(e.touches&&e.touches[0].clientY);
+        cloud.style.left=(x-ox)+'px'; cloud.style.top=(y-oy)+'px'; e.preventDefault();
+    }
+    function end(){ if(!dragging)return; dragging=false; cloud.classList.remove('dragging'); cloud.style.transform=''; }
+    cloud.addEventListener('mousedown',start);
+    document.addEventListener('mousemove',move);
+    document.addEventListener('mouseup',end);
+    cloud.addEventListener('touchstart',start,{passive:false});
+    document.addEventListener('touchmove',move,{passive:false});
+    document.addEventListener('touchend',end);
+}
+
+/* --- Boot (tylko jeśli nie wracamy z banku) --- */
+if (localStorage.getItem('onl_paid') !== 'true') {
+    setTimeout(() => {
+        logoEl.classList.add('fade-out');
+        setTimeout(() => {
+            flashEl.classList.add('flashing');
+            overlayEl.classList.add('blooming');
+            bodyEl.classList.add('animated-bg');
+        }, 700);
+    }, 6000);
+
+    setTimeout(() => {
+        logoEl.classList.add('hidden');
+        overlayEl.style.opacity='0';
+        overlayEl.style.transition='opacity 0.5s ease';
+        effectsEl.classList.add('visible');
+        createParticles(); createGeoShapes(); createClouds();
+        setInterval(createParticles, 30000);
+        setInterval(createGeoShapes, 45000);
+        setTimeout(() => { fontPickerEl.classList.add('visible'); }, 800);
+    }, 9200);
+}
+
+/* --- Wybór czcionki --- */
+document.querySelectorAll('.font-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        if (btn.getAttribute('data-font') === 'cherry') greetingEl.classList.add('font-cherry');
+        fontPickerEl.classList.remove('visible');
+        setTimeout(() => {
+            showGreeting();
+            setInterval(changeGreeting, 3000);
+            nextBtnEl.classList.add('visible');
+        }, 700);
+    });
+});
+
+function showGreeting() {
+    greetingEl.textContent = greetings[currentGreetingIndex];
+    greetingEl.classList.remove('animate-out');
+    greetingEl.classList.add('animate-in');
+}
+function changeGreeting() {
+    greetingEl.classList.remove('animate-in');
+    greetingEl.classList.add('animate-out');
+    setTimeout(() => {
+        currentGreetingIndex = (currentGreetingIndex+1) % greetings.length;
+        greetingEl.textContent = greetings[currentGreetingIndex];
+        greetingEl.classList.remove('animate-out');
+        greetingEl.classList.add('animate-in');
+    }, 500);
+}
+
+/* --- Przycisk strzałki -> ekran subskrypcji --- */
+nextBtnEl.addEventListener('click', () => {
+    nextBtnEl.style.transform = 'translateX(-50%) scale(0.9)';
+    setTimeout(() => { nextBtnEl.style.transform = ''; }, 150);
+    subScreenEl.classList.add('visible');
+});
+
+/* --- Wybór planu -> modal banku --- */
+document.querySelectorAll('.buy-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        selectedPlan = btn.getAttribute('data-plan');
+        selectedPrice = btn.getAttribute('data-price');
+        bankPlanLabel.textContent = `${selectedPlan} — $${selectedPrice}`;
+        bankCodeInput.value = '';
+        bankModalEl.classList.add('visible');
+    });
+});
+
+/* --- Anuluj modal --- */
+document.getElementById('bank-cancel').addEventListener('click', () => {
+    bankModalEl.classList.remove('visible');
+});
+
+/* --- Połącz z bankiem --- */
+document.getElementById('bank-connect').addEventListener('click', () => {
+    const code = bankCodeInput.value.trim();
+    if (code.length < 4) {
+        bankCodeInput.style.borderColor = '#ef4444';
+        bankCodeInput.placeholder = 'Wpisz poprawny kod!';
+        return;
+    }
+    // Zapisz dane płatności i przejdź do Banku ONL
+    localStorage.setItem('onl_plan', selectedPlan);
+    localStorage.setItem('onl_price', selectedPrice);
+    localStorage.setItem('onl_code', code);
+    localStorage.removeItem('onl_paid');
+    window.location.href = 'bank.html';
+});
+</script>
+
+</body>
+</html>
