@@ -92,20 +92,62 @@
     #next-btn:hover { background: rgba(168,85,247,0.5); transform: translateX(-50%) scale(1.15); }
     #next-btn .arrow { width: 24px; height: 24px; border-top: 4px solid #fff; border-right: 4px solid #fff; transform: rotate(45deg); margin-left: -6px; }
 
-    /* Subskrypcje */
-    #subscription-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 60; display: none; flex-direction: column; padding: 40px 20px; overflow-y: auto; align-items: center; background: rgba(10,0,25,0.85); }
-    #subscription-screen.visible { display: flex; }
-    .sub-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; max-width: 1400px; width: 100%; }
-    .sub-card { background: rgba(30,10,55,0.7); border: 2px solid rgba(168,85,247,0.4); border-radius: 20px; padding: 25px; color: #fff; transition: all 0.3s ease; }
-    .sub-card:hover { transform: translateY(-8px); border-color: #fff; }
-    .sub-card h2 { font-size: 1.6rem; margin-bottom: 5px; }
-    .sub-card .price { font-size: 1.8rem; font-weight: 700; color: #c084fc; margin-bottom: 15px; }
-    .sub-card .desc { font-size: 0.9rem; margin-bottom: 15px; }
-    .sub-card .pros { font-size: 0.85rem; color: #86efac; margin-bottom: 4px; }
-    .sub-card .warn { font-size: 0.85rem; color: #fbbf24; margin-bottom: 4px; }
-    .buy-btn { margin-top: auto; padding: 14px; border: none; border-radius: 12px; background: linear-gradient(135deg, #a855f7, #c084fc); color: #fff; font-size: 1.05rem; font-weight: 600; cursor: pointer; width: 100%; }
+   <!-- Subskrypcje -->
+<div id="subscription-screen">
+    <h1 style="color:#fff;text-align:center;margin-bottom:30px">Wybierz subskrypcję</h1>
+    <div class="sub-grid">
+        
+        <div class="sub-card">
+            <h2>Normal</h2>
+            <div class="price">$20 <span style="font-size:0.9rem;opacity:0.6">/ start</span></div>
+            <div class="desc">Subskrypcja do pracy, grania i wyluzowania się. Po roku <strong>$50</strong>.</div>
+            <div class="warn">⚠️ Haczyk: jeśli temperatura procesora przekroczy <strong>80°C</strong> — system wywali Recovery Screen (ekran odzyskiwania), niby dla bezpieczeństwa.</div>
+            <button class="buy-btn" data-plan="Normal" data-price="20">Kup za $20</button>
+        </div>
 
-    /* Modal Banku */
+        <div class="sub-card">
+            <h2>Pro</h2>
+            <div class="price">$500 <span style="font-size:0.9rem;opacity:0.6">/ mies.</span></div>
+            <div class="desc">Bezpieczny plan stworzony z myślą o pracy, programowaniu i testowaniu.</div>
+            <div class="pros">✔ Własny, odizolowany sandbox (piaskownica)</div>
+            <div class="pros">✔ Zaawansowany system testowania plików przed wirusami</div>
+            <div class="pros">✔ Idealna opcja, gdy trzeba odpalić niepewny kod</div>
+            <div style="font-size:0.85rem;color:#fca5a5;margin-bottom:6px">✘ Wada: Całkowicie nie nadaje się do gier — system blokuje uruchamianie jakichkolwiek produkcji gamingowych</div>
+            <button class="buy-btn" data-plan="Pro" data-price="500">Kup za $500</button>
+        </div>
+
+        <div class="sub-card">
+            <h2>Pro+ 🎮</h2>
+            <div class="price">od $700 <span style="font-size:0.9rem;opacity:0.6">/ mies.</span></div>
+            <div class="desc">Wersja bezkompromisowa, która nadaje się już absolutnie do wszystkiego – od zaawansowanego kodu po najnowsze gry.</div>
+            <div class="pros">✔ System lojalnościowy: co każdy miesiąc cena spada o $50, aż zatrzyma się na $100 (niżej już nie spadnie)</div>
+            <div class="pros">✔ Brak limitów temperatur z wersji Normal</div>
+            <div class="pros">✔ Pełna swoboda i brak blokad na gry</div>
+            <button class="buy-btn" data-plan="Pro+" data-price="700">Kup za $700</button>
+        </div>
+
+        <div class="sub-card">
+            <h2>Ultimate+ 🚀</h2>
+            <div class="price">$1200 <span style="font-size:0.9rem;opacity:0.6">/ mies.</span></div>
+            <div class="desc">Kompletny pakiet zoptymalizowany pod maksymalną wydajność i wygodę użytkownika.</div>
+            <div class="pros">✔ Nadaje się do wszystkiego (praca i gry)</div>
+            <div class="pros">✔ Posiada wbudowany skaner antywirusowy oraz automatyczną optymalizację systemu</div>
+            <div class="pros">✔ Daje dostęp do wszystkich dobrych programów za darmo, a najlepsze aplikacje są już od razu zainstalowane. Po prostu włączasz i działasz</div>
+            <button class="buy-btn" data-plan="Ultimate+" data-price="1200">Kup za $1200</button>
+        </div>
+
+        <div class="sub-card" style="border-color:#fbbf24">
+            <h2>Deluxe+ 👑</h2>
+            <div class="price">$2000 <span style="font-size:0.9rem;opacity:0.6">/ mies.</span></div>
+            <div class="desc">Najwyższy możliwy plan w hierarchii NewOS, łączący potęgę wszystkich poprzednich opcji.</div>
+            <div class="pros">✔ Posiada absolutnie wszystko, co oferują inne plany (sandboxy, darmowe programy, optymalizacje), a nawet jeszcze więcej</div>
+            <div class="pros">✔ Zawiera w sobie wszystko <strong>OPRÓCZ funkcji z subskrypcji Normal</strong> — czyli całkowicie wycinasz błąd 80°C</div>
+            <div class="pros">✔ Możesz kręcić procesor na maksa i grać bez obaw, że system zniszczy Ci skina!</div>
+            <button class="buy-btn" data-plan="Deluxe+" data-price="2000">Kup za $2000</button>
+        </div>
+
+    </div>
+</div>
     #bank-modal { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 70; display: none; justify-content: center; align-items: center; background: rgba(0,0,0,0.7); }
     #bank-modal.visible { display: flex; }
     .bank-box { background: rgba(20,5,40,0.95); border: 2px solid rgba(168,85,247,0.7); border-radius: 25px; padding: 40px; text-align: center; max-width: 440px; width: 90%; }
