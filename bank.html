@@ -5,135 +5,723 @@
 <title>Bank ONL</title>
 <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    html, body { width: 100%; height: 100%; }
+    html, body { width: 100%; min-height: 100%; }
     body {
         font-family: 'Segoe UI', Arial, sans-serif;
         background: linear-gradient(135deg, #001f3f 0%, #003366 50%, #004080 100%);
-        display: flex; justify-content: center; align-items: center;
-        min-height: 100vh; color: #fff;
+        min-height: 100vh; color: #fff; padding: 20px;
     }
-    .bank-card {
-        background: rgba(255,255,255,0.1); backdrop-filter: blur(15px);
-        border: 1px solid rgba(255,255,255,0.2); border-radius: 24px;
-        padding: 45px; max-width: 480px; width: 90%; text-align: center;
-        box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    .container { max-width: 1000px; margin: 0 auto; }
+
+    /* NAGŁÓWEK */
+    .bank-header {
+        display: flex; justify-content: space-between; align-items: center;
+        padding: 20px 30px; margin-bottom: 25px;
+        background: rgba(255,255,255,0.08); backdrop-filter: blur(15px);
+        border: 1px solid rgba(255,255,255,0.15); border-radius: 20px;
     }
-    .bank-logo {
-        font-size: 2.2rem; font-weight: 800; margin-bottom: 5px;
-        letter-spacing: 1px;
-    }
+    .bank-logo { font-size: 1.8rem; font-weight: 800; letter-spacing: 1px; }
     .bank-logo span { color: #38bdf8; }
-    .bank-sub { color: rgba(255,255,255,0.6); font-size: 0.9rem; margin-bottom: 30px; }
-    .detail-row {
-        display: flex; justify-content: space-between; padding: 14px 0;
-        border-bottom: 1px solid rgba(255,255,255,0.1); font-size: 1rem;
+    .header-right { text-align: right; }
+    .header-right .label { font-size: 0.8rem; color: rgba(255,255,255,0.6); }
+    .header-right .name { font-weight: 600; }
+
+    /* PRZEŁĄCZNIK KONT */
+    .accounts-switcher {
+        display: flex; gap: 12px; margin-bottom: 25px; overflow-x: auto; padding-bottom: 5px;
     }
+    .account-tab {
+        min-width: 220px; padding: 18px; border-radius: 18px; cursor: pointer;
+        border: 2px solid rgba(255,255,255,0.15); transition: all 0.3s ease; flex-shrink: 0;
+        background: rgba(255,255,255,0.06);
+    }
+    .account-tab.active { border-color: #38bdf8; background: rgba(56,189,248,0.15); box-shadow: 0 0 20px rgba(56,189,248,0.3); }
+    .account-tab .a-name { font-weight: 700; margin-bottom: 4px; }
+    .account-tab .a-num { font-size: 0.75rem; color: rgba(255,255,255,0.5); letter-spacing: 2px; margin-bottom: 8px; }
+    .account-tab .a-balance { font-size: 1.3rem; font-weight: 800; color: #38bdf8; }
+    .account-tab.add-new { display: flex; justify-content: center; align-items: center; font-size: 2rem; color: rgba(255,255,255,0.4); min-width: 70px; }
+    .account-tab.add-new:hover { color: #38bdf8; border-color: #38bdf8; }
+
+    /* KARTA SALDA */
+    .balance-card {
+        background: linear-gradient(135deg, #0284c7, #38bdf8);
+        border-radius: 24px; padding: 35px; margin-bottom: 25px;
+        box-shadow: 0 15px 40px rgba(56,189,248,0.4); position: relative; overflow: hidden;
+    }
+    .balance-card.gold { background: linear-gradient(135deg, #d4a017, #fbbf24); box-shadow: 0 15px 40px rgba(251,191,36,0.4); }
+    .balance-card.green { background: linear-gradient(135deg, #059669, #34d399); box-shadow: 0 15px 40px rgba(52,211,153,0.4); }
+    .balance-card::before {
+        content: ""; position: absolute; top: -50%; right: -20%;
+        width: 300px; height: 300px; background: rgba(255,255,255,0.1); border-radius: 50%;
+    }
+    .balance-card .label { font-size: 0.95rem; opacity: 0.9; margin-bottom: 8px; }
+    .balance-card .balance { font-size: 3rem; font-weight: 800; }
+    .balance-card .card-num { margin-top: 15px; font-size: 1.1rem; letter-spacing: 3px; opacity: 0.85; }
+    .balance-card .loan-info { margin-top: 12px; font-size: 0.9rem; color: #fecaca; }
+
+    /* AKCJE */
+    .actions {
+        display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 12px; margin-bottom: 25px;
+    }
+    .action-btn {
+        background: rgba(255,255,255,0.1); backdrop-filter: blur(10px);
+        border: 1px solid rgba(255,255,255,0.2); border-radius: 18px;
+        padding: 20px 12px; text-align: center; cursor: pointer; transition: all 0.3s ease;
+    }
+    .action-btn:hover { background: rgba(255,255,255,0.2); transform: translateY(-4px); box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
+    .action-btn .icon { font-size: 1.8rem; margin-bottom: 6px; }
+    .action-btn .txt { font-size: 0.85rem; font-weight: 600; }
+
+    /* SEKCJE */
+    .section {
+        background: rgba(255,255,255,0.08); backdrop-filter: blur(15px);
+        border: 1px solid rgba(255,255,255,0.15); border-radius: 20px;
+        padding: 25px; margin-bottom: 25px;
+    }
+    .section h2 { font-size: 1.3rem; margin-bottom: 18px; display: flex; align-items: center; gap: 8px; }
+
+    /* LOKATY */
+    .deposit-item {
+        display: flex; justify-content: space-between; align-items: center;
+        padding: 16px; background: rgba(52,211,153,0.1); border: 1px solid rgba(52,211,153,0.3);
+        border-radius: 14px; margin-bottom: 12px;
+    }
+    .deposit-item .d-info .d-amount { font-weight: 700; font-size: 1.1rem; color: #34d399; }
+    .deposit-item .d-info .d-detail { font-size: 0.8rem; color: rgba(255,255,255,0.6); }
+    .deposit-item button {
+        padding: 10px 18px; border: none; border-radius: 10px; background: #34d399;
+        color: #003; font-weight: 700; cursor: pointer; transition: all 0.3s ease;
+    }
+    .deposit-item button:hover { transform: scale(1.05); }
+    .deposit-item button:disabled { background: rgba(255,255,255,0.2); color: rgba(255,255,255,0.5); cursor: not-allowed; }
+
+    /* HISTORIA */
+    .transaction {
+        display: flex; justify-content: space-between; align-items: center;
+        padding: 14px 0; border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    .transaction:last-child { border-bottom: none; }
+    .transaction .t-left { display: flex; align-items: center; gap: 12px; }
+    .transaction .t-icon {
+        width: 42px; height: 42px; border-radius: 12px; display: flex;
+        justify-content: center; align-items: center; font-size: 1.2rem;
+    }
+    .transaction .t-icon.in { background: rgba(34,197,94,0.25); }
+    .transaction .t-icon.out { background: rgba(239,68,68,0.25); }
+    .transaction .t-title { font-weight: 600; }
+    .transaction .t-date { font-size: 0.8rem; color: rgba(255,255,255,0.5); }
+    .transaction .t-amount { font-weight: 700; font-size: 1.05rem; }
+    .transaction .t-amount.in { color: #4ade80; }
+    .transaction .t-amount.out { color: #f87171; }
+    .empty { text-align: center; color: rgba(255,255,255,0.4); padding: 20px; }
+
+    /* MODAL */
+    .modal {
+        position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px);
+        display: none; justify-content: center; align-items: center; z-index: 100; padding: 20px;
+    }
+    .modal.visible { display: flex; animation: fadeIn 0.3s ease; }
+    .modal-box {
+        background: #0c2d4d; border: 1px solid rgba(255,255,255,0.2); border-radius: 24px;
+        padding: 35px; max-width: 440px; width: 100%; text-align: center;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.6); max-height: 90vh; overflow-y: auto;
+    }
+    .modal-box h2 { margin-bottom: 10px; }
+    .modal-box p { color: rgba(255,255,255,0.7); margin-bottom: 20px; font-size: 0.95rem; }
+    .modal-box input, .modal-box select {
+        width: 100%; padding: 15px; border-radius: 12px; border: 2px solid rgba(56,189,248,0.4);
+        background: rgba(0,0,0,0.3); color: #fff; font-size: 1.1rem; text-align: center; margin-bottom: 15px; outline: none;
+    }
+    .modal-box input:focus, .modal-box select:focus { border-color: #38bdf8; }
+    .modal-box select option { background: #0c2d4d; }
+    .modal-box .amount-big { font-size: 2.2rem; font-weight: 800; color: #38bdf8; margin: 15px 0; }
+    .detail-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.1); }
     .detail-row .label { color: rgba(255,255,255,0.6); }
     .detail-row .value { font-weight: 600; }
-    .amount { font-size: 2.5rem; font-weight: 800; color: #38bdf8; margin: 25px 0; }
-    .question { font-size: 1.15rem; margin-bottom: 25px; }
-    .btn-row { display: flex; gap: 15px; }
-    button {
-        flex: 1; padding: 16px; border: none; border-radius: 14px;
-        font-size: 1.05rem; font-weight: 700; cursor: pointer; transition: all 0.3s ease;
+    .btn-row { display: flex; gap: 12px; margin-top: 20px; }
+    .modal-box button.mbtn { flex: 1; padding: 15px; border: none; border-radius: 12px; font-size: 1rem; font-weight: 700; cursor: pointer; transition: all 0.3s ease; }
+    .btn-primary { background: linear-gradient(135deg, #22c55e, #16a34a); color: #fff; }
+    .btn-primary:hover { transform: scale(1.04); box-shadow: 0 0 25px rgba(34,197,94,0.6); }
+    .btn-secondary { background: rgba(255,255,255,0.15); color: #fff; }
+    .btn-secondary:hover { background: rgba(255,255,255,0.25); }
+    .opt-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+    .opt-item {
+        padding: 15px; border: 2px solid rgba(56,189,248,0.3); border-radius: 12px;
+        cursor: pointer; transition: all 0.3s ease; text-align: left;
+        display: flex; justify-content: space-between; align-items: center;
     }
-    .confirm { background: linear-gradient(135deg, #22c55e, #16a34a); color: #fff; }
-    .confirm:hover { transform: scale(1.04); box-shadow: 0 0 25px rgba(34,197,94,0.6); }
-    .reject { background: rgba(255,255,255,0.15); color: #fff; }
-    .reject:hover { background: rgba(255,255,255,0.25); }
-    .secure { margin-top: 20px; font-size: 0.8rem; color: rgba(255,255,255,0.5); }
-    .secure::before { content: "🔒 "; }
+    .opt-item:hover, .opt-item.selected { border-color: #38bdf8; background: rgba(56,189,248,0.15); }
+    .opt-item .o-amount { font-weight: 700; font-size: 1.1rem; }
+    .opt-item .o-detail { font-size: 0.8rem; color: rgba(255,255,255,0.6); }
 
-    /* Ekran ładowania połączenia */
-    #connecting {
-        position: fixed; inset: 0; background: #001f3f;
-        display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 10;
+    /* Powiadomienie płatności */
+    .payment-alert {
+        background: rgba(251,191,36,0.15); border: 1px solid rgba(251,191,36,0.5);
+        border-radius: 16px; padding: 18px; margin-bottom: 25px; display: none;
+        animation: pulse 2s ease-in-out infinite;
     }
-    #connecting.hidden { display: none; }
-    .spinner {
-        width: 60px; height: 60px; border: 5px solid rgba(255,255,255,0.2);
-        border-top-color: #38bdf8; border-radius: 50%;
-        animation: spin 1s linear infinite; margin-bottom: 20px;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
+    .payment-alert.visible { display: block; }
+    .payment-alert .pa-title { font-weight: 700; color: #fbbf24; margin-bottom: 5px; }
+    @keyframes pulse { 0%,100% { box-shadow: 0 0 0 rgba(251,191,36,0); } 50% { box-shadow: 0 0 25px rgba(251,191,36,0.4); } }
 
-    /* Ekran sukcesu */
-    #success {
-        position: fixed; inset: 0; background: linear-gradient(135deg, #14532d, #166534);
-        display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 20;
-        text-align: center;
+    /* Bonus banner */
+    .bonus-banner {
+        background: linear-gradient(135deg, rgba(168,85,247,0.3), rgba(56,189,248,0.3));
+        border: 1px solid rgba(168,85,247,0.5); border-radius: 16px; padding: 18px;
+        margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center;
     }
-    #success.visible { display: flex; animation: fadeIn 0.5s ease; }
-    #success .big-check { font-size: 6rem; margin-bottom: 20px; animation: pop 0.5s ease; }
-    #success h1 { font-size: 2rem; margin-bottom: 10px; }
-    #success p { color: rgba(255,255,255,0.8); }
+    .bonus-banner .bb-text .bb-title { font-weight: 700; font-size: 1.1rem; }
+    .bonus-banner .bb-text .bb-sub { font-size: 0.85rem; color: rgba(255,255,255,0.7); }
+    .bonus-banner button {
+        padding: 12px 24px; border: none; border-radius: 12px; font-weight: 700; cursor: pointer;
+        background: linear-gradient(135deg, #a855f7, #38bdf8); color: #fff; transition: all 0.3s ease;
+    }
+    .bonus-banner button:hover { transform: scale(1.05); box-shadow: 0 0 25px rgba(168,85,247,0.6); }
+    .bonus-banner button:disabled { background: rgba(255,255,255,0.15); cursor: not-allowed; transform: none; box-shadow: none; }
+
+    /* Toast */
+    .toast {
+        position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px);
+        background: #16a34a; color: #fff; padding: 16px 30px; border-radius: 14px;
+        font-weight: 600; z-index: 200; opacity: 0; transition: all 0.4s ease;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    }
+    .toast.visible { transform: translateX(-50%) translateY(0); opacity: 1; }
+    .toast.error { background: #dc2626; }
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+    #pay-success {
+        position: fixed; inset: 0; background: linear-gradient(135deg, #14532d, #166534);
+        display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 300; text-align: center;
+    }
+    #pay-success.visible { display: flex; animation: fadeIn 0.5s ease; }
+    #pay-success .big-check { font-size: 6rem; margin-bottom: 20px; animation: pop 0.5s ease; }
+    #pay-success h1 { font-size: 2rem; margin-bottom: 10px; }
     @keyframes pop { 0% { transform: scale(0); } 70% { transform: scale(1.2); } 100% { transform: scale(1); } }
 </style>
 </head>
 <body>
 
-<!-- Łączenie -->
-<div id="connecting">
-    <div class="spinner"></div>
-    <p>Łączenie z Bankiem ONL...</p>
-</div>
+<div class="container">
 
-<!-- Karta potwierdzenia -->
-<div class="bank-card" id="payment-card" style="display:none;">
-    <div class="bank-logo">Bank <span>ONL</span></div>
-    <div class="bank-sub">Bezpieczne płatności online</div>
-
-    <div class="detail-row"><span class="label">Odbiorca</span><span class="value">NewOS</span></div>
-    <div class="detail-row"><span class="label">Subskrypcja</span><span class="value" id="plan-name">—</span></div>
-    <div class="detail-row"><span class="label">Kod klienta</span><span class="value" id="client-code">—</span></div>
-
-    <div class="amount" id="amount">$0</div>
-
-    <div class="question">Czy chcesz potwierdzić płatność?</div>
-    <div class="btn-row">
-        <button class="reject" id="reject">Odrzuć</button>
-        <button class="confirm" id="confirm">Potwierdź płatność</button>
+    <div class="bank-header">
+        <div class="bank-logo">Bank <span>ONL</span></div>
+        <div class="header-right">
+            <div class="label">Klient</div>
+            <div class="name" id="client-name">Użytkownik ONL</div>
+        </div>
     </div>
-    <div class="secure">Połączenie szyfrowane • Bank ONL</div>
+
+    <!-- BONUS -->
+    <div class="bonus-banner" id="bonus-banner" style="display:none;">
+        <div class="bb-text">
+            <div class="bb-title">🎁 Codzienny bonus!</div>
+            <div class="bb-sub" id="bonus-sub">Odbierz $100 za dzisiaj</div>
+        </div>
+        <button id="claim-bonus">Odbierz</button>
+    </div>
+
+    <!-- PŁATNOŚĆ -->
+    <div class="payment-alert" id="payment-alert">
+        <div class="pa-title">⚠️ Oczekująca płatność z NewOS</div>
+        <div id="payment-alert-text">Subskrypcja — $0</div>
+        <div style="margin-top:12px;">
+            <button class="mbtn btn-primary" style="padding:10px 20px; max-width:200px;" id="open-payment">Zobacz płatność</button>
+        </div>
+    </div>
+
+    <!-- KONTA -->
+    <div class="accounts-switcher" id="accounts-switcher"></div>
+
+    <!-- SALDO -->
+    <div class="balance-card" id="balance-card">
+        <div class="label">Dostępne środki</div>
+        <div class="balance" id="balance-display">$0</div>
+        <div class="card-num" id="card-num">•••• •••• •••• 0000</div>
+        <div class="loan-info" id="loan-display"></div>
+    </div>
+
+    <!-- AKCJE -->
+    <div class="actions">
+        <div class="action-btn" id="btn-deposit"><div class="icon">💰</div><div class="txt">Doładuj</div></div>
+        <div class="action-btn" id="btn-withdraw"><div class="icon">💸</div><div class="txt">Wypłać</div></div>
+        <div class="action-btn" id="btn-transfer"><div class="icon">💱</div><div class="txt">Przelew</div></div>
+        <div class="action-btn" id="btn-savings"><div class="icon">📈</div><div class="txt">Lokata</div></div>
+        <div class="action-btn" id="btn-loan"><div class="icon">🏦</div><div class="txt">Pożyczka</div></div>
+        <div class="action-btn" id="btn-repay"><div class="icon">✅</div><div class="txt">Spłać</div></div>
+        <div class="action-btn" id="btn-reset"><div class="icon">🔄</div><div class="txt">Reset</div></div>
+    </div>
+
+    <!-- LOKATY -->
+    <div class="section" id="savings-section" style="display:none;">
+        <h2>📈 Twoje lokaty</h2>
+        <div id="savings-list"></div>
+    </div>
+
+    <!-- HISTORIA -->
+    <div class="section">
+        <h2>📜 Historia transakcji</h2>
+        <div id="transactions"></div>
+    </div>
+
 </div>
 
-<!-- Sukces -->
-<div id="success">
+<!-- MODAL: KWOTA (doładuj/wypłać) -->
+<div class="modal" id="modal-amount">
+    <div class="modal-box">
+        <h2 id="amount-title">Doładuj</h2>
+        <p id="amount-desc">Podaj kwotę</p>
+        <input type="number" id="amount-input" placeholder="0" min="1">
+        <div class="btn-row">
+            <button class="mbtn btn-secondary" onclick="closeModal('modal-amount')">Anuluj</button>
+            <button class="mbtn btn-primary" id="amount-confirm">Potwierdź</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL: PRZELEW -->
+<div class="modal" id="modal-transfer">
+    <div class="modal-box">
+        <h2>💱 Przelew</h2>
+        <p>Przelej środki na inne konto</p>
+        <select id="transfer-target"></select>
+        <input type="number" id="transfer-amount" placeholder="Kwota" min="1">
+        <input type="text" id="transfer-title" placeholder="Tytuł przelewu (opcjonalnie)">
+        <div class="btn-row">
+            <button class="mbtn btn-secondary" onclick="closeModal('modal-transfer')">Anuluj</button>
+            <button class="mbtn btn-primary" id="transfer-confirm">Wyślij</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL: LOKATA -->
+<div class="modal" id="modal-savings">
+    <div class="modal-box">
+        <h2>📈 Załóż lokatę</h2>
+        <p>Wybierz plan (odsetki naliczane z czasem)</p>
+        <div class="opt-list" id="savings-options">
+            <div class="opt-item" data-rate="5" data-time="10"><span><span class="o-amount">Krótka</span><br><span class="o-detail">+5% co 10 sekund</span></span><span>⚡</span></div>
+            <div class="opt-item" data-rate="15" data-time="30"><span><span class="o-amount">Średnia</span><br><span class="o-detail">+15% co 30 sekund</span></span><span>📊</span></div>
+            <div class="opt-item" data-rate="50" data-time="60"><span><span class="o-amount">Długa</span><br><span class="o-detail">+50% co 60 sekund</span></span><span>💎</span></div>
+        </div>
+        <input type="number" id="savings-amount" placeholder="Kwota lokaty" min="1">
+        <div class="btn-row">
+            <button class="mbtn btn-secondary" onclick="closeModal('modal-savings')">Anuluj</button>
+            <button class="mbtn btn-primary" id="savings-confirm">Załóż</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL: NOWE KONTO -->
+<div class="modal" id="modal-newaccount">
+    <div class="modal-box">
+        <h2>💳 Nowe konto</h2>
+        <p>Nadaj nazwę nowemu kontu</p>
+        <input type="text" id="newaccount-name" placeholder="np. Oszczędności" maxlength="20">
+        <div class="btn-row">
+            <button class="mbtn btn-secondary" onclick="closeModal('modal-newaccount')">Anuluj</button>
+            <button class="mbtn btn-primary" id="newaccount-confirm">Utwórz</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL: POŻYCZKA -->
+<div class="modal" id="modal-loan">
+    <div class="modal-box">
+        <h2>🏦 Pożyczka</h2>
+        <p>Wybierz kwotę (oprocentowanie 10%)</p>
+        <div class="opt-list" id="loan-options">
+            <div class="opt-item" data-loan="100"><span class="o-amount">$100</span><span class="o-detail">do spłaty: $110</span></div>
+            <div class="opt-item" data-loan="500"><span class="o-amount">$500</span><span class="o-detail">do spłaty: $550</span></div>
+            <div class="opt-item" data-loan="1000"><span class="o-amount">$1000</span><span class="o-detail">do spłaty: $1100</span></div>
+            <div class="opt-item" data-loan="5000"><span class="o-amount">$5000</span><span class="o-detail">do spłaty: $5500</span></div>
+        </div>
+        <div class="btn-row">
+            <button class="mbtn btn-secondary" onclick="closeModal('modal-loan')">Anuluj</button>
+            <button class="mbtn btn-primary" id="loan-confirm">Weź pożyczkę</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL: PŁATNOŚĆ -->
+<div class="modal" id="modal-payment">
+    <div class="modal-box">
+        <h2>Potwierdź płatność</h2>
+        <p>NewOS prosi o płatność za subskrypcję</p>
+        <div class="detail-row"><span class="label">Odbiorca</span><span class="value">NewOS</span></div>
+        <div class="detail-row"><span class="label">Subskrypcja</span><span class="value" id="pay-plan">—</span></div>
+        <div class="amount-big" id="pay-amount">$0</div>
+        <div class="detail-row"><span class="label">Konto</span><span class="value" id="pay-account">—</span></div>
+        <div class="detail-row"><span class="label">Saldo</span><span class="value" id="pay-balance">$0</span></div>
+        <div class="btn-row">
+            <button class="mbtn btn-secondary" id="pay-reject">Odrzuć</button>
+            <button class="mbtn btn-primary" id="pay-confirm">Potwierdź</button>
+        </div>
+    </div>
+</div>
+
+<div id="pay-success">
     <div class="big-check">✅</div>
     <h1>Płatność zatwierdzona!</h1>
     <p>Trwa powrót do systemu NewOS...</p>
 </div>
 
+<div class="toast" id="toast"></div>
+
 <script>
-const plan = localStorage.getItem('onl_plan') || 'Nieznany';
-const price = localStorage.getItem('onl_price') || '0';
-const code = localStorage.getItem('onl_code') || '—';
+/* ========= STAN ========= */
+function loadState() {
+    let accounts = JSON.parse(localStorage.getItem('bank_accounts') || 'null');
+    if (!accounts) {
+        accounts = [{
+            id: 'acc1', name: 'Konto główne', num: '2077',
+            balance: 1000, loan: 0, savings: [], transactions: []
+        }];
+    }
+    return {
+        accounts,
+        activeId: localStorage.getItem('bank_active') || accounts[0].id,
+        lastBonus: localStorage.getItem('bank_lastbonus') || null
+    };
+}
+function saveState() {
+    localStorage.setItem('bank_accounts', JSON.stringify(state.accounts));
+    localStorage.setItem('bank_active', state.activeId);
+    if (state.lastBonus) localStorage.setItem('bank_lastbonus', state.lastBonus);
+}
+let state = loadState();
+function activeAcc() { return state.accounts.find(a => a.id === state.activeId); }
 
-document.getElementById('plan-name').textContent = plan;
-document.getElementById('client-code').textContent = code;
-document.getElementById('amount').textContent = '$' + price;
+/* ========= TRANSAKCJE ========= */
+function addTx(acc, title, amount, type, icon) {
+    const now = new Date();
+    const date = now.toLocaleString('pl-PL', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
+    acc.transactions.push({ title, amount, type, icon, date });
+}
 
-// Symulacja łączenia z bankiem
-setTimeout(() => {
-    document.getElementById('connecting').classList.add('hidden');
-    document.getElementById('payment-card').style.display = 'block';
-}, 2000);
+/* ========= RENDER ========= */
+function render() {
+    // przełącznik kont
+    const sw = document.getElementById('accounts-switcher');
+    sw.innerHTML = state.accounts.map(a => `
+        <div class="account-tab ${a.id === state.activeId ? 'active' : ''}" data-id="${a.id}">
+            <div class="a-name">${a.name}</div>
+            <div class="a-num">•••• ${a.num}</div>
+            <div class="a-balance">$${a.balance.toFixed(2)}</div>
+        </div>
+    `).join('') + `<div class="account-tab add-new" id="add-account">＋</div>`;
 
-// Potwierdzenie płatności
-document.getElementById('confirm').addEventListener('click', () => {
-    localStorage.setItem('onl_paid', 'true');
-    document.getElementById('success').classList.add('visible');
-    setTimeout(() => {
-        window.location.href = 'index.html';
-    }, 2500);
+    sw.querySelectorAll('.account-tab[data-id]').forEach(tab => {
+        tab.addEventListener('click', () => {
+            state.activeId = tab.getAttribute('data-id');
+            saveState(); render();
+        });
+    });
+    document.getElementById('add-account').addEventListener('click', () => {
+        document.getElementById('newaccount-name').value = '';
+        openModal('modal-newaccount');
+    });
+
+    const acc = activeAcc();
+    document.getElementById('balance-display').textContent = '$' + acc.balance.toFixed(2);
+    document.getElementById('card-num').textContent = '•••• •••• •••• ' + acc.num;
+    const loanEl = document.getElementById('loan-display');
+    loanEl.textContent = acc.loan > 0 ? '⚠️ Do spłaty pożyczki: $' + acc.loan.toFixed(2) : '';
+
+    // kolor karty zależnie od konta
+    const card = document.getElementById('balance-card');
+    card.className = 'balance-card';
+    const idx = state.accounts.indexOf(acc);
+    if (idx === 1) card.classList.add('gold');
+    if (idx === 2) card.classList.add('green');
+
+    // lokaty
+    const savSec = document.getElementById('savings-section');
+    const savList = document.getElementById('savings-list');
+    if (acc.savings && acc.savings.length > 0) {
+        savSec.style.display = 'block';
+        savList.innerHTML = acc.savings.map((s, i) => {
+            const now = Date.now();
+            const elapsed = Math.floor((now - s.start) / 1000);
+            const cycles = Math.floor(elapsed / s.time);
+            const earned = s.amount * (s.rate/100) * cycles;
+            const total = s.amount + earned;
+            const nextIn = s.time - (elapsed % s.time);
+            return `
+                <div class="deposit-item">
+                    <div class="d-info">
+                        <div class="d-amount">$${total.toFixed(2)} <span style="font-size:0.8rem;color:#4ade80;">(+$${earned.toFixed(2)})</span></div>
+                        <div class="d-detail">Wpłata: $${s.amount.toFixed(2)} • +${s.rate}%/${s.time}s • następne odsetki za ${nextIn}s</div>
+                    </div>
+                    <button data-sav="${i}">Wypłać</button>
+                </div>`;
+        }).join('');
+        savList.querySelectorAll('button[data-sav]').forEach(b => {
+            b.addEventListener('click', () => withdrawSaving(parseInt(b.getAttribute('data-sav'))));
+        });
+    } else {
+        savSec.style.display = 'none';
+    }
+
+    // historia
+    const txEl = document.getElementById('transactions');
+    if (acc.transactions.length === 0) {
+        txEl.innerHTML = '<div class="empty">Brak transakcji</div>';
+    } else {
+        txEl.innerHTML = acc.transactions.slice().reverse().map(t => `
+            <div class="transaction">
+                <div class="t-left">
+                    <div class="t-icon ${t.type}">${t.icon}</div>
+                    <div><div class="t-title">${t.title}</div><div class="t-date">${t.date}</div></div>
+                </div>
+                <div class="t-amount ${t.type}">${t.type === 'in' ? '+' : '-'}$${Math.abs(t.amount).toFixed(2)}</div>
+            </div>
+        `).join('');
+    }
+
+    checkBonus();
+}
+
+/* ========= TOAST ========= */
+function toast(msg, err=false) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'toast visible' + (err ? ' error' : '');
+    setTimeout(() => { t.className = 'toast' + (err ? ' error' : ''); }, 2800);
+}
+
+function openModal(id){ document.getElementById(id).classList.add('visible'); }
+function closeModal(id){ document.getElementById(id).classList.remove('visible'); }
+
+/* ========= DOŁADUJ / WYPŁAĆ ========= */
+let amountMode = 'deposit';
+document.getElementById('btn-deposit').addEventListener('click', () => {
+    amountMode='deposit';
+    document.getElementById('amount-title').textContent='💰 Doładuj';
+    document.getElementById('amount-desc').textContent='Podaj kwotę doładowania';
+    document.getElementById('amount-input').value='';
+    openModal('modal-amount');
+});
+document.getElementById('btn-withdraw').addEventListener('click', () => {
+    amountMode='withdraw';
+    document.getElementById('amount-title').textContent='💸 Wypłać';
+    document.getElementById('amount-desc').textContent='Podaj kwotę wypłaty';
+    document.getElementById('amount-input').value='';
+    openModal('modal-amount');
+});
+document.getElementById('amount-confirm').addEventListener('click', () => {
+    const acc = activeAcc();
+    const val = parseFloat(document.getElementById('amount-input').value);
+    if (!val || val <= 0) { toast('Podaj poprawną kwotę!', true); return; }
+    if (amountMode==='deposit') {
+        acc.balance += val; addTx(acc,'Doładowanie',val,'in','💰'); toast('Doładowano $'+val.toFixed(2));
+    } else {
+        if (val > acc.balance) { toast('Za mało środków!', true); return; }
+        acc.balance -= val; addTx(acc,'Wypłata',val,'out','💸'); toast('Wypłacono $'+val.toFixed(2));
+    }
+    saveState(); render(); closeModal('modal-amount');
 });
 
-// Odrzucenie
-document.getElementById('reject').addEventListener('click', () => {
+/* ========= PRZELEW ========= */
+document.getElementById('btn-transfer').addEventListener('click', () => {
+    const others = state.accounts.filter(a => a.id !== state.activeId);
+    const sel = document.getElementById('transfer-target');
+    if (others.length === 0) {
+        sel.innerHTML = '<option value="EXTERNAL">Konto zewnętrzne (••2137)</option>';
+    } else {
+        sel.innerHTML = others.map(a => `<option value="${a.id}">${a.name} (••${a.num})</option>`).join('')
+            + '<option value="EXTERNAL">Konto zewnętrzne (••2137)</option>';
+    }
+    document.getElementById('transfer-amount').value='';
+    document.getElementById('transfer-title').value='';
+    openModal('modal-transfer');
+});
+document.getElementById('transfer-confirm').addEventListener('click', () => {
+    const acc = activeAcc();
+    const val = parseFloat(document.getElementById('transfer-amount').value);
+    const targetId = document.getElementById('transfer-target').value;
+    const title = document.getElementById('transfer-title').value.trim() || 'Przelew';
+    if (!val || val <= 0) { toast('Podaj poprawną kwotę!', true); return; }
+    if (val > acc.balance) { toast('Za mało środków!', true); return; }
+    acc.balance -= val;
+    addTx(acc, title + ' →', val, 'out', '💱');
+    if (targetId !== 'EXTERNAL') {
+        const target = state.accounts.find(a => a.id === targetId);
+        target.balance += val;
+        addTx(target, title + ' ←', val, 'in', '💱');
+    }
+    saveState(); render(); closeModal('modal-transfer');
+    toast('Przelano $'+val.toFixed(2));
+});
+
+/* ========= LOKATA ========= */
+let selSaving = null;
+document.getElementById('btn-savings').addEventListener('click', () => {
+    selSaving = null;
+    document.querySelectorAll('#savings-options .opt-item').forEach(o=>o.classList.remove('selected'));
+    document.getElementById('savings-amount').value='';
+    openModal('modal-savings');
+});
+document.querySelectorAll('#savings-options .opt-item').forEach(o => {
+    o.addEventListener('click', () => {
+        document.querySelectorAll('#savings-options .opt-item').forEach(x=>x.classList.remove('selected'));
+        o.classList.add('selected');
+        selSaving = { rate: parseFloat(o.getAttribute('data-rate')), time: parseFloat(o.getAttribute('data-time')) };
+    });
+});
+document.getElementById('savings-confirm').addEventListener('click', () => {
+    const acc = activeAcc();
+    const val = parseFloat(document.getElementById('savings-amount').value);
+    if (!selSaving) { toast('Wybierz plan lokaty!', true); return; }
+    if (!val || val <= 0) { toast('Podaj kwotę!', true); return; }
+    if (val > acc.balance) { toast('Za mało środków!', true); return; }
+    acc.balance -= val;
+    acc.savings.push({ amount: val, rate: selSaving.rate, time: selSaving.time, start: Date.now() });
+    addTx(acc,'Założenie lokaty',val,'out','📈');
+    saveState(); render(); closeModal('modal-savings');
+    toast('Lokata założona!');
+});
+function withdrawSaving(i) {
+    const acc = activeAcc();
+    const s = acc.savings[i];
+    const elapsed = Math.floor((Date.now() - s.start)/1000);
+    const cycles = Math.floor(elapsed / s.time);
+    const earned = s.amount * (s.rate/100) * cycles;
+    const total = s.amount + earned;
+    acc.balance += total;
+    addTx(acc,'Wypłata lokaty (+$'+earned.toFixed(2)+')', total,'in','📈');
+    acc.savings.splice(i,1);
+    saveState(); render();
+    toast('Wypłacono lokatę: $'+total.toFixed(2));
+}
+
+/* ========= NOWE KONTO ========= */
+document.getElementById('newaccount-confirm').addEventListener('click', () => {
+    const name = document.getElementById('newaccount-name').value.trim();
+    if (!name) { toast('Podaj nazwę konta!', true); return; }
+    if (state.accounts.length >= 4) { toast('Maksymalnie 4 konta!', true); return; }
+    const num = Math.floor(1000 + Math.random()*9000).toString();
+    const id = 'acc' + Date.now();
+    state.accounts.push({ id, name, num, balance: 0, loan: 0, savings: [], transactions: [] });
+    state.activeId = id;
+    saveState(); render(); closeModal('modal-newaccount');
+    toast('Konto "'+name+'" utworzone!');
+});
+
+/* ========= POŻYCZKA ========= */
+let selLoan = null;
+document.getElementById('btn-loan').addEventListener('click', () => {
+    selLoan = null;
+    document.querySelectorAll('#loan-options .opt-item').forEach(o=>o.classList.remove('selected'));
+    openModal('modal-loan');
+});
+document.querySelectorAll('#loan-options .opt-item').forEach(o => {
+    o.addEventListener('click', () => {
+        document.querySelectorAll('#loan-options .opt-item').forEach(x=>x.classList.remove('selected'));
+        o.classList.add('selected');
+        selLoan = parseFloat(o.getAttribute('data-loan'));
+    });
+});
+document.getElementById('loan-confirm').addEventListener('click', () => {
+    const acc = activeAcc();
+    if (!selLoan) { toast('Wybierz kwotę!', true); return; }
+    if (acc.loan > 0) { toast('Najpierw spłać obecną pożyczkę!', true); return; }
+    acc.balance += selLoan; acc.loan += selLoan*1.1;
+    addTx(acc,'Pożyczka',selLoan,'in','🏦');
+    saveState(); render(); closeModal('modal-loan');
+    toast('Pożyczka $'+selLoan.toFixed(2)+' przyznana!');
+});
+
+/* ========= SPŁATA ========= */
+document.getElementById('btn-repay').addEventListener('click', () => {
+    const acc = activeAcc();
+    if (acc.loan <= 0) { toast('Brak pożyczki!', true); return; }
+    if (acc.balance < acc.loan) { toast('Za mało środków ($'+acc.loan.toFixed(2)+')!', true); return; }
+    const a = acc.loan; acc.balance -= a; acc.loan = 0;
+    addTx(acc,'Spłata pożyczki',a,'out','✅');
+    saveState(); render(); toast('Pożyczka spłacona!');
+});
+
+/* ========= RESET ========= */
+document.getElementById('btn-reset').addEventListener('click', () => {
+    if (confirm('Zresetować WSZYSTKIE konta do stanu początkowego?')) {
+        localStorage.removeItem('bank_accounts');
+        localStorage.removeItem('bank_active');
+        localStorage.removeItem('bank_lastbonus');
+        state = loadState(); render(); toast('Zresetowano!');
+    }
+});
+
+/* ========= CODZIENNY BONUS ========= */
+function checkBonus() {
+    const today = new Date().toDateString();
+    const banner = document.getElementById('bonus-banner');
+    if (state.lastBonus === today) {
+        banner.style.display = 'none';
+    } else {
+        banner.style.display = 'flex';
+        document.getElementById('bonus-sub').textContent = 'Odbierz $100 za dzisiaj!';
+    }
+}
+document.getElementById('claim-bonus').addEventListener('click', () => {
+    const acc = activeAcc();
+    acc.balance += 100;
+    addTx(acc,'Codzienny bonus',100,'in','🎁');
+    state.lastBonus = new Date().toDateString();
+    saveState(); render();
+    toast('🎁 Odebrano bonus $100!');
+});
+
+/* ========= PŁATNOŚĆ ZA SUBSKRYPCJĘ ========= */
+const pendingPlan = localStorage.getItem('onl_plan');
+const pendingPrice = localStorage.getItem('onl_price');
+const pendingCode = localStorage.getItem('onl_code');
+const hasPending = pendingPlan && pendingPrice && localStorage.getItem('onl_paid') !== 'true';
+if (pendingCode) document.getElementById('client-name').textContent = pendingCode;
+
+if (hasPending) {
+    document.getElementById('payment-alert').classList.add('visible');
+    document.getElementById('payment-alert-text').textContent = `${pendingPlan} — $${pendingPrice}`;
+}
+document.getElementById('open-payment').addEventListener('click', showPayment);
+function showPayment() {
+    const acc = activeAcc();
+    document.getElementById('pay-plan').textContent = pendingPlan;
+    document.getElementById('pay-amount').textContent = '$'+pendingPrice;
+    document.getElementById('pay-account').textContent = acc.name;
+    document.getElementById('pay-balance').textContent = '$'+acc.balance.toFixed(2);
+    openModal('modal-payment');
+}
+if (hasPending) setTimeout(showPayment, 1200);
+
+document.getElementById('pay-confirm').addEventListener('click', () => {
+    const acc = activeAcc();
+    const price = parseFloat(pendingPrice);
+    if (acc.balance < price) { toast('Za mało środków! Doładuj lub weź pożyczkę.', true); closeModal('modal-payment'); return; }
+    acc.balance -= price;
+    addTx(acc,'Subskrypcja NewOS: '+pendingPlan, price,'out','💳');
+    saveState(); render();
+    localStorage.setItem('onl_paid','true');
+    closeModal('modal-payment');
+    document.getElementById('pay-success').classList.add('visible');
+    setTimeout(() => { window.location.href='index.html'; }, 2500);
+});
+document.getElementById('pay-reject').addEventListener('click', () => {
     localStorage.removeItem('onl_paid');
-    window.location.href = 'index.html';
+    closeModal('modal-payment');
+    document.getElementById('payment-alert').classList.remove('visible');
+    toast('Płatność odrzucona');
+    setTimeout(() => { window.location.href='index.html'; }, 1000);
 });
+
+/* ========= AUTO-ODŚWIEŻANIE LOKAT ========= */
+setInterval(() => {
+    if (activeAcc().savings && activeAcc().savings.length > 0) render();
+}, 1000);
+
+/* ========= START ========= */
+render();
 </script>
 
 </body>
