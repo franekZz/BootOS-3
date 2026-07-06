@@ -716,4 +716,226 @@ function showDesktop() {
 }
 </script>
 </body>
-</html>
+<script>
+/*
+    POPRAWKA BANKU:
+    - bank NIE zamyka się po płatności
+    - pokazuje klucz subskrypcji
+    - można skopiować klucz
+    - przycisk Potwierdź płatność ma nowe działanie
+*/
+
+(function () {
+    function makeSubscriptionKey() {
+        const plan = localStorage.getItem('onl_plan') || 'NEWOS';
+        const cleanPlan = plan.replace(/[^A-Z0-9]/gi, '').toUpperCase();
+
+        return 'SUB-' + cleanPlan + '-' +
+            Math.random().toString(36).substring(2, 10).toUpperCase() + '-' +
+            Math.random().toString(36).substring(2, 6).toUpperCase();
+    }
+
+    function overridePaymentButtons() {
+        const oldConfirmBtn = document.getElementById('pay-confirm');
+        const oldRejectBtn = document.getElementById('pay-reject');
+
+        if (!oldConfirmBtn || !oldRejectBtn) {
+            console.warn('Nie znaleziono przycisków płatności.');
+            return;
+        }
+
+        /*
+            Klonowanie usuwa stare event listenery,
+            czyli usuwa stare zachowanie zamykania banku po 3 sekundach.
+        */
+        const newConfirmBtn = oldConfirmBtn.cloneNode(true);
+        const newRejectBtn = oldRejectBtn.cloneNode(true);
+
+        oldConfirmBtn.parentNode.replaceChild(newConfirmBtn, oldConfirmBtn);
+        oldRejectBtn.parentNode.replaceChild(newRejectBtn, oldRejectBtn);
+
+        newConfirmBtn.addEventListener('click', () => {
+            const plan = localStorage.getItem('onl_plan') || 'Nieznany';
+            const price = parseFloat(localStorage.getItem('onl_price') || '0');
+
+            const account = activeAcc();
+
+            if (account.balance < price) {
+                toast('Za mało środków!', true);
+                closeModal('modal-payment');
+                return;
+            }
+
+            // Pobierz pieniądze
+            account.balance -= price;
+            addTx(account, 'NewOS: ' + plan, price, 'out', '💳');
+
+            saveState();
+            render();
+
+            // Wygeneruj i zapisz klucz
+            const subscriptionKey = makeSubscriptionKey();
+            localStorage.setItem('newos_subscription_key', subscriptionKey);
+
+            // Powiadom NewOS, że płatność gotowa
+            localStorage.setItem('onl_rejected', 'false');
+            localStorage.setItem('onl_paid', 'true');
+
+            closeModal('modal-payment');
+
+            const paymentAlert = document.getElementById('payment-alert');
+            if (paymentAlert) {
+                paymentAlert.classList.remove('visible');
+            }
+
+            const successEl = document.getElementById('pay-success');
+
+            successEl.innerHTML = `
+                <div class="big-check">✅</div>
+
+                <h1>Płatność zatwierdzona!</h1>
+
+                <p style="margin-bottom:20px">
+                    Skopiuj klucz subskrypcji i wklej go w systemie NewOS.
+                </p>
+
+                <div
+                    id="success-key"
+                    style="
+                        background: rgba(0,0,0,0.35);
+                        border: 2px dashed rgba(52,211,153,0.8);
+                        color: #34d399;
+                        padding: 20px;
+                        border-radius: 14px;
+                        font-family: monospace;
+                        font-size: 1.15rem;
+                        letter-spacing: 1px;
+                        max-width: 90%;
+                        word-break: break-all;
+                        margin-bottom: 20px;
+                    "
+                >${subscriptionKey}</div>
+
+                <button
+                    id="copy-success-key"
+                    style="
+                        padding: 14px 30px;
+                        border: none;
+                        border-radius: 12px;
+                        background: #34d399;
+                        color: #003;
+                        font-weight: 800;
+                        cursor: pointer;
+                        margin-bottom: 15px;
+                    "
+                >
+                    📋 Kopiuj klucz
+                </button>
+
+                <br>
+
+                <button
+                    onclick="window.close()"
+                    style="
+                        padding: 14px 30px;
+                        border: none;
+                        border-radius: 12px;
+                        background: rgba(255,255,255,0.15);
+                        color: white;
+                        font-weight: 700;
+                        cursor: pointer;
+                    "
+                >
+                    Zamknij bank
+                </button>
+
+                <p style="margin-top:20px;opacity:0.75;font-size:0.9rem">
+                    Jeśli karta się nie zamknie, zamknij ją ręcznie i wróć do NewOS.
+                </p>
+            `;
+
+            successEl.classList.add('visible');
+
+            document.getElementById('copy-success-key').addEventListener('click', () => {
+                const key = document.getElementById('success-key').textContent;
+
+                navigator.clipboard.writeText(key).then(() => {
+                    toast('Skopiowano klucz!');
+                }).catch(() => {
+                    alert('Klucz: ' + key);
+                });
+            });
+        });
+
+        newRejectBtn.addEventListener('click', () => {
+            localStorage.setItem('onl_rejected', 'true');
+            localStorage.removeItem('onl_paid');
+
+            closeModal('modal-payment');
+            toast('Odrzucono płatność');
+
+            setTimeout(() => {
+                window.close();
+            }, 1500);
+        });
+    }
+
+    /*
+        Poprawka zakładki Klucze:
+        jeśli klucz subskrypcji już istnieje,
+        pokazuje ten sam klucz zamiast generować nowy za każdym razem.
+    */
+    window.renderKeys = function (tab) {
+        const content = document.getElementById('keys-content');
+        const plan = localStorage.getItem('onl_plan') || 'Normal';
+
+        if (!content) return;
+
+        if (tab === 'newos') {
+            const key = localStorage.getItem('newos_system_key') || genKey('NOS');
+            localStorage.setItem('newos_system_key', key);
+
+            content.innerHTML = `
+                <p style="margin-bottom:15px;opacity:0.7">
+                    Klucz systemu NewOS
+                </p>
+                <div class="key-box" id="key-val">${key}</div>
+                <button class="copy-btn" onclick="copyKey()">Kopiuj klucz</button>
+            `;
+        }
+
+        else if (tab === 'sub') {
+            let key = localStorage.getItem('newos_subscription_key');
+
+            if (!key) {
+                key = makeSubscriptionKey();
+                localStorage.setItem('newos_subscription_key', key);
+            }
+
+            content.innerHTML = `
+                <p style="margin-bottom:15px;opacity:0.7">
+                    Klucz subskrypcji: <strong>${plan}</strong>
+                </p>
+                <div class="key-box" id="key-val">${key}</div>
+                <button class="copy-btn" onclick="copyKey()">Kopiuj klucz</button>
+            `;
+        }
+
+        else {
+            const key = localStorage.getItem('newos_boot_key') || genKey('BOT');
+            localStorage.setItem('newos_boot_key', key);
+
+            content.innerHTML = `
+                <p style="margin-bottom:15px;opacity:0.7">
+                    Klucz BootOS 3
+                </p>
+                <div class="key-box" id="key-val">${key}</div>
+                <button class="copy-btn" onclick="copyKey()">Kopiuj klucz</button>
+            `;
+        }
+    };
+
+    // Uruchom poprawkę po załadowaniu strony
+    overridePaymentButtons();
+})();
+</script>
