@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<title>NewOS - Subskrypcje</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cherry+Bomb+One&display=swap" rel="stylesheet">
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: linear-gradient(135deg, #0a0015, #1a0033, #2d1b69, #6b2fb5, #a855f7, #c084fc);
+    background-size: 400% 400%;
+    animation: gradientShift 12s ease infinite;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px;
+    overflow-y: auto;
+}
+
+#subscription-screen {
+    width: 100%;
+    max-width: 1500px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#subscription-screen h1 {
+    margin-bottom: 30px;
+    text-align: center;
+    font-size: 2.4rem;
+    text-shadow: 0 0 30px rgba(168,85,247,.9);
+}
+
+.sub-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+    gap: 20px;
+    width: 100%;
+}
+
+.sub-card {
+    background: rgba(30,10,55,.75);
+    border: 2px solid rgba(168,85,247,.45);
+    border-radius: 20px;
+    padding: 25px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    transition: 0.3s;
+}
+
+.sub-card:hover {
+    border-color: white;
+    transform: translateY(-6px);
+    box-shadow: 0 10px 40px rgba(168,85,247,.4);
+}
+
+.sub-card h2 {
+    font-size: 1.6rem;
+}
+
+.price {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: #c084fc;
+}
+
+.desc {
+    line-height: 1.45;
+    opacity: .92;
+}
+
+.pros {
+    font-size: .9rem;
+    color: #86efac;
+}
+
+.warn {
+    font-size: .9rem;
+    color: #fbbf24;
+}
+
+.cons {
+    font-size: .9rem;
+    color: #fca5a5;
+}
+
+.buy-btn {
+    margin-top: auto;
+    padding: 14px;
+    border: none;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #a855f7, #c084fc);
+    color: white;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.buy-btn:hover {
+    transform: scale(1.04);
+    box-shadow: 0 5px 20px rgba(168,85,247,.6);
+}
+
+#bank-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    background: rgba(0,0,0,.75);
+    display: none;
+    justify-content: center;
+    align-items: center;
+}
+
+#bank-modal.visible {
+    display: flex;
+}
+
+.bank-box {
+    width: 90%;
+    max-width: 450px;
+    padding: 40px;
+    border-radius: 25px;
+    background: rgba(20,5,40,.95);
+    border: 2px solid rgba(168,85,247,.7);
+    text-align: center;
+    backdrop-filter: blur(15px);
+}
+
+.bank-box h2 {
+    margin-bottom: 10px;
+}
+
+.bank-box p {
+    opacity: .75;
+    margin-bottom: 20px;
+}
+
+.bank-box input {
+    width: 100%;
+    padding: 15px;
+    border-radius: 12px;
+    border: 2px solid rgba(168,85,247,.5);
+    background: rgba(0,0,0,.4);
+    color: white;
+    text-align: center;
+    font-size: 1.1rem;
+    margin-bottom: 20px;
+}
+
+.btn-row {
+    display: flex;
+    gap: 12px;
+}
+
+.bank-box button {
+    flex: 1;
+    padding: 14px;
+    border: none;
+    border-radius: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.bank-connect {
+    background: #16a34a;
+    color: white;
+}
+
+.bank-connect:hover {
+    background: #15803d;
+}
+
+.bank-cancel {
+    background: rgba(255,255,255,.15);
+    color: white;
+}
+
+.bank-cancel:hover {
+    background: rgba(255,255,255,.25);
+}
+
+#back-btn {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    padding: 12px 24px;
+    border-radius: 12px;
+    border: 2px solid rgba(255,255,255,.3);
+    background: rgba(168,85,247,.2);
+    color: white;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: 0.3s;
+    z-index: 10;
+}
+
+#back-btn:hover {
+    background: rgba(168,85,247,.4);
+    border-color: white;
+}
+
+@keyframes gradientShift {
+    0%,100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}
+
+@keyframes nextPulse {
+    50% { box-shadow: 0 0 60px #a855f7; }
+}
+</style>
+</head>
+
+<body>
+
+<button id="back-btn" onclick="window.location.href='index.html'">← Powrót</button>
+
+<div id="subscription-screen">
+    <h1>Wybierz subskrypcję</h1>
+
+    <div class="sub-grid">
+
+        <div class="sub-card">
+            <h2>Normal</h2>
+            <div class="price">$20 <span style="font-size:.9rem;opacity:.65">/ start</span></div>
+            <div class="desc">
+                Subskrypcja do pracy, grania i wyluzowania się.
+                Po roku cena zmienia się na <strong>$50</strong>.
+            </div>
+            <div class="warn">
+                ⚠️ Haczyk: jeśli temperatura procesora przekroczy <strong>80°C</strong>,
+                system wyrzuci Recovery Screen — niby dla bezpieczeństwa.
+            </div>
+            <button class="buy-btn" data-plan="Normal" data-price="20">Kup za $20</button>
+        </div>
+
+        <div class="sub-card">
+            <h2>Pro</h2>
+            <div class="price">$500 <span style="font-size:.9rem;opacity:.65">/ mies.</span></div>
+            <div class="desc">
+                Bezpieczny plan stworzony z myślą o pracy, programowaniu i testowaniu.
+            </div>
+            <div class="pros">✔ Własny, odizolowany sandbox / piaskownica</div>
+            <div class="pros">✔ Zaawansowany system testowania plików przed wirusami</div>
+            <div class="pros">✔ Idealny do odpalania niepewnego kodu</div>
+            <div class="cons">✘ Wada: całkowicie nie nadaje się do gier — system blokuje produkcje gamingowe</div>
+            <button class="buy-btn" data-plan="Pro" data-price="500">Kup za $500</button>
+        </div>
+
+        <div class="sub-card">
+            <h2>Pro+ 🎮</h2>
+            <div class="price">od $700 <span style="font-size:.9rem;opacity:.65">/ mies.</span></div>
+            <div class="desc">
+                Wersja bezkompromisowa, która nadaje się do wszystkiego:
+                od zaawansowanego kodu po najnowsze gry.
+            </div>
+            <div class="pros">✔ Co miesiąc cena spada o $50, aż zatrzyma się na $100</div>
+            <div class="pros">✔ Brak limitów temperatur z wersji Normal</div>
+            <div class="pros">✔ Pełna swoboda i brak blokad na gry</div>
+            <button class="buy-btn" data-plan="Pro+" data-price="700">Kup za $700</button>
+        </div>
+
+        <div class="sub-card">
+            <h2>Ultimate+ 🚀</h2>
+            <div class="price">$1200 <span style="font-size:.9rem;opacity:.65">/ mies.</span></div>
+            <div class="desc">
+                Kompletny pakiet zoptymalizowany pod maksymalną wydajność
+                i wygodę użytkownika.
+            </div>
+            <div class="pros">✔ Nadaje się do wszystkiego — praca i gry</div>
+            <div class="pros">✔ Wbudowany skaner antywirusowy</div>
+            <div class="pros">✔ Automatyczna optymalizacja systemu</div>
+            <div class="pros">✔ Dostęp do dobrych programów za darmo, najlepsze narzędzia od razu zainstalowane</div>
+            <button class="buy-btn" data-plan="Ultimate+" data-price="1200">Kup za $1200</button>
+        </div>
+
+        <div class="sub-card" style="border-color:#fbbf24">
+            <h2>Deluxe+ 👑</h2>
+            <div class="price">$2000 <span style="font-size:.9rem;opacity:.65">/ mies.</span></div>
+            <div class="desc">
+                Najwyższy możliwy plan w hierarchii NewOS,
+                łączący potęgę wszystkich poprzednich opcji.
+            </div>
+            <div class="pros">✔ Ma sandboxy, darmowe programy, optymalizacje i jeszcze więcej</div>
+            <div class="pros">✔ Zawiera wszystko oprócz błędu z Normal — wycina problem 80°C</div>
+            <div class="pros">✔ Możesz kręcić procesor na maksa i grać bez obaw, że system zniszczy Ci skina</div>
+            <button class="buy-btn" data-plan="Deluxe+" data-price="2000">Kup za $2000</button>
+        </div>
+
+    </div>
+</div>
+
+<div id="bank-modal">
+    <div class="bank-box">
+        <h2>Płatność przez Bank ONL</h2>
+        <p>Wpisz kod dostępu do Banku ONL</p>
+        <div id="bank-plan-label" style="color:#c084fc;font-weight:800;font-size:1.2rem;margin-bottom:20px">—</div>
+        <input type="text" id="bank-code" placeholder="Kod ONL" maxlength="20">
+        <div class="btn-row">
+            <button class="bank-cancel" id="bank-cancel">Anuluj</button>
+            <button class="bank-connect" id="bank-connect">Połącz</button>
+        </div>
+        <div style="font-size:.8rem;opacity:.45;margin-top:15px">Testowy kod: ONL1234</div>
+    </div>
+</div>
+
+<script>
+let selectedPlan = null;
+let selectedPrice = null;
+
+window.addEventListener("storage", (e) => {
+    if (e.key === "onl_paid" && e.newValue === "true") {
+        localStorage.removeItem("onl_paid");
+        bankModalEl.classList.remove("visible");
+        
+        setTimeout(() => {
+            window.location.href = "setup.html";
+        }, 1000);
+    }
+
+    if (e.key === "onl_rejected" && e.newValue === "true") {
+        localStorage.removeItem("onl_rejected");
+        bankModalEl.querySelector(".bank-box").innerHTML = `
+            <h2>Płatność odrzucona</h2>
+            <p>Płatność została anulowana w banku.</p>
+            <button class="bank-cancel" onclick="location.reload()">Zamknij</button>
+        `;
+    }
+});
+
+const bankModalEl = document.getElementById("bank-modal");
+const bankPlanLabel = document.getElementById("bank-plan-label");
+const bankCodeInput = document.getElementById("bank-code");
+
+document.querySelectorAll(".buy-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+        selectedPlan = btn.dataset.plan;
+        selectedPrice = btn.dataset.price;
+
+        bankPlanLabel.textContent = `${selectedPlan} — $${selectedPrice}`;
+        bankCodeInput.value = "";
+        bankModalEl.classList.add("visible");
+    });
+});
+
+document.getElementById("bank-cancel").addEventListener("click", () => {
+    bankModalEl.classList.remove("visible");
+});
+
+document.getElementById("bank-connect").addEventListener("click", () => {
+    const code = bankCodeInput.value.trim();
+
+    if (code.length < 4) {
+        bankCodeInput.style.borderColor = "#ef4444";
+        return;
+    }
+
+    localStorage.setItem("onl_plan", selectedPlan);
+    localStorage.setItem("onl_price", selectedPrice);
+    localStorage.setItem("onl_code", code);
+
+    localStorage.removeItem("onl_paid");
+    localStorage.removeItem("onl_rejected");
+    localStorage.removeItem("onl_sub_key");
+    localStorage.removeItem("onl_key_ready");
+    localStorage.removeItem("onl_key_plan");
+
+    window.open("bank.html", "_blank");
+
+    bankModalEl.querySelector(".bank-box").innerHTML = `
+        <h2>Oczekiwanie na płatność...</h2>
+        <p>
+            Bank ONL został otwarty w nowej karcie.<br>
+            Potwierdź płatność, potem wejdź w Klucze.
+        </p>
+        <div style="color:#c084fc;font-size:1.2rem;font-weight:800;margin:20px 0">
+            ${selectedPlan} — $${selectedPrice}
+        </div>
+        <div style="font-size:2.5rem;animation:nextPulse 1.5s infinite">🏦 ➜ 💳</div>
+    `;
+});
+</script>
+</body>
+</html>
