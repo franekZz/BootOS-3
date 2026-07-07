@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<title>NewOS Deluxe Desktop</title>
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    font-family: 'Segoe UI', Arial, sans-serif;
+}
+
+body {
+    color: white;
+}
+
+body.theme-ciemny {
+    background: linear-gradient(135deg, #0f172a, #111827, #1e1b4b);
+}
+
+body.theme-biały {
+    background: linear-gradient(135deg, #f8fafc, #e5e7eb, #cbd5e1);
+    color: #111;
+}
+
+body.theme-fioletowy {
+    background: linear-gradient(135deg, #1a0033, #2d1b69, #6b2fb5, #a855f7);
+}
+
+#desktop {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.wallpaper-glow {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+        radial-gradient(circle at 20% 20%, rgba(168,85,247,.35), transparent 30%),
+        radial-gradient(circle at 80% 70%, rgba(56,189,248,.25), transparent 35%);
+}
+
+.desktop-area {
+    flex: 1;
+    padding: 28px;
+    display: flex;
+    gap: 18px;
+    align-items: flex-start;
+    position: relative;
+    z-index: 1;
+}
+
+.desktop-icon {
+    width: 92px;
+    min-height: 92px;
+    padding: 10px;
+    text-align: center;
+    border-radius: 14px;
+    cursor: pointer;
+    user-select: none;
+    transition: .2s;
+}
+
+.desktop-icon:hover {
+    background: rgba(255,255,255,.14);
+    backdrop-filter: blur(8px);
+}
+
+body.theme-biały .desktop-icon:hover {
+    background: rgba(0,0,0,.08);
+}
+
+.desktop-icon .icon {
+    font-size: 2.6rem;
+    margin-bottom: 6px;
+}
+
+.desktop-icon .label {
+    font-size: .78rem;
+}
+
+.taskbar {
+    height: 56px;
+    background: rgba(0,0,0,.78);
+    backdrop-filter: blur(18px);
+    border-top: 1px solid rgba(255,255,255,.12);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 18px;
+    position: relative;
+    z-index: 20;
+}
+
+body.theme-biały .taskbar {
+    background: rgba(255,255,255,.8);
+    color: #111;
+    border-top: 1px solid rgba(0,0,0,.12);
+}
+
+.task-left,
+.task-center,
+.task-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.start-btn {
+    padding: 10px 18px;
+    border: none;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #a855f7, #c084fc);
+    color: white;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.task-app {
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: rgba(255,255,255,.12);
+    cursor: pointer;
+    font-size: 1.2rem;
+}
+
+.clock-box {
+    text-align: right;
+    font-size: .85rem;
+}
+
+.clock-box .time {
+    font-weight: 700;
+}
+
+.clock-box .date {
+    opacity: .65;
+    font-size: .75rem;
+}
+
+#start-menu {
+    position: absolute;
+    left: 18px;
+    bottom: 68px;
+    width: 330px;
+    background: rgba(15,23,42,.92);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255,255,255,.15);
+    border-radius: 22px;
+    padding: 18px;
+    display: none;
+    z-index: 50;
+    box-shadow: 0 20px 60px rgba(0,0,0,.45);
+}
+
+#start-menu.visible {
+    display: block;
+}
+
+body.theme-biały #start-menu {
+    background: rgba(255,255,255,.92);
+    color: #111;
+    border-color: rgba(0,0,0,.12);
+}
+
+.start-user {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #a855f7, #38bdf8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.4rem;
+}
+
+.menu-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+}
+
+.menu-item {
+    padding: 14px 8px;
+    border-radius: 14px;
+    background: rgba(255,255,255,.08);
+    text-align: center;
+    cursor: pointer;
+}
+
+.menu-item:hover {
+    background: rgba(168,85,247,.25);
+}
+
+body.theme-biały .menu-item {
+    background: rgba(0,0,0,.06);
+}
+
+.mi-icon {
+    font-size: 1.6rem;
+    margin-bottom: 6px;
+}
+
+.mi-label {
+    font-size: .75rem;
+}
+
+.power-row {
+    margin-top: 14px;
+    display: flex;
+    gap: 10px;
+}
+
+.power-btn {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    border-radius: 12px;
+    background: rgba(255,255,255,.12);
+    color: inherit;
+    cursor: pointer;
+    font-weight: 700;
+}
+
+.window {
+    position: absolute;
+    width: 520px;
+    min-height: 330px;
+    top: 100px;
+    left: 160px;
+    background: rgba(15,23,42,.92);
+    backdrop-filter: blur(22px);
+    border: 1px solid rgba(255,255,255,.14);
+    border-radius: 18px;
+    overflow: hidden;
+    display: none;
+    z-index: 30;
+    box-shadow: 0 25px 70px rgba(0,0,0,.5);
+}
+
+.window.visible {
+    display: block;
+}
+
+body.theme-biały .window {
+    background: rgba(255,255,255,.95);
+    color: #111;
+    border-color: rgba(0,0,0,.1);
+}
+
+.window-bar {
+    height: 46px;
+    background: rgba(0,0,0,.35);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 14px;
+    cursor: move;
+}
+
+body.theme-biały .window-bar {
+    background: rgba(0,0,0,.08);
+}
+
+.window-title {
+    font-weight: 800;
+}
+
+.win-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    background: rgba(239,68,68,.8);
+    color: white;
+}
+
+.window-content {
+    padding: 20px;
+}
+
+.stat-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+    margin-top: 15px;
+}
+
+.stat-card {
+    background: rgba(255,255,255,.08);
+    padding: 16px;
+    border-radius: 14px;
+}
+
+body.theme-biały .stat-card {
+    background: rgba(0,0,0,.06);
+}
+
+.stat-card small {
+    opacity: .65;
+}
+
+.stat-card strong {
+    display: block;
+    font-size: 1.2rem;
+    margin-top: 5px;
+}
+
+.terminal {
+    background: #050505;
+    color: #00ff66;
+    font-family: 'Courier New', monospace;
+    border-radius: 12px;
+    padding: 15px;
+    min-height: 210px;
+    white-space: pre-wrap;
+}
+
+.settings-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px;
+    border-bottom: 1px solid rgba(255,255,255,.1);
+}
+
+.theme-choice {
+    display: flex;
+    gap: 8px;
+}
+
+.theme-choice button {
+    padding: 8px 12px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 700;
+}
+
+#not-installed {
+    position: fixed;
+    inset: 0;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    background: #020617;
+    color: white;
+    z-index: 999;
+    text-align: center;
+    padding: 20px;
+}
+
+#not-installed.visible {
+    display: flex;
+}
+
+#not-installed .box {
+    max-width: 460px;
+    background: rgba(255,255,255,.08);
+    padding: 35px;
+    border-radius: 22px;
+    border: 1px solid rgba(255,255,255,.15);
+}
+
+#not-installed button {
+    margin-top: 20px;
+    padding: 14px 28px;
+    border: none;
+    border-radius: 12px;
+    background: #a855f7;
+    color: white;
+    font-weight: 800;
+    cursor: pointer;
+}
+</style>
+</head>
+
+<body>
+
+<div id="not-installed">
+    <div class="box">
+        <h1>NewOS nie jest jeszcze skonfigurowany</h1>
+        <p style="opacity:.75;margin-top:12px">
+            Najpierw przejdź przez instalator w index.html.
+        </p>
+        <button onclick="location.href='index.html'">Wróć do instalatora</button>
+    </div>
+</div>
+
+<div id="desktop">
+    <div class="wallpaper-glow"></div>
+
+    <div class="desktop-area">
+        <div class="desktop-icon" onclick="openWindow('files-window')">
+            <div class="icon">📁</div>
+            <div class="label">Pliki</div>
+        </div>
+
+        <div class="desktop-icon" onclick="openWindow('browser-window')">
+            <div class="icon">🌐</div>
+            <div class="label">Przeglądarka</div>
+        </div>
+
+        <div class="desktop-icon" onclick="openWindow('settings-window')">
+            <div class="icon">⚙️</div>
+            <div class="label">Ustawienia</div>
+        </div>
+
+        <div class="desktop-icon" onclick="window.open('bank.html','_blank')">
+            <div class="icon">🏦</div>
+            <div class="label">Bank ONL</div>
+        </div>
+
+        <div class="desktop-icon" onclick="openWindow('terminal-window')">
+            <div class="icon">💻</div>
+            <div class="label">Terminal</div>
+        </div>
+
+        <div class="desktop-icon" onclick="openWindow('about-window')">
+            <div class="icon">👑</div>
+            <div class="label">NewOS Deluxe</div>
+        </div>
+    </div>
+
+    <div id="start-menu">
+        <div class="start-user">
+            <div class="avatar">👤</div>
+            <div>
+                <strong id="start-user-name">User</strong><br>
+                <small id="start-pc-name">NEW-PC</small>
+            </div>
+        </div>
+
+        <div class="menu-grid">
+            <div class="menu-item" onclick="openWindow('files-window')">
+                <div class="mi-icon">📁</div>
+                <div class="mi-label">Pliki</div>
+            </div>
+
+            <div class="menu-item" onclick="openWindow('browser-window')">
+                <div class="mi-icon">🌐</div>
+                <div class="mi-label">Internet</div>
+            </div>
+
+            <div class="menu-item" onclick="openWindow('settings-window')">
+                <div class="mi-icon">⚙️</div>
+                <div class="mi-label">Ustawienia</div>
+            </div>
+
+            <div class="menu-item" onclick="window.open('bank.html','_blank')">
+                <div class="mi-icon">🏦</div>
+                <div class="mi-label">Bank</div>
+            </div>
+
+            <div class="menu-item" onclick="openWindow('terminal-window')">
+                <div class="mi-icon">💻</div>
+                <div class="mi-label">Terminal</div>
+            </div>
+
+            <div class="menu-item" onclick="openWindow('about-window')">
+                <div class="mi-icon">👑</div>
+                <div class="mi-label">System</div>
+            </div>
+        </div>
+
+        <div class="power-row">
+            <button class="power-btn" onclick="restartSystem()">Restart</button>
+            <button class="power-btn" onclick="shutdownSystem()">Wyłącz</button>
+        </div>
+    </div>
+
+    <div class="taskbar">
+        <div class="task-left">
+            <button class="start-btn" id="start-btn">NewOS</button>
+        </div>
+
+        <div class="task-center">
+            <div class="task-app" onclick="openWindow('files-window')">📁</div>
+            <div class="task-app" onclick="openWindow('browser-window')">🌐</div>
+            <div class="task-app" onclick="openWindow('settings-window')">⚙️</div>
+            <div class="task-app" onclick="window.open('bank.html','_blank')">🏦</div>
+        </div>
+
+        <div class="task-right">
+            <div class="clock-box">
+                <div class="time" id="clock-time">00:00</div>
+                <div class="date" id="clock-date">---</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="window" id="files-window" style="top:90px;left:130px">
+    <div class="window-bar">
+        <div class="window-title">📁 Pliki</div>
+        <button class="win-btn" onclick="closeWindow('files-window')">×</button>
+    </div>
+
+    <div class="window-content">
+        <h2>Ten komputer</h2>
+
+        <div class="stat-grid">
+            <div class="stat-card">
+                <small>Dysk systemowy</small>
+                <strong>NewOS (C:)</strong>
+            </div>
+
+            <div class="stat-card">
+                <small>Wolne miejsce</small>
+                <strong>412 GB</strong>
+            </div>
+
+            <div class="stat-card">
+                <small>Dokumenty</small>
+                <strong>📄 Puste</strong>
+            </div>
+
+            <div class="stat-card">
+                <small>Pobrane</small>
+                <strong>📦 0 plików</strong>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="window" id="browser-window" style="top:120px;left:220px">
+    <div class="window-bar">
+        <div class="window-title">🌐 NewBrowser</div>
+        <button class="win-btn" onclick="closeWindow('browser-window')">×</button>
+    </div>
+
+    <div class="window-content">
+        <h2>Witaj w NewBrowser</h2>
+        <p style="opacity:.75;margin:10px 0 20px">
+            Symulowana przeglądarka NewOS.
+        </p>
+
+        <div class="stat-card">
+            <small>Adres</small>
+            <strong>https://newos.local/start</strong>
+        </div>
+    </div>
+</div>
+
+<div class="window" id="settings-window" style="top:110px;left:260px">
+    <div class="window-bar">
+        <div class="window-title">⚙️ Ustawienia</div>
+        <button class="win-btn" onclick="closeWindow('settings-window')">×</button>
+    </div>
+
+    <div class="window-content">
+        <h2>Personalizacja</h2>
+
+        <div class="settings-row">
+            <span>Motyw</span>
+            <div class="theme-choice">
+                <button onclick="setTheme('ciemny')">Ciemny</button>
+                <button onclick="setTheme('biały')">Biały</button>
+                <button onclick="setTheme('fioletowy')">Fioletowy</button>
+            </div>
+        </div>
+
+        <div class="settings-row">
+            <span>Nazwa komputera</span>
+            <strong id="settings-pc">NEW-PC</strong>
+        </div>
+
+        <div class="settings-row">
+            <span>Użytkownik</span>
+            <strong id="settings-user">User</strong>
+        </div>
+    </div>
+</div>
+
+<div class="window" id="terminal-window" style="top:150px;left:180px">
+    <div class="window-bar">
+        <div class="window-title">💻 Terminal</div>
+        <button class="win-btn" onclick="closeWindow('terminal-window')">×</button>
+    </div>
+
+    <div class="window-content">
+        <div class="terminal">NewOS Terminal Deluxe
+(c) Metal Nothing Corporation
+
+C:\Users\User> systeminfo
+System: NewOS Deluxe
+Kernel: BootOS 3
+Status: Ready
+
+C:\Users\User></div>
+    </div>
+</div>
+
+<div class="window" id="about-window" style="top:100px;left:330px">
+    <div class="window-bar">
+        <div class="window-title">👑 O systemie</div>
+        <button class="win-btn" onclick="closeWindow('about-window')">×</button>
+    </div>
+
+    <div class="window-content">
+        <h2>Metal Nothing + NewOS</h2>
+
+        <p style="opacity:.75;margin:10px 0 20px">
+            System został pomyślnie zainstalowany.
+        </p>
+
+        <div class="stat-grid">
+            <div class="stat-card">
+                <small>Wersja</small>
+                <strong>NewOS Deluxe UI</strong>
+            </div>
+
+            <div class="stat-card">
+                <small>Subskrypcja</small>
+                <strong id="about-plan">—</strong>
+            </div>
+
+            <div class="stat-card">
+                <small>Bootloader</small>
+                <strong>BootOS 3</strong>
+            </div>
+
+            <div class="stat-card">
+                <small>Status</small>
+                <strong>Aktywny</strong>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const installed = localStorage.getItem("newos_installed");
+
+if (installed !== "true") {
+    document.getElementById("not-installed").classList.add("visible");
+}
+
+const user = localStorage.getItem("newos_user") || "User";
+const pc = localStorage.getItem("newos_pc") || "NEW-PC";
+const theme = localStorage.getItem("newos_theme") || "ciemny";
+const plan = localStorage.getItem("newos_plan") || localStorage.getItem("onl_plan") || "Normal";
+
+document.getElementById("start-user-name").textContent = user;
+document.getElementById("start-pc-name").textContent = pc;
+document.getElementById("settings-user").textContent = user;
+document.getElementById("settings-pc").textContent = pc;
+document.getElementById("about-plan").textContent = plan;
+
+function setTheme(themeName) {
+    document.body.className = "theme-" + themeName;
+    localStorage.setItem("newos_theme", themeName);
+}
+
+setTheme(theme);
+
+function updateClock() {
+    const now = new Date();
+
+    document.getElementById("clock-time").textContent =
+        now.toLocaleTimeString("pl-PL", {
+            hour: "2-digit",
+            minute: "2-digit"
+        });
+
+    document.getElementById("clock-date").textContent =
+        now.toLocaleDateString("pl-PL", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric"
+        });
+}
+
+updateClock();
+setInterval(updateClock, 1000);
+
+const startBtn = document.getElementById("start-btn");
+const startMenu = document.getElementById("start-menu");
+
+startBtn.addEventListener("click", () => {
+    startMenu.classList.toggle("visible");
+});
+
+document.addEventListener("click", (e) => {
+    if (!startMenu.contains(e.target) && e.target !== startBtn) {
+        startMenu.classList.remove("visible");
+    }
+});
+
+let topZ = 40;
+
+function openWindow(id) {
+    const win = document.getElementById(id);
+    if (!win) return;
+
+    win.classList.add("visible");
+    win.style.zIndex = ++topZ;
+    startMenu.classList.remove("visible");
+}
+
+function closeWindow(id) {
+    const win = document.getElementById(id);
+    if (!win) return;
+    win.classList.remove("visible");
+}
+
+document.querySelectorAll(".window").forEach(makeDraggableWindow);
+
+function makeDraggableWindow(win) {
+    const bar = win.querySelector(".window-bar");
+    let dragging = false;
+    let offsetX = 0;
+    let offsetY = 0;
+
+    bar.addEventListener("mousedown", (e) => {
+        dragging = true;
+        win.style.zIndex = ++topZ;
+
+        const rect = win.getBoundingClientRect();
+        offsetX = e.clientX - rect.left;
+        offsetY = e.clientY - rect.top;
+
+        e.preventDefault();
+    });
+
+    document.addEventListener("mousemove", (e) => {
+        if (!dragging) return;
+
+        win.style.left = (e.clientX - offsetX) + "px";
+        win.style.top = (e.clientY - offsetY) + "px";
+    });
+
+    document.addEventListener("mouseup", () => {
+        dragging = false;
+    });
+}
+
+function restartSystem() {
+    startMenu.classList.remove("visible");
+
+    document.body.innerHTML = `
+        <div style="
+            width:100%;
+            height:100%;
+            background:#000;
+            color:#fff;
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            flex-direction:column;
+            font-family:'Segoe UI',Arial,sans-serif;
+        ">
+            <h1 style="font-size:2rem;margin-bottom:15px;">Uruchamianie ponownie...</h1>
+            <p style="opacity:.7">NewOS Deluxe</p>
+        </div>
+    `;
+
+    setTimeout(() => {
+        location.reload();
+    }, 3000);
+}
+
+function shutdownSystem() {
+    startMenu.classList.remove("visible");
+
+    document.body.innerHTML = `
+        <div style="
+            width:100%;
+            height:100%;
+            background:#000;
+            color:#fff;
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            flex-direction:column;
+            font-family:'Segoe UI',Arial,sans-serif;
+        ">
+            <h1 style="font-size:2rem;margin-bottom:15px;">System został wyłączony</h1>
+            <p style="opacity:.7">Możesz zamknąć kartę.</p>
+        </div>
+    `;
+}
+</script>
+
+</body>
+</html>
