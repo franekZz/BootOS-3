@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<title>NewOS - Instalacja</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cherry+Bomb+One&display=swap" rel="stylesheet">
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+}
+
+#setup-surface {
+    position: absolute;
+    inset: 0;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    background: black;
+    color: white;
+    overflow-y: auto;
+}
+
+#setup-surface.white {
+    background: #f3f4f6;
+    color: #111;
+}
+
+#setup-surface.purple {
+    background: linear-gradient(135deg, #2d1b69, #a855f7);
+    color: white;
+}
+
+.setup-content {
+    max-width: 700px;
+    width: 90%;
+    padding: 40px 0;
+}
+
+.setup-content h1 {
+    font-size: 2.2rem;
+    margin-bottom: 20px;
+}
+
+.setup-content h2 {
+    font-size: 1.4rem;
+    margin: 20px 0 10px;
+}
+
+.setup-options {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 15px;
+    margin: 20px 0;
+}
+
+.opt-card {
+    min-width: 140px;
+    padding: 20px;
+    border-radius: 15px;
+    border: 2px solid rgba(128,128,128,.35);
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.opt-card:hover,
+.opt-card.selected {
+    border-color: #a855f7;
+    background: rgba(168,85,247,.2);
+    transform: scale(1.05);
+}
+
+.setup-input {
+    width: 100%;
+    padding: 15px;
+    border-radius: 12px;
+    border: 2px solid #aaa;
+    font-size: 1.05rem;
+    margin-bottom: 15px;
+    background: rgba(255,255,255,.1);
+    color: inherit;
+}
+
+.setup-btn {
+    padding: 15px 40px;
+    border: none;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #a855f7, #c084fc);
+    color: white;
+    font-size: 1rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.setup-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 5px 20px rgba(168,85,247,.6);
+}
+
+.setup-link {
+    display: inline-block;
+    margin-top: 10px;
+    color: #38bdf8;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 10px;
+    background: rgba(255,255,255,.2);
+    border-radius: 20px;
+    overflow: hidden;
+}
+
+.fill {
+    height: 100%;
+    width: 0;
+    background: #a855f7;
+    transition: .5s;
+}
+
+.cmd-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 42%;
+    background: rgba(0,0,0,.96);
+    color: #0f0;
+    font-family: 'Courier New', monospace;
+    padding: 20px;
+    display: none;
+    flex-direction: column;
+    z-index: 120;
+}
+
+.cmd-overlay.visible {
+    display: flex;
+}
+
+.cmd-output {
+    flex: 1;
+    white-space: pre-wrap;
+    text-align: left;
+    overflow: auto;
+}
+
+.cmd-input-line {
+    display: flex;
+}
+
+.cmd-input-line span {
+    margin-right: 6px;
+}
+
+.cmd-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: #0f0;
+    outline: none;
+    font-family: inherit;
+    font-size: 1rem;
+}
+
+#lockscreen {
+    position: absolute;
+    inset: 0;
+    z-index: 250;
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+}
+
+#lockscreen.visible {
+    display: flex;
+}
+
+.lock-time {
+    font-size: 6rem;
+    font-weight: 200;
+}
+
+.lock-date {
+    font-size: 1.2rem;
+    opacity: .75;
+    margin: 10px 0 35px;
+}
+
+.lock-input {
+    width: 260px;
+    padding: 12px;
+    border-radius: 25px;
+    border: 2px solid rgba(255,255,255,.3);
+    background: rgba(255,255,255,.12);
+    color: white;
+    text-align: center;
+}
+
+@keyframes nextPulse {
+    50% { box-shadow: 0 0 60px #a855f7; }
+}
+</style>
+</head>
+
+<body>
+
+<div id="setup-surface">
+    <div class="setup-content" id="setup-content"></div>
+
+    <div class="cmd-overlay" id="cmd-overlay">
+        <div class="cmd-output" id="cmd-output">NewOS Setup CMD [Wersja 7.0]
+(c) Metal Nothing Corporation.
+
+</div>
+        <div class="cmd-input-line">
+            <span>C:\Setup></span>
+            <input id="cmd-input" class="cmd-input" type="text">
+        </div>
+    </div>
+</div>
+
+<div id="lockscreen">
+    <div class="lock-time" id="lock-time">12:00</div>
+    <div class="lock-date" id="lock-date"></div>
+    <input id="lock-input" class="lock-input" type="password" placeholder="Hasło">
+</div>
+
+<script>
+const setupSurface = document.getElementById("setup-surface");
+const setupContent = document.getElementById("setup-content");
+const cmdOverlay = document.getElementById("cmd-overlay");
+const cmdOutput = document.getElementById("cmd-output");
+const cmdInput = document.getElementById("cmd-input");
+const lockscreenEl = document.getElementById("lockscreen");
+
+let osData = {
+    theme: "ciemny",
+    user: "",
+    pass: "",
+    pcName: "NEW-PC"
+};
+
+let cmdActive = false;
+
+const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+window.addEventListener("storage", (e) => {
+    if (
+        e.key === "onl_key_ready" ||
+        e.key === "onl_key_plan" ||
+        e.key === "onl_sub_key"
+    ) {
+        if (typeof window.refreshKeyAcceptButton === "function") {
+            window.refreshKeyAcceptButton();
+        }
+    }
+});
+
+async function startSetupSequence() {
+    setupSurface.style.background = "#000";
+
+    setupContent.innerHTML = `
+        <h1 style="color:#fff;font-size:1.6rem">
+            Uruchamianie ponownie<br>
+            stosowanie pakietu...
+        </h1>
+    `;
+
+    await wait(3000);
+
+    setupContent.innerHTML = `
+        <h1 style="font-family:'Cherry Bomb One',cursive;color:#fff">
+            Metal Nothing + NewOS
+        </h1>
+    `;
+
+    await wait(7000);
+
+    setupSurface.style.background = "#f3f4f6";
+    setupSurface.className = "white";
+
+    setupContent.innerHTML = `
+        <h1 style="color:#111">Wybierz Motyw</h1>
+        <div class="setup-options">
+            <div class="opt-card" data-theme="ciemny" style="background:#222;color:#fff">🌑 Ciemny</div>
+            <div class="opt-card" data-theme="biały" style="background:#fff;color:#111">☀️ Biały</div>
+            <div class="opt-card" data-theme="fioletowy" style="background:#6b2fb5;color:#fff">🔮 Fioletowy</div>
+        </div>
+    `;
+
+    document.querySelectorAll(".opt-card").forEach(card => {
+        card.addEventListener("click", () => {
+            osData.theme = card.dataset.theme;
+
+            document.querySelectorAll(".opt-card").forEach(c => c.classList.remove("selected"));
+            card.classList.add("selected");
+
+            setTimeout(() => showStep("partition"), 500);
+        });
+    });
+}
+
+function applyTheme() {
+    if (osData.theme === "biały") {
+        setupSurface.className = "white";
+        setupSurface.style.background = "#f3f4f6";
+        return "#111";
+    }
+
+    if (osData.theme === "fioletowy") {
+        setupSurface.className = "purple";
+        setupSurface.style.background = "linear-gradient(135deg,#2d1b69,#a855f7)";
+        return "#fff";
+    }
+
+    setupSurface.className = "";
+    setupSurface.style.background = "#111";
+    return "#fff";
+}
+
+function showStep(step) {
+    cmdOverlay.classList.remove("visible");
+    cmdActive = false;
+
+    const color = applyTheme();
+
+    if (step === "partition") {
+        setupContent.innerHTML = `
+            <h1 style="color:${color}">Wybierz partycję do zainstalowania</h1>
+
+            <div class="setup-options">
+                <div class="opt-card selected">💾 Dysk 0<br><small>Partycja 1 — 500GB</small></div>
+                <div class="opt-card">💾 Dysk 1<br><small>Partycja 2 — 1TB</small></div>
+            </div>
+
+            <button class="setup-btn" onclick="showStep('key')">Dalej</button>
+        `;
+    }
+
+    if (step === "key") {
+        const chosenPlan = localStorage.getItem("onl_plan") || "Normal";
+
+        setupContent.innerHTML = `
+            <h1 style="color:${color}">Kod Bezpieczeństwa Subskrypcji</h1>
+
+            <p style="opacity:.75;margin-bottom:15px;line-height:1.5">
+                Przejdź do banku ONL i wykonaj:
+                <br><br>
+                <strong>Klucze → NewOS → Subskrypcyjne → BootOS 3</strong>
+                <br>
+                Następnie wybierz wersję:
+                <strong>${chosenPlan}</strong>.
+            </p>
+
+            <div
+                id="key-wait-box"
+                style="
+                    padding:18px;
+                    border-radius:14px;
+                    background:rgba(168,85,247,.15);
+                    border:1px solid rgba(168,85,247,.45);
+                    margin-bottom:18px;
+                "
+            >
+                ⏳ Oczekiwanie na zaakceptowanie klucza w banku...
+            </div>
+
+            <button
+                id="accept-key-btn"
+                class="setup-btn"
+                style="display:none"
+            >
+                Zaakceptuj
+            </button>
+
+            <div id="paste-key-area" style="display:none;margin-top:25px">
+                <p style="opacity:.75;margin-bottom:12px">
+                    Skopiuj klucz z banku i wklej go tutaj:
+                </p>
+
+                <input
+                    id="sub-key-input"
+                    class="setup-input"
+                    placeholder="Wklej klucz subskrypcji"
+                >
+
+                <button id="decrypt-btn" class="setup-btn">
+                    Odszyfruj
+                </button>
+            </div>
+        `;
+
+        const acceptBtn = document.getElementById("accept-key-btn");
+        const pasteArea = document.getElementById("paste-key-area");
+        const waitBox = document.getElementById("key-wait-box");
+
+        function refreshAcceptButton() {
+            const keyReady = localStorage.getItem("onl_key_ready") === "true";
+            const keyPlan = localStorage.getItem("onl_key_plan");
+            const bankKey = localStorage.getItem("onl_sub_key");
+
+            if (keyReady && keyPlan === chosenPlan && bankKey) {
+                waitBox.innerHTML = `
+                    ✅ Bank ONL przygotował klucz dla wersji:
+                    <strong>${keyPlan}</strong>.
+                    <br>
+                    Kliknij „Zaakceptuj", potem wklej klucz.
+                `;
+
+                acceptBtn.style.display = "inline-block";
+            }
+        }
+
+        window.refreshKeyAcceptButton = refreshAcceptButton;
+        refreshAcceptButton();
+
+        acceptBtn.addEventListener("click", () => {
+            acceptBtn.style.display = "none";
+            pasteArea.style.display = "block";
+        });
+
+        document.getElementById("decrypt-btn").addEventListener("click", async () => {
+            const typedKey = document.getElementById("sub-key-input").value.trim();
+            const bankKey = localStorage.getItem("onl_sub_key");
+
+            if (!typedKey) {
+                alert("Wklej klucz subskrypcji.");
+                return;
+            }
+
+            if (!bankKey) {
+                alert("Bank jeszcze nie przygotował klucza.");
+                return;
+            }
+
+            if (typedKey !== bankKey) {
+                alert("Ten klucz jest niepoprawny albo nie pasuje do subskrypcji.");
+                return;
+            }
+
+            setupSurface.className = "";
+            setupSurface.style.background = "#000";
+
+            setupContent.innerHTML = `
+                <h1 style="color:#a855f7">Odszyfrowywanie...</h1>
+            `;
+
+            await wait(4000);
+
+            setupContent.innerHTML = "";
+            setupSurface.style.background = "#000";
+
+            await wait(4000);
+
+            setupContent.innerHTML = `
+                <h1 style="font-family:'Cherry Bomb One',cursive;color:#fff">
+                    Metal Nothing + NewOS
+                </h1>
+            `;
+
+            await wait(7000);
+
+            showStep("locale");
+        });
+    }
+
+    if (step === "locale") {
+        setupContent.innerHTML = `
+            <h1 style="color:${color}">Kraj i język klawiatury</h1>
+
+            <select class="setup-input">
+                <option>Polska</option>
+                <option>USA</option>
+                <option>Niemcy</option>
+                <option>Ukraina</option>
+            </select>
+
+            <select class="setup-input">
+                <option>Polski programisty</option>
+                <option>English US</option>
+                <option>Deutsch</option>
+            </select>
+
+            <button class="setup-btn" onclick="showStep('wifi')">Dalej</button>
+        `;
+    }
+
+    if (step === "wifi") {
+        setupContent.innerHTML = `
+            <h1 style="color:${color}">Połącz z WiFi</h1>
+
+            <p style="opacity:.75;margin-bottom:15px">
+                Naciśnij <strong>F10</strong>, aby otworzyć CMD.
+                <br>
+                Komenda: <strong>wifi services off</strong> pomija WiFi.
+            </p>
+
+            <div class="setup-options">
+                <div class="opt-card">📶 HomeNet</div>
+                <div class="opt-card">📶 5G-Network</div>
+                <div class="opt-card">➕ Dodaj WiFi</div>
+            </div>
+
+            <input class="setup-input" placeholder="Nazwa WiFi">
+            <input class="setup-input" type="password" placeholder="Hasło WiFi">
+
+            <button class="setup-btn" onclick="showStep('hyper')">Dalej</button>
+        `;
+    }
+
+    if (step === "hyper") {
+        setupContent.innerHTML = `
+            <h1 style="color:${color}">Hyper Account</h1>
+
+            <input class="setup-input" placeholder="Login">
+            <input class="setup-input" type="password" placeholder="Hasło">
+
+            <button class="setup-btn" onclick="showStep('user')">Zaloguj</button>
+            <br>
+
+            <span class="setup-link">Nie pamiętam hasła</span><br>
+            <span class="setup-link" onclick="showStep('user')">Zarejestruj, jeśli nie masz konta</span><br>
+            <span class="setup-link" style="color:#fbbf24" onclick="showStep('user')">Login Admin</span>
+        `;
+    }
+
+    if (step === "user") {
+        setupContent.innerHTML = `
+            <h1 style="color:${color}">Nazwa Komputera</h1>
+            <input id="pc-name" class="setup-input" placeholder="Nazwa komputera">
+
+            <h2 style="color:${color}">Nazwa Użytkownika</h2>
+            <input id="user-name" class="setup-input" placeholder="Nazwa użytkownika">
+
+            <h2 style="color:${color}">Hasło</h2>
+            <input id="user-pass" class="setup-input" type="password" placeholder="Zostaw puste, aby pominąć">
+
+            <button class="setup-btn" onclick="saveUser()">Dalej</button>
+        `;
+    }
+
+    if (step === "install") {
+        setupContent.innerHTML = `
+            <h1 style="color:${color}">Instalowanie...</h1>
+
+            <p id="install-status">Instalowanie Systemu</p>
+
+            <div class="progress-bar">
+                <div id="install-fill" class="fill"></div>
+            </div>
+        `;
+
+        runInstall();
+    }
+}
+
+function saveUser() {
+    osData.pcName = document.getElementById("pc-name").value || "NEW-PC";
+    osData.user = document.getElementById("user-name").value || "User";
+    osData.pass = document.getElementById("user-pass").value || "";
+
+    showStep("install");
+}
+
+async function runInstall() {
+    const fill = document.getElementById("install-fill");
+    const status = document.getElementById("install-status");
+
+    const steps = [
+        ["Instalowanie Systemu", 30],
+        ["Instalowanie Sterowników", 65],
+        ["Instalowanie Aktualizacji", 95],
+        ["Koniec", 100]
+    ];
+
+    for (const [text, percent] of steps) {
+        status.textContent = text;
+        fill.style.width = percent + "%";
+        await wait(2200);
+    }
+
+    setupSurface.className = "";
+    setupSurface.style.background = "#000";
+    setupContent.innerHTML = "";
+
+    await wait(3000);
+
+    setupContent.innerHTML = `
+        <h1 style="font-family:'Cherry Bomb One',cursive;color:#fff">
+            Metal Nothing + NewOS
+        </h1>
+    `;
+
+    await wait(7000);
+
+    setupSurface.style.display = "none";
+
+    bootAfterInstall();
+}
+
+function bootAfterInstall() {
+    if (osData.pass) {
+        lockscreenEl.classList.add("visible");
+
+        updateLockClock();
+        setInterval(updateLockClock, 1000);
+
+        const input = document.getElementById("lock-input");
+        input.focus();
+
+        input.addEventListener("keydown", (e) => {
+            if (e.key === "Enter" && input.value === osData.pass) {
+                lockscreenEl.classList.remove("visible");
+                goToDesktop();
+            }
+        });
+    } else {
+        goToDesktop();
+    }
+}
+
+function updateLockClock() {
+    const now = new Date();
+
+    document.getElementById("lock-time").textContent =
+        now.toLocaleTimeString("pl-PL", {
+            hour: "2-digit",
+            minute: "2-digit"
+        });
+
+    document.getElementById("lock-date").textContent =
+        now.toLocaleDateString("pl-PL", {
+            weekday: "long",
+            day: "numeric",
+            month: "long"
+        });
+}
+
+function goToDesktop() {
+    localStorage.setItem("newos_installed", "true");
+    localStorage.setItem("newos_user", osData.user || "User");
+    localStorage.setItem("newos_pc", osData.pcName || "NEW-PC");
+    localStorage.setItem("newos_theme", osData.theme || "ciemny");
+    localStorage.setItem("newos_plan", localStorage.getItem("onl_plan") || "Normal");
+
+    window.location.href = "pulpitdeluxe.html";
+}
+
+window.addEventListener("keydown", async (e) => {
+    if (e.key === "F10" && !cmdActive) {
+        e.preventDefault();
+        cmdActive = true;
+        cmdOverlay.classList.add("visible");
+        cmdInput.focus();
+    }
+});
+
+cmdInput.addEventListener("keydown", async (e) => {
+    if (e.key === "Enter") {
+        const value = cmdInput.value.trim();
+        cmdOutput.textContent += `C:\\Setup>${value}\n`;
+        cmdInput.value = "";
+
+        if (value.toLowerCase() === "wifi services off") {
+            cmdOutput.textContent += "Wyłączanie usług WiFi...\nUruchamianie ponownie...\n";
+
+            await wait(4000);
+
+            cmdOverlay.classList.remove("visible");
+            cmdActive = false;
+
+            setupSurface.style.background = "#000";
+            setupContent.innerHTML = `
+                <h1 style="font-family:'Cherry Bomb One',cursive;color:#fff">
+                    Metal Nothing + NewOS
+                </h1>
+            `;
+
+            await wait(7000);
+            showStep("hyper");
+        }
+    }
+});
+
+startSetupSequence();
+</script>
+</body>
+</html>
