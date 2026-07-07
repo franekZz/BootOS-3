@@ -224,4 +224,341 @@ body.animated-bg {
     color: white;
     font-size: 1.4rem;
     cursor: pointer;
-    transition: 
+    transition: 0.3s;
+}
+
+.font-btn:hover {
+    background: rgba(168,85,247,.4);
+    transform: scale(1.05);
+}
+
+.font-btn.cherry {
+    font-family: 'Cherry Bomb One', cursive;
+}
+
+.font-btn small {
+    display: block;
+    font-size: .8rem;
+    opacity: .7;
+    margin-top: 8px;
+}
+
+/* POWITANIA */
+#greeting {
+    position: relative;
+    z-index: 10;
+    font-size: 7vw;
+    font-weight: 600;
+    opacity: 0;
+    text-shadow: 0 0 30px rgba(168,85,247,.9);
+    pointer-events: none;
+}
+
+#greeting.font-cherry {
+    font-family: 'Cherry Bomb One', cursive;
+}
+
+#greeting.animate-in {
+    animation: greetingIn .7s forwards, textGlow 3s infinite .7s;
+}
+
+#greeting.animate-out {
+    animation: greetingOut .5s forwards;
+}
+
+/* PRZYCISK STRZAŁKI */
+#next-btn {
+    position: absolute;
+    bottom: 6%;
+    left: 50%;
+    transform: translateX(-50%) scale(.5);
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: 2px solid rgba(255,255,255,.7);
+    background: rgba(168,85,247,.25);
+    z-index: 30;
+    opacity: 0;
+    pointer-events: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: .5s;
+}
+
+#next-btn.visible {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateX(-50%) scale(1);
+    animation: nextPulse 2s infinite;
+}
+
+#next-btn:hover {
+    transform: translateX(-50%) scale(1.15);
+}
+
+.arrow {
+    width: 24px;
+    height: 24px;
+    border-top: 4px solid white;
+    border-right: 4px solid white;
+    transform: rotate(45deg);
+    margin-left: -6px;
+}
+
+/* ANIMACJE */
+@keyframes logoAppear {
+    0% { opacity: 0; transform: scale(.5); }
+    100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes glowPulse {
+    50% { text-shadow: 0 0 25px white; }
+}
+
+@keyframes gradientShift {
+    0%,100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}
+
+@keyframes bloomReveal {
+    to { clip-path: circle(150% at 50% 50%); }
+}
+
+@keyframes flashPulse {
+    30% { opacity: 1; }
+    100% { opacity: 0; transform: scale(2); }
+}
+
+@keyframes waveRotate {
+    to { transform: rotate(360deg); }
+}
+
+@keyframes particleFloat {
+    0% { transform: translateY(100vh); opacity: 0; }
+    10%,90% { opacity: 1; }
+    100% { transform: translateY(-100px) translateX(var(--drift)); opacity: 0; }
+}
+
+@keyframes cloudDrift {
+    from { transform: translateX(-200px); }
+    to { transform: translateX(calc(100vw + 200px)); }
+}
+
+@keyframes greetingIn {
+    0% { opacity: 0; transform: scale(.3); filter: blur(12px); }
+    100% { opacity: 1; transform: scale(1); filter: blur(0); }
+}
+
+@keyframes greetingOut {
+    to { opacity: 0; transform: scale(.5) translateY(-40px); filter: blur(12px); }
+}
+
+@keyframes textGlow {
+    50% { text-shadow: 0 0 60px #a855f7; }
+}
+
+@keyframes nextPulse {
+    50% { box-shadow: 0 0 60px #a855f7; }
+}
+</style>
+</head>
+
+<body>
+
+<div id="transition-overlay"></div>
+<div id="flash"></div>
+
+<div id="logo">
+    <span class="metal-nothing">Metal Nothing</span>
+    <span class="new-os">+ NewOS</span>
+</div>
+
+<div id="effects">
+    <div class="wave"></div>
+    <div class="wave"></div>
+    <div class="wave"></div>
+</div>
+
+<div id="font-picker">
+    <h2>Wybierz czcionkę</h2>
+    <div class="font-buttons">
+        <button class="font-btn cherry" data-font="cherry">
+            Metal Nothing
+            <small>Cherry Bomb</small>
+        </button>
+        <button class="font-btn normal" data-font="normal">
+            Normal
+            <small>Standardowa</small>
+        </button>
+    </div>
+</div>
+
+<div id="greeting"></div>
+
+<div id="next-btn">
+    <div class="arrow"></div>
+</div>
+
+<script>
+const greetings = [
+    "Cześć", "Hello", "你好", "Привет", "Привіт", "Hola", "Bonjour",
+    "Hallo", "Ciao", "こんにちは", "안녕하세요", "Olá", "مرحبا", "Merhaba"
+];
+
+const logoEl = document.getElementById("logo");
+const greetingEl = document.getElementById("greeting");
+const bodyEl = document.body;
+const effectsEl = document.getElementById("effects");
+const fontPickerEl = document.getElementById("font-picker");
+const overlayEl = document.getElementById("transition-overlay");
+const flashEl = document.getElementById("flash");
+const nextBtnEl = document.getElementById("next-btn");
+
+let currentGreetingIndex = 0;
+
+function createParticles() {
+    for (let i = 0; i < 25; i++) {
+        setTimeout(() => {
+            const p = document.createElement("div");
+            p.className = "particle";
+
+            const size = Math.random() * 14 + 6;
+            p.style.width = size + "px";
+            p.style.height = size + "px";
+            p.style.left = Math.random() * 100 + "%";
+            p.style.setProperty("--drift", (Math.random() - 0.5) * 400 + "px");
+            p.style.animationDuration = (Math.random() * 10 + 15) + "s";
+
+            effectsEl.appendChild(p);
+        }, i * 160);
+    }
+}
+
+function createClouds() {
+    for (let i = 0; i < 6; i++) {
+        const c = document.createElement("div");
+        c.className = "cloud";
+        c.style.top = (Math.random() * 70 + 8) + "%";
+        c.style.animationDuration = (Math.random() * 20 + 25) + "s";
+        c.style.animationDelay = (Math.random() * -30) + "s";
+        effectsEl.appendChild(c);
+        makeDraggable(c);
+    }
+}
+
+function makeDraggable(cloud) {
+    let dragging = false;
+    let offsetX = 0;
+    let offsetY = 0;
+
+    function start(e) {
+        dragging = true;
+        cloud.classList.add("dragging");
+
+        const rect = cloud.getBoundingClientRect();
+        cloud.style.left = rect.left + "px";
+        cloud.style.top = rect.top + "px";
+        cloud.style.animation = "none";
+
+        const x = e.clientX || (e.touches && e.touches[0].clientX);
+        const y = e.clientY || (e.touches && e.touches[0].clientY);
+
+        offsetX = x - rect.left;
+        offsetY = y - rect.top;
+        e.preventDefault();
+    }
+
+    function move(e) {
+        if (!dragging) return;
+
+        const x = e.clientX || (e.touches && e.touches[0].clientX);
+        const y = e.clientY || (e.touches && e.touches[0].clientY);
+
+        cloud.style.left = (x - offsetX) + "px";
+        cloud.style.top = (y - offsetY) + "px";
+        e.preventDefault();
+    }
+
+    function end() {
+        dragging = false;
+        cloud.classList.remove("dragging");
+    }
+
+    cloud.addEventListener("mousedown", start);
+    document.addEventListener("mousemove", move);
+    document.addEventListener("mouseup", end);
+
+    cloud.addEventListener("touchstart", start, { passive: false });
+    document.addEventListener("touchmove", move, { passive: false });
+    document.addEventListener("touchend", end);
+}
+
+// Sekwencja bootowania
+setTimeout(() => {
+    logoEl.classList.add("fade-out");
+
+    setTimeout(() => {
+        flashEl.classList.add("flashing");
+        overlayEl.classList.add("blooming");
+        bodyEl.classList.add("animated-bg");
+    }, 700);
+}, 6000);
+
+setTimeout(() => {
+    logoEl.classList.add("hidden");
+    overlayEl.style.opacity = "0";
+    effectsEl.classList.add("visible");
+
+    createParticles();
+    createClouds();
+
+    setTimeout(() => {
+        fontPickerEl.classList.add("visible");
+    }, 800);
+}, 9200);
+
+// Wybór czcionki
+document.querySelectorAll(".font-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+        if (btn.dataset.font === "cherry") {
+            greetingEl.classList.add("font-cherry");
+        }
+
+        fontPickerEl.classList.remove("visible");
+
+        setTimeout(() => {
+            showGreeting();
+            setInterval(changeGreeting, 3000);
+            nextBtnEl.classList.add("visible");
+        }, 700);
+    });
+});
+
+function showGreeting() {
+    greetingEl.textContent = greetings[currentGreetingIndex];
+    greetingEl.classList.remove("animate-out");
+    greetingEl.classList.add("animate-in");
+}
+
+function changeGreeting() {
+    greetingEl.classList.remove("animate-in");
+    greetingEl.classList.add("animate-out");
+
+    setTimeout(() => {
+        currentGreetingIndex = (currentGreetingIndex + 1) % greetings.length;
+        greetingEl.textContent = greetings[currentGreetingIndex];
+        greetingEl.classList.remove("animate-out");
+        greetingEl.classList.add("animate-in");
+    }, 500);
+}
+
+// Przejście dalej
+nextBtnEl.addEventListener("click", () => {
+    window.location.href = "subskrybcjasetup.html";
+});
+</script>
+
+</body>
+</html>
