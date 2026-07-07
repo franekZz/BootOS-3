@@ -2,7 +2,7 @@
 <html lang="pl">
 <head>
 <meta charset="UTF-8">
-<title>NewOS Boot</title>
+<title>BootOS 3 - Boot</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -495,7 +495,7 @@ function makeDraggable(cloud) {
     document.addEventListener("touchend", end);
 }
 
-// Sekwencja bootowania
+/* BOOT */
 setTimeout(() => {
     logoEl.classList.add("fade-out");
 
@@ -519,7 +519,7 @@ setTimeout(() => {
     }, 800);
 }, 9200);
 
-// Wybór czcionki
+/* WYBÓR CZCIONKI */
 document.querySelectorAll(".font-btn").forEach(btn => {
     btn.addEventListener("click", () => {
         if (btn.dataset.font === "cherry") {
@@ -554,11 +554,10 @@ function changeGreeting() {
     }, 500);
 }
 
-// Przejście dalej
+/* STRZAŁKA - PRZEJŚCIE DO SUBSKRYPCJI */
 nextBtnEl.addEventListener("click", () => {
-    window.location.href = "subskrybcjasetup.html";
+    window.location.href = "subskrypcje.html";
 });
 </script>
-
 </body>
 </html>
