@@ -3,228 +3,508 @@
 <head>
 <meta charset="UTF-8">
 <title>NewOS Boot</title>
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cherry+Bomb+One&display=swap" rel="stylesheet">
 
 <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    html, body { width: 100%; height: 100%; overflow: hidden; }
-    
-    body {
-        display: flex; justify-content: center; align-items: center;
-        background: #000; position: relative;
-        font-family: 'Segoe UI', Arial, sans-serif;
-    }
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow:hidden}
+body{
+    font-family:'Segoe UI',Arial,sans-serif;
+    background:#000;
+    color:#fff;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    position:relative;
+}
+body.animated-bg{
+    background:linear-gradient(135deg,#0a0015,#1a0033,#2d1b69,#6b2fb5,#a855f7,#c084fc);
+    background-size:400% 400%;
+    animation:gradientShift 12s ease infinite;
+}
 
-    body.animated-bg {
-        background: linear-gradient(135deg, #0a0015 0%, #1a0033 20%, #2d1b69 40%, #6b2fb5 60%, #a855f7 80%, #c084fc 100%);
-        background-size: 400% 400%;
-        animation: gradientShift 12s ease infinite;
-    }
+#logo{
+    text-align:center;
+    opacity:0;
+    transform:scale(.5);
+    animation:logoAppear 1.5s ease-out forwards;
+    z-index:20;
+    white-space:nowrap;
+    transition:.8s;
+}
+#logo.fade-out{opacity:0;transform:scale(1.3)}
+#logo.hidden{display:none}
+.metal-nothing{
+    font-family:'Cherry Bomb One',cursive;
+    font-size:4vw;
+    animation:glowPulse 3s infinite;
+}
+.new-os{
+    font-size:4vw;
+    font-weight:300;
+    letter-spacing:2px;
+}
 
-    /* Przejście */
-    #transition-overlay {
-        position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-        z-index: 20; pointer-events: none;
-        background: radial-gradient(circle at center, #c084fc 0%, #a855f7 25%, #6b2fb5 50%, #2d1b69 75%, #0a0015 100%);
-        background-size: 400% 400%; animation: gradientShift 12s ease infinite;
-        clip-path: circle(0% at 50% 50%); opacity: 0;
-    }
-    #transition-overlay.blooming {
-        animation: bloomReveal 2.5s cubic-bezier(0.65, 0, 0.35, 1) forwards, gradientShift 12s ease infinite;
-        opacity: 1;
-    }
+#transition-overlay{
+    position:absolute;
+    inset:0;
+    z-index:15;
+    pointer-events:none;
+    background:radial-gradient(circle,#c084fc,#a855f7,#6b2fb5,#2d1b69,#0a0015);
+    clip-path:circle(0% at 50% 50%);
+    opacity:0;
+}
+#transition-overlay.blooming{
+    opacity:1;
+    animation:bloomReveal 2.5s forwards;
+}
+#flash{
+    position:absolute;
+    inset:0;
+    z-index:16;
+    pointer-events:none;
+    background:radial-gradient(circle,rgba(255,255,255,.9),rgba(192,132,252,.4),transparent 70%);
+    opacity:0;
+}
+#flash.flashing{animation:flashPulse 2.5s forwards}
 
-    #flash {
-        position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-        z-index: 25; pointer-events: none;
-        background: radial-gradient(circle at center, rgba(255,255,255,0.9) 0%, rgba(192,132,252,0.4) 30%, transparent 70%);
-        opacity: 0;
-    }
-    #flash.flashing { animation: flashPulse 2.5s ease-out forwards; }
+#effects{
+    position:absolute;
+    inset:0;
+    opacity:0;
+    transition:2s;
+    z-index:1;
+    overflow:hidden;
+}
+#effects.visible{opacity:1}
+.wave{
+    position:absolute;
+    width:200%;
+    height:200%;
+    top:-50%;
+    left:-50%;
+    border-radius:40%;
+    background:radial-gradient(circle,rgba(168,85,247,.25),transparent 70%);
+    animation:waveRotate 20s linear infinite;
+}
+.wave:nth-child(2){animation-duration:26s;animation-direction:reverse}
+.wave:nth-child(3){animation-duration:32s}
 
-    /* Logo */
-    #logo {
-        text-align: center; opacity: 0; transform: scale(0.5);
-        animation: logoAppear 1.5s ease-out forwards; white-space: nowrap;
-        transition: opacity 0.8s ease, transform 0.8s ease; position: relative; z-index: 30;
-    }
-    #logo.fade-out { opacity: 0; transform: scale(1.3); }
-    #logo.hidden { display: none; }
-    .metal-nothing { font-family: 'Cherry Bomb One', cursive; color: #fff; font-size: 4vw; display: inline-block; animation: glowPulse 3s ease-in-out infinite; }
-    .new-os { color: #fff; font-size: 4vw; font-weight: 300; letter-spacing: 2px; display: inline-block; }
+.particle{
+    position:absolute;
+    border-radius:50%;
+    background:radial-gradient(circle,rgba(168,85,247,.85),transparent 70%);
+    box-shadow:0 0 25px rgba(168,85,247,.8);
+    animation:particleFloat linear infinite;
+}
+.cloud{
+    position:absolute;
+    width:120px;
+    height:40px;
+    border-radius:100px;
+    background:rgba(255,255,255,.9);
+    cursor:grab;
+    z-index:5;
+    box-shadow:0 0 30px rgba(255,255,255,.5);
+    animation:cloudDrift linear infinite;
+}
+.cloud:before,.cloud:after{
+    content:"";
+    position:absolute;
+    border-radius:50%;
+    background:rgba(255,255,255,.9);
+}
+.cloud:before{width:55px;height:55px;top:-25px;left:20px}
+.cloud:after{width:70px;height:70px;top:-35px;right:20px}
+.cloud.dragging{animation:none!important;z-index:100;cursor:grabbing}
 
-    /* Efekty */
-    #effects { position: absolute; width: 100%; height: 100%; top: 0; left: 0; opacity: 0; transition: opacity 2s ease; z-index: 1; overflow: hidden; }
-    #effects.visible { opacity: 1; }
-    .particle { position: absolute; border-radius: 50%; background: radial-gradient(circle, rgba(168,85,247,0.8) 0%, rgba(168,85,247,0) 70%); animation: float-particle linear infinite; box-shadow: 0 0 20px rgba(168,85,247,0.8), 0 0 40px rgba(168,85,247,0.6); }
-    .wave { position: absolute; width: 200%; height: 200%; border-radius: 40%; background: radial-gradient(circle, rgba(168,85,247,0.3) 0%, rgba(139,92,246,0.2) 30%, transparent 100%); animation: wave-rotate 20s linear infinite; }
-    .wave:nth-child(1) { top: -50%; left: -50%; animation-duration: 15s; }
-    .wave:nth-child(2) { top: -50%; left: -50%; animation-duration: 20s; animation-direction: reverse; }
-    .wave:nth-child(3) { top: -50%; left: -50%; animation-duration: 25s; }
-    
-    .cloud { position: absolute; width: 120px; height: 40px; background: rgba(255,255,255,0.9); border-radius: 100px; cursor: grab; z-index: 5; box-shadow: 0 0 30px rgba(255,255,255,0.5); animation: cloud-drift linear infinite; }
-    .cloud:before, .cloud:after { content: ''; position: absolute; background: rgba(255,255,255,0.9); border-radius: 50%; }
-    .cloud:before { width: 55px; height: 55px; top: -25px; left: 20px; }
-    .cloud:after { width: 70px; height: 70px; top: -35px; right: 20px; }
-    .cloud.dragging { cursor: grabbing; animation: none !important; z-index: 100; transform: scale(1.1); }
+#font-picker{
+    position:absolute;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%) scale(.8);
+    background:rgba(20,5,40,.88);
+    border:2px solid rgba(168,85,247,.6);
+    border-radius:25px;
+    padding:40px 50px;
+    z-index:40;
+    opacity:0;
+    pointer-events:none;
+    text-align:center;
+    transition:.6s;
+    backdrop-filter:blur(15px);
+}
+#font-picker.visible{
+    opacity:1;
+    pointer-events:auto;
+    transform:translate(-50%,-50%) scale(1);
+}
+#font-picker h2{margin-bottom:30px;font-size:2rem}
+.font-buttons{
+    display:flex;
+    gap:25px;
+    flex-wrap:wrap;
+    justify-content:center;
+}
+.font-btn{
+    padding:20px 35px;
+    border-radius:15px;
+    border:2px solid rgba(168,85,247,.6);
+    background:rgba(168,85,247,.15);
+    color:#fff;
+    font-size:1.4rem;
+    cursor:pointer;
+}
+.font-btn:hover{background:rgba(168,85,247,.4);transform:scale(1.05)}
+.font-btn.cherry{font-family:'Cherry Bomb One',cursive}
+.font-btn small{display:block;font-size:.8rem;opacity:.7;margin-top:8px}
 
-    /* Czcionki */
-    #font-picker { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.8); background: rgba(20,5,40,0.85); backdrop-filter: blur(15px); border: 2px solid rgba(168,85,247,0.6); border-radius: 25px; padding: 40px 50px; z-index: 50; opacity: 0; pointer-events: none; text-align: center; transition: opacity 0.6s ease, transform 0.6s ease; }
-    #font-picker.visible { opacity: 1; pointer-events: auto; transform: translate(-50%, -50%) scale(1); }
-    #font-picker h2 { color: #fff; font-size: 2rem; margin-bottom: 30px; }
-    .font-buttons { display: flex; gap: 25px; justify-content: center; }
-    .font-btn { padding: 20px 35px; border: 2px solid rgba(168,85,247,0.6); border-radius: 15px; background: rgba(168,85,247,0.15); color: #fff; font-size: 1.5rem; cursor: pointer; transition: all 0.3s ease; min-width: 180px; }
-    .font-btn:hover { background: rgba(168,85,247,0.4); transform: translateY(-5px) scale(1.05); }
-    .font-btn.cherry { font-family: 'Cherry Bomb One', cursive; }
-    .font-btn small { display: block; font-size: 0.8rem; opacity: 0.7; margin-top: 8px; }
+#greeting{
+    position:relative;
+    z-index:10;
+    font-size:7vw;
+    font-weight:600;
+    opacity:0;
+    text-shadow:0 0 30px rgba(168,85,247,.9);
+    pointer-events:none;
+}
+#greeting.font-cherry{font-family:'Cherry Bomb One',cursive}
+#greeting.animate-in{animation:greetingIn .7s forwards,textGlow 3s infinite .7s}
+#greeting.animate-out{animation:greetingOut .5s forwards}
 
-    /* Powitania */
-    #greeting { text-align: center; opacity: 0; color: #fff; font-size: 7vw; font-weight: 600; text-shadow: 0 0 20px rgba(255,255,255,0.8), 0 0 40px rgba(168,85,247,0.8); position: relative; z-index: 10; pointer-events: none; }
-    #greeting.font-cherry { font-family: 'Cherry Bomb One', cursive; font-weight: 400; }
-    #greeting.animate-in { animation: greetingIn 0.7s cubic-bezier(0.34,1.56,0.64,1) forwards, text-glow 3s ease-in-out infinite 0.7s; }
-    #greeting.animate-out { animation: greetingOut 0.5s ease-in forwards; }
+#next-btn{
+    position:absolute;
+    bottom:6%;
+    left:50%;
+    transform:translateX(-50%) scale(.5);
+    width:80px;
+    height:80px;
+    border-radius:50%;
+    border:2px solid rgba(255,255,255,.7);
+    background:rgba(168,85,247,.25);
+    z-index:30;
+    opacity:0;
+    pointer-events:none;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    cursor:pointer;
+    transition:.5s;
+}
+#next-btn.visible{
+    opacity:1;
+    pointer-events:auto;
+    transform:translateX(-50%) scale(1);
+    animation:nextPulse 2s infinite;
+}
+#next-btn:hover{transform:translateX(-50%) scale(1.15)}
+.arrow{
+    width:24px;
+    height:24px;
+    border-top:4px solid #fff;
+    border-right:4px solid #fff;
+    transform:rotate(45deg);
+    margin-left:-6px;
+}
 
-    /* Przycisk strzałki */
-    #next-btn { position: absolute; bottom: 6%; left: 50%; transform: translateX(-50%) scale(0.5); width: 80px; height: 80px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.7); background: rgba(168,85,247,0.25); backdrop-filter: blur(10px); cursor: pointer; z-index: 40; opacity: 0; pointer-events: none; display: flex; justify-content: center; align-items: center; transition: opacity 0.6s ease, transform 0.4s cubic-bezier(0.34,1.56,0.64,1); }
-    #next-btn.visible { opacity: 1; pointer-events: auto; transform: translateX(-50%) scale(1); animation: nextPulse 2.5s ease-in-out infinite; }
-    #next-btn:hover { background: rgba(168,85,247,0.5); transform: translateX(-50%) scale(1.15); }
-    #next-btn .arrow { width: 24px; height: 24px; border-top: 4px solid #fff; border-right: 4px solid #fff; transform: rotate(45deg); margin-left: -6px; }
+#subscription-screen{
+    position:absolute;
+    inset:0;
+    z-index:50;
+    display:none;
+    flex-direction:column;
+    align-items:center;
+    padding:40px 20px;
+    overflow-y:auto;
+    background:rgba(10,0,25,.9);
+}
+#subscription-screen.visible{display:flex}
+#subscription-screen h1{
+    margin-bottom:30px;
+    text-align:center;
+    font-size:2.4rem;
+}
+.sub-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(290px,1fr));
+    gap:20px;
+    max-width:1500px;
+    width:100%;
+}
+.sub-card{
+    background:rgba(30,10,55,.75);
+    border:2px solid rgba(168,85,247,.45);
+    border-radius:20px;
+    padding:25px;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+}
+.sub-card:hover{border-color:#fff;transform:translateY(-6px)}
+.sub-card h2{font-size:1.6rem}
+.price{
+    font-size:1.8rem;
+    font-weight:800;
+    color:#c084fc;
+}
+.desc{line-height:1.45;opacity:.92}
+.pros{font-size:.9rem;color:#86efac}
+.warn{font-size:.9rem;color:#fbbf24}
+.cons{font-size:.9rem;color:#fca5a5}
+.buy-btn{
+    margin-top:auto;
+    padding:14px;
+    border:none;
+    border-radius:12px;
+    background:linear-gradient(135deg,#a855f7,#c084fc);
+    color:#fff;
+    font-size:1rem;
+    font-weight:700;
+    cursor:pointer;
+}
+.buy-btn:hover{transform:scale(1.04)}
 
-   <!-- Subskrypcje -->
-<div id="subscription-screen">
-    <h1 style="color:#fff;text-align:center;margin-bottom:30px">Wybierz subskrypcję</h1>
-    <div class="sub-grid">
-        
-        <div class="sub-card">
-            <h2>Normal</h2>
-            <div class="price">$20 <span style="font-size:0.9rem;opacity:0.6">/ start</span></div>
-            <div class="desc">Subskrypcja do pracy, grania i wyluzowania się. Po roku <strong>$50</strong>.</div>
-            <div class="warn">⚠️ Haczyk: jeśli temperatura procesora przekroczy <strong>80°C</strong> — system wywali Recovery Screen (ekran odzyskiwania), niby dla bezpieczeństwa.</div>
-            <button class="buy-btn" data-plan="Normal" data-price="20">Kup za $20</button>
-        </div>
+#bank-modal{
+    position:absolute;
+    inset:0;
+    z-index:60;
+    background:rgba(0,0,0,.75);
+    display:none;
+    justify-content:center;
+    align-items:center;
+}
+#bank-modal.visible{display:flex}
+.bank-box{
+    width:90%;
+    max-width:450px;
+    padding:40px;
+    border-radius:25px;
+    background:rgba(20,5,40,.95);
+    border:2px solid rgba(168,85,247,.7);
+    text-align:center;
+}
+.bank-box h2{margin-bottom:10px}
+.bank-box p{opacity:.75;margin-bottom:20px}
+.bank-box input{
+    width:100%;
+    padding:15px;
+    border-radius:12px;
+    border:2px solid rgba(168,85,247,.5);
+    background:rgba(0,0,0,.4);
+    color:#fff;
+    text-align:center;
+    font-size:1.1rem;
+    margin-bottom:20px;
+}
+.btn-row{display:flex;gap:12px}
+.bank-box button{
+    flex:1;
+    padding:14px;
+    border:none;
+    border-radius:12px;
+    font-weight:700;
+    cursor:pointer;
+}
+.bank-connect{background:#16a34a;color:#fff}
+.bank-cancel{background:rgba(255,255,255,.15);color:#fff}
 
-        <div class="sub-card">
-            <h2>Pro</h2>
-            <div class="price">$500 <span style="font-size:0.9rem;opacity:0.6">/ mies.</span></div>
-            <div class="desc">Bezpieczny plan stworzony z myślą o pracy, programowaniu i testowaniu.</div>
-            <div class="pros">✔ Własny, odizolowany sandbox (piaskownica)</div>
-            <div class="pros">✔ Zaawansowany system testowania plików przed wirusami</div>
-            <div class="pros">✔ Idealna opcja, gdy trzeba odpalić niepewny kod</div>
-            <div style="font-size:0.85rem;color:#fca5a5;margin-bottom:6px">✘ Wada: Całkowicie nie nadaje się do gier — system blokuje uruchamianie jakichkolwiek produkcji gamingowych</div>
-            <button class="buy-btn" data-plan="Pro" data-price="500">Kup za $500</button>
-        </div>
+#setup-surface{
+    position:absolute;
+    inset:0;
+    z-index:100;
+    display:none;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    text-align:center;
+    background:#000;
+    color:#fff;
+    overflow-y:auto;
+}
+#setup-surface.visible{display:flex}
+#setup-surface.white{background:#f3f4f6;color:#111}
+#setup-surface.purple{background:linear-gradient(135deg,#2d1b69,#a855f7);color:#fff}
+.setup-content{
+    max-width:650px;
+    width:90%;
+    padding:40px 0;
+}
+.setup-content h1{font-size:2.2rem;margin-bottom:20px}
+.setup-content h2{font-size:1.4rem;margin:20px 0 10px}
+.setup-options{
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    gap:15px;
+    margin:20px 0;
+}
+.opt-card{
+    min-width:140px;
+    padding:20px;
+    border-radius:15px;
+    border:2px solid rgba(128,128,128,.35);
+    cursor:pointer;
+}
+.opt-card:hover,.opt-card.selected{
+    border-color:#a855f7;
+    background:rgba(168,85,247,.2);
+    transform:scale(1.05);
+}
+.setup-input{
+    width:100%;
+    padding:15px;
+    border-radius:12px;
+    border:2px solid #aaa;
+    font-size:1.05rem;
+    margin-bottom:15px;
+}
+.setup-btn{
+    padding:15px 40px;
+    border:none;
+    border-radius:12px;
+    background:linear-gradient(135deg,#a855f7,#c084fc);
+    color:#fff;
+    font-size:1rem;
+    font-weight:800;
+    cursor:pointer;
+}
+.setup-link{
+    display:inline-block;
+    margin-top:10px;
+    color:#38bdf8;
+    cursor:pointer;
+    text-decoration:underline;
+}
+.progress-bar{
+    width:100%;
+    height:10px;
+    background:rgba(255,255,255,.2);
+    border-radius:20px;
+    overflow:hidden;
+}
+.fill{
+    height:100%;
+    width:0;
+    background:#a855f7;
+    transition:.5s;
+}
 
-        <div class="sub-card">
-            <h2>Pro+ 🎮</h2>
-            <div class="price">od $700 <span style="font-size:0.9rem;opacity:0.6">/ mies.</span></div>
-            <div class="desc">Wersja bezkompromisowa, która nadaje się już absolutnie do wszystkiego – od zaawansowanego kodu po najnowsze gry.</div>
-            <div class="pros">✔ System lojalnościowy: co każdy miesiąc cena spada o $50, aż zatrzyma się na $100 (niżej już nie spadnie)</div>
-            <div class="pros">✔ Brak limitów temperatur z wersji Normal</div>
-            <div class="pros">✔ Pełna swoboda i brak blokad na gry</div>
-            <button class="buy-btn" data-plan="Pro+" data-price="700">Kup za $700</button>
-        </div>
+.cmd-overlay{
+    position:absolute;
+    bottom:0;
+    left:0;
+    width:100%;
+    height:42%;
+    background:rgba(0,0,0,.96);
+    color:#0f0;
+    font-family:'Courier New',monospace;
+    padding:20px;
+    display:none;
+    flex-direction:column;
+    z-index:120;
+}
+.cmd-overlay.visible{display:flex}
+.cmd-output{
+    flex:1;
+    white-space:pre-wrap;
+    text-align:left;
+    overflow:auto;
+}
+.cmd-input-line{display:flex}
+.cmd-input-line span{margin-right:6px}
+.cmd-input{
+    flex:1;
+    background:transparent;
+    border:none;
+    color:#0f0;
+    outline:none;
+    font-family:inherit;
+    font-size:1rem;
+}
 
-        <div class="sub-card">
-            <h2>Ultimate+ 🚀</h2>
-            <div class="price">$1200 <span style="font-size:0.9rem;opacity:0.6">/ mies.</span></div>
-            <div class="desc">Kompletny pakiet zoptymalizowany pod maksymalną wydajność i wygodę użytkownika.</div>
-            <div class="pros">✔ Nadaje się do wszystkiego (praca i gry)</div>
-            <div class="pros">✔ Posiada wbudowany skaner antywirusowy oraz automatyczną optymalizację systemu</div>
-            <div class="pros">✔ Daje dostęp do wszystkich dobrych programów za darmo, a najlepsze aplikacje są już od razu zainstalowane. Po prostu włączasz i działasz</div>
-            <button class="buy-btn" data-plan="Ultimate+" data-price="1200">Kup za $1200</button>
-        </div>
+#desktop{
+    position:absolute;
+    inset:0;
+    z-index:200;
+    display:none;
+    flex-direction:column;
+    background:linear-gradient(135deg,#1a1a2e,#16213e);
+}
+#desktop.visible{display:flex}
+.desktop-area{
+    flex:1;
+    padding:30px;
+    display:flex;
+    gap:20px;
+    align-items:flex-start;
+}
+.desktop-icon{
+    width:90px;
+    text-align:center;
+    padding:10px;
+    border-radius:12px;
+    cursor:pointer;
+}
+.desktop-icon:hover{background:rgba(255,255,255,.12)}
+.di-icon{font-size:2.5rem}
+.di-txt{font-size:.8rem}
+.taskbar{
+    height:52px;
+    background:rgba(0,0,0,.85);
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:0 22px;
+}
 
-        <div class="sub-card" style="border-color:#fbbf24">
-            <h2>Deluxe+ 👑</h2>
-            <div class="price">$2000 <span style="font-size:0.9rem;opacity:0.6">/ mies.</span></div>
-            <div class="desc">Najwyższy możliwy plan w hierarchii NewOS, łączący potęgę wszystkich poprzednich opcji.</div>
-            <div class="pros">✔ Posiada absolutnie wszystko, co oferują inne plany (sandboxy, darmowe programy, optymalizacje), a nawet jeszcze więcej</div>
-            <div class="pros">✔ Zawiera w sobie wszystko <strong>OPRÓCZ funkcji z subskrypcji Normal</strong> — czyli całkowicie wycinasz błąd 80°C</div>
-            <div class="pros">✔ Możesz kręcić procesor na maksa i grać bez obaw, że system zniszczy Ci skina!</div>
-            <button class="buy-btn" data-plan="Deluxe+" data-price="2000">Kup za $2000</button>
-        </div>
+#lockscreen{
+    position:absolute;
+    inset:0;
+    z-index:250;
+    display:none;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    background:linear-gradient(135deg,#0f0c29,#302b63,#24243e);
+}
+#lockscreen.visible{display:flex}
+.lock-time{font-size:6rem;font-weight:200}
+.lock-date{font-size:1.2rem;opacity:.75;margin:10px 0 35px}
+.lock-input{
+    width:260px;
+    padding:12px;
+    border-radius:25px;
+    border:2px solid rgba(255,255,255,.3);
+    background:rgba(255,255,255,.12);
+    color:#fff;
+    text-align:center;
+}
 
-    </div>
-</div>
-    #bank-modal { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 70; display: none; justify-content: center; align-items: center; background: rgba(0,0,0,0.7); }
-    #bank-modal.visible { display: flex; }
-    .bank-box { background: rgba(20,5,40,0.95); border: 2px solid rgba(168,85,247,0.7); border-radius: 25px; padding: 40px; text-align: center; max-width: 440px; width: 90%; }
-    .bank-box h2 { color: #fff; margin-bottom: 10px; }
-    .bank-box p { color: rgba(255,255,255,0.7); margin-bottom: 20px; }
-    .bank-box input { width: 100%; padding: 15px; border-radius: 12px; border: 2px solid rgba(168,85,247,0.5); background: rgba(0,0,0,0.4); color: #fff; font-size: 1.2rem; text-align: center; margin-bottom: 20px; outline: none; }
-    .bank-box .btn-row { display: flex; gap: 12px; }
-    .bank-box button { flex: 1; padding: 14px; border: none; border-radius: 12px; font-size: 1rem; font-weight: 600; cursor: pointer; }
-    .bank-connect { background: linear-gradient(135deg, #22c55e, #16a34a); color: #fff; }
-    .bank-cancel { background: rgba(255,255,255,0.15); color: #fff; }
-
-    /* Setup Wizard */
-    #setup-surface { position: absolute; inset: 0; z-index: 100; display: none; flex-direction: column; justify-content: center; align-items: center; background: #000; color: #fff; text-align: center; overflow-y: auto; }
-    #setup-surface.visible { display: flex; }
-    #setup-surface.white { background: #f3f4f6; color: #111; }
-    #setup-surface.purple { background: linear-gradient(135deg, #2d1b69, #a855f7); color: #fff; }
-    .setup-content { max-width: 600px; width: 90%; padding: 40px 0; }
-    .setup-content h1 { font-size: 2.2rem; margin-bottom: 20px; }
-    .setup-content h2 { font-size: 1.5rem; margin-bottom: 15px; font-weight: 400; opacity: 0.8; }
-    .setup-options { display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; margin: 20px 0; }
-    .opt-card { padding: 20px 30px; border: 2px solid rgba(128,128,128,0.3); border-radius: 15px; cursor: pointer; transition: all 0.3s; min-width: 120px; }
-    .opt-card:hover, .opt-card.selected { border-color: #a855f7; background: rgba(168,85,247,0.2); transform: scale(1.05); }
-    .setup-btn { padding: 15px 40px; border: none; border-radius: 12px; font-size: 1.1rem; font-weight: 600; cursor: pointer; margin-top: 20px; background: linear-gradient(135deg, #a855f7, #c084fc); color: #fff; transition: transform 0.2s; }
-    .setup-btn:hover { transform: scale(1.05); }
-    .setup-input { width: 100%; padding: 15px; border-radius: 12px; border: 2px solid #ccc; background: rgba(255,255,255,0.1); color: inherit; font-size: 1.1rem; margin-bottom: 15px; outline: none; }
-    .setup-input:focus { border-color: #a855f7; }
-    .setup-link { color: #38bdf8; cursor: pointer; text-decoration: underline; margin-top: 10px; display: inline-block; }
-    .progress-bar { width: 100%; height: 8px; background: rgba(255,255,255,0.2); border-radius: 10px; overflow: hidden; margin: 15px 0; }
-    .progress-bar .fill { height: 100%; background: #a855f7; width: 0%; transition: width 0.3s; }
-
-    /* CMD */
-    .cmd-overlay { position: absolute; bottom: 0; left: 0; width: 100%; height: 40%; background: rgba(0,0,0,0.95); color: #0f0; padding: 20px; font-family: 'Courier New', monospace; display: none; z-index: 110; flex-direction: column; }
-    .cmd-overlay.visible { display: flex; }
-    .cmd-output { flex: 1; overflow-y: auto; white-space: pre-wrap; }
-    .cmd-input-line { display: flex; }
-    .cmd-input-line span { color: #0f0; margin-right: 5px; }
-    .cmd-input { background: transparent; border: none; color: #0f0; outline: none; flex: 1; font-family: inherit; font-size: 1rem; }
-
-    /* Pulpit */
-    #desktop { position: absolute; inset: 0; z-index: 200; display: none; flex-direction: column; background: linear-gradient(135deg, #1a1a2e, #16213e); color: #fff; }
-    #desktop.visible { display: flex; }
-    .desktop-area { flex: 1; padding: 30px; display: flex; gap: 15px; }
-    .desktop-icon { width: 80px; text-align: center; cursor: pointer; padding: 10px; border-radius: 10px; transition: background 0.2s; }
-    .desktop-icon:hover { background: rgba(255,255,255,0.1); }
-    .desktop-icon .di-icon { font-size: 2.5rem; margin-bottom: 5px; }
-    .desktop-icon .di-txt { font-size: 0.75rem; }
-    .taskbar { height: 50px; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); display: flex; align-items: center; padding: 0 20px; justify-content: space-between; }
-
-    /* Ekran blokady */
-    #lockscreen { position: absolute; inset: 0; z-index: 250; display: none; flex-direction: column; justify-content: center; align-items: center; background: linear-gradient(135deg, #0f0c29, #302b63, #24243e); text-align: center; }
-    #lockscreen.visible { display: flex; }
-    .lock-time { font-size: 6rem; font-weight: 200; margin-bottom: 10px; }
-    .lock-date { font-size: 1.2rem; opacity: 0.7; margin-bottom: 40px; }
-    .lock-input { width: 250px; padding: 12px; border-radius: 25px; border: 2px solid rgba(255,255,255,0.3); background: rgba(255,255,255,0.1); color: #fff; text-align: center; font-size: 1rem; outline: none; }
-    .lock-input:focus { border-color: #a855f7; }
-
-    /* Animacje */
-    @keyframes bloomReveal { 0% { clip-path: circle(0% at 50% 50%); } 100% { clip-path: circle(150% at 50% 50%); } }
-    @keyframes flashPulse { 0% { opacity: 0; transform: scale(0.3); } 30% { opacity: 0.9; transform: scale(1); } 100% { opacity: 0; transform: scale(2); } }
-    @keyframes nextPulse { 0%, 100% { box-shadow: 0 0 30px rgba(168,85,247,0.6); } 50% { box-shadow: 0 0 60px rgba(168,85,247,0.9); } }
-    @keyframes float-particle { 0% { transform: translateY(100vh) translateX(0); opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { transform: translateY(-100px) translateX(var(--drift)); opacity: 0; } }
-    @keyframes wave-rotate { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-    @keyframes cloud-drift { 0% { transform: translateX(-200px); } 100% { transform: translateX(calc(100vw + 200px)); } }
-    @keyframes greetingIn { 0% { opacity: 0; transform: scale(0.3) rotate(-10deg); filter: blur(15px); } 60% { transform: scale(1.1) rotate(3deg); } 100% { opacity: 1; transform: scale(1) rotate(0deg); filter: blur(0); } }
-    @keyframes greetingOut { 0% { opacity: 1; transform: scale(1); filter: blur(0); } 100% { opacity: 0; transform: scale(0.5) translateY(-40px); filter: blur(15px); } }
-    @keyframes text-glow { 0%, 100% { text-shadow: 0 0 20px rgba(255,255,255,0.8); } 50% { text-shadow: 0 0 60px rgba(168,85,247,1); } }
-    @keyframes logoAppear { 0% { opacity: 0; transform: scale(0.5); } 70% { transform: scale(1.05); } 100% { opacity: 1; transform: scale(1); } }
-    @keyframes glowPulse { 0%, 100% { text-shadow: 0 0 10px rgba(255,255,255,0.5); } 50% { text-shadow: 0 0 20px rgba(255,255,255,0.8); } }
-    @keyframes gradientShift { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+@keyframes logoAppear{0%{opacity:0;transform:scale(.5)}100%{opacity:1;transform:scale(1)}}
+@keyframes glowPulse{50%{text-shadow:0 0 25px #fff}}
+@keyframes gradientShift{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+@keyframes bloomReveal{to{clip-path:circle(150% at 50% 50%)}}
+@keyframes flashPulse{30%{opacity:1}100%{opacity:0;transform:scale(2)}}
+@keyframes waveRotate{to{transform:rotate(360deg)}}
+@keyframes particleFloat{0%{transform:translateY(100vh);opacity:0}10%,90%{opacity:1}100%{transform:translateY(-100px) translateX(var(--drift));opacity:0}}
+@keyframes cloudDrift{from{transform:translateX(-200px)}to{transform:translateX(calc(100vw + 200px))}}
+@keyframes greetingIn{0%{opacity:0;transform:scale(.3);filter:blur(12px)}100%{opacity:1;transform:scale(1);filter:blur(0)}}
+@keyframes greetingOut{to{opacity:0;transform:scale(.5) translateY(-40px);filter:blur(12px)}}
+@keyframes textGlow{50%{text-shadow:0 0 60px #a855f7}}
+@keyframes nextPulse{50%{box-shadow:0 0 60px #a855f7}}
 </style>
 </head>
 <body>
-    <div id="transition-overlay"></div>
+
+<div id="transition-overlay"></div>
 <div id="flash"></div>
 
 <div id="logo">
-    <span class="metal-nothing">Metal Nothing</span> <span class="new-os">+ NewOS</span>
+    <span class="metal-nothing">Metal Nothing</span>
+    <span class="new-os">+ NewOS</span>
 </div>
 
 <div id="effects">
@@ -236,317 +516,443 @@
 <div id="font-picker">
     <h2>Wybierz czcionkę</h2>
     <div class="font-buttons">
-        <button class="font-btn cherry" data-font="cherry">Metal Nothing<small>Cherry Bomb</small></button>
-        <button class="font-btn normal" data-font="normal">Normal<small>Standardowa</small></button>
+        <button class="font-btn cherry" data-font="cherry">
+            Metal Nothing
+            <small>Cherry Bomb</small>
+        </button>
+        <button class="font-btn normal" data-font="normal">
+            Normal
+            <small>Standardowa</small>
+        </button>
     </div>
 </div>
 
 <div id="greeting"></div>
 
-<div id="next-btn"><div class="arrow"></div></div>
+<div id="next-btn">
+    <div class="arrow"></div>
+</div>
 
-<!-- Subskrypcje -->
 <div id="subscription-screen">
-    <h1 style="color:#fff;text-align:center;margin-bottom:30px">Wybierz subskrypcję</h1>
+    <h1>Wybierz subskrypcję</h1>
+
     <div class="sub-grid">
+
         <div class="sub-card">
-            <h2>Normal</h2><div class="price">$20</div>
-            <div class="desc">Plan do pracy i grania.</div>
-            <div class="warn">⚠️ >80°C = Recovery Screen</div>
-            <button class="buy-btn" data-plan="Normal" data-price="20">Kup</button>
+            <h2>Normal</h2>
+            <div class="price">$20 <span style="font-size:.9rem;opacity:.65">/ start</span></div>
+            <div class="desc">
+                Subskrypcja do pracy, grania i wyluzowania się.
+                Po roku cena zmienia się na <strong>$50</strong>.
+            </div>
+            <div class="warn">
+                ⚠️ Haczyk: jeśli temperatura procesora przekroczy <strong>80°C</strong>,
+                system wyrzuci Recovery Screen — niby dla bezpieczeństwa.
+            </div>
+            <button class="buy-btn" data-plan="Normal" data-price="20">Kup za $20</button>
         </div>
+
         <div class="sub-card">
-            <h2>Pro</h2><div class="price">$500</div>
-            <div class="desc">Bezpieczny plan do pracy i testowania.</div>
-            <div class="pros">✔ Sandbox, Antywirus</div>
-            <button class="buy-btn" data-plan="Pro" data-price="500">Kup</button>
+            <h2>Pro</h2>
+            <div class="price">$500 <span style="font-size:.9rem;opacity:.65">/ mies.</span></div>
+            <div class="desc">
+                Bezpieczny plan stworzony z myślą o pracy, programowaniu i testowaniu.
+            </div>
+            <div class="pros">✔ Własny, odizolowany sandbox / piaskownica</div>
+            <div class="pros">✔ Zaawansowany system testowania plików przed wirusami</div>
+            <div class="pros">✔ Idealny do odpalania niepewnego kodu</div>
+            <div class="cons">✘ Wada: całkowicie nie nadaje się do gier — system blokuje produkcje gamingowe</div>
+            <button class="buy-btn" data-plan="Pro" data-price="500">Kup za $500</button>
         </div>
+
         <div class="sub-card">
-            <h2>Pro+ 🎮</h2><div class="price">$700</div>
-            <div class="desc">Wersja bezkompromisowa.</div>
-            <div class="pros">✔ Brak limitów temp, gry OK</div>
-            <button class="buy-btn" data-plan="Pro+" data-price="700">Kup</button>
+            <h2>Pro+ 🎮</h2>
+            <div class="price">od $700 <span style="font-size:.9rem;opacity:.65">/ mies.</span></div>
+            <div class="desc">
+                Wersja bezkompromisowa, która nadaje się do wszystkiego:
+                od zaawansowanego kodu po najnowsze gry.
+            </div>
+            <div class="pros">✔ Co miesiąc cena spada o $50, aż zatrzyma się na $100</div>
+            <div class="pros">✔ Brak limitów temperatur z wersji Normal</div>
+            <div class="pros">✔ Pełna swoboda i brak blokad na gry</div>
+            <button class="buy-btn" data-plan="Pro+" data-price="700">Kup za $700</button>
         </div>
+
         <div class="sub-card">
-            <h2>Ultimate+ 🚀</h2><div class="price">$1200</div>
-            <div class="desc">Maksymalna wydajność.</div>
-            <div class="pros">✔ Darmowe programy, optymalizacja</div>
-            <button class="buy-btn" data-plan="Ultimate+" data-price="1200">Kup</button>
+            <h2>Ultimate+ 🚀</h2>
+            <div class="price">$1200 <span style="font-size:.9rem;opacity:.65">/ mies.</span></div>
+            <div class="desc">
+                Kompletny pakiet zoptymalizowany pod maksymalną wydajność
+                i wygodę użytkownika.
+            </div>
+            <div class="pros">✔ Nadaje się do wszystkiego — praca i gry</div>
+            <div class="pros">✔ Wbudowany skaner antywirusowy</div>
+            <div class="pros">✔ Automatyczna optymalizacja systemu</div>
+            <div class="pros">✔ Dostęp do dobrych programów za darmo, najlepsze narzędzia od razu zainstalowane</div>
+            <button class="buy-btn" data-plan="Ultimate+" data-price="1200">Kup za $1200</button>
         </div>
+
         <div class="sub-card" style="border-color:#fbbf24">
-            <h2>Deluxe+ 👑</h2><div class="price">$2000</div>
-            <div class="desc">Najwyższy plan - brak błędu 80°C.</div>
-            <div class="pros">✔ Wszystko z innych planów</div>
-            <button class="buy-btn" data-plan="Deluxe+" data-price="2000">Kup</button>
+            <h2>Deluxe+ 👑</h2>
+            <div class="price">$2000 <span style="font-size:.9rem;opacity:.65">/ mies.</span></div>
+            <div class="desc">
+                Najwyższy możliwy plan w hierarchii NewOS,
+                łączący potęgę wszystkich poprzednich opcji.
+            </div>
+            <div class="pros">✔ Ma sandboxy, darmowe programy, optymalizacje i jeszcze więcej</div>
+            <div class="pros">✔ Zawiera wszystko oprócz błędu z Normal — wycina problem 80°C</div>
+            <div class="pros">✔ Możesz kręcić procesor na maksa i grać bez obaw, że system zniszczy Ci skina</div>
+            <button class="buy-btn" data-plan="Deluxe+" data-price="2000">Kup za $2000</button>
         </div>
+
     </div>
 </div>
 
-<!-- Modal Banku -->
 <div id="bank-modal">
     <div class="bank-box">
         <h2>Płatność przez Bank ONL</h2>
-        <p>Wpisz kod dostępu</p>
-        <div id="bank-plan-label" style="color:#c084fc;font-weight:700;font-size:1.2rem;margin-bottom:20px">—</div>
-        <input type="text" id="bank-code" placeholder="Kod ONL" maxlength="12">
+        <p>Wpisz kod dostępu do Banku ONL</p>
+        <div id="bank-plan-label" style="color:#c084fc;font-weight:800;font-size:1.2rem;margin-bottom:20px">—</div>
+        <input type="text" id="bank-code" placeholder="Kod ONL" maxlength="20">
         <div class="btn-row">
             <button class="bank-cancel" id="bank-cancel">Anuluj</button>
             <button class="bank-connect" id="bank-connect">Połącz</button>
         </div>
-        <div style="font-size:0.8rem;color:rgba(255,255,255,0.4);margin-top:15px">Kod: ONL1234</div>
+        <div style="font-size:.8rem;opacity:.45;margin-top:15px">Testowy kod: ONL1234</div>
     </div>
 </div>
 
-<!-- Setup Wizard -->
 <div id="setup-surface">
     <div class="setup-content" id="setup-content"></div>
+
     <div class="cmd-overlay" id="cmd-overlay">
-        <div class="cmd-output" id="cmd-output">NewOS Setup CMD [Wersja 7.0]\n(c) Metal Nothing Corporation.\n\n</div>
+        <div class="cmd-output" id="cmd-output">NewOS Setup CMD [Wersja 7.0]
+(c) Metal Nothing Corporation.
+
+</div>
         <div class="cmd-input-line">
             <span>C:\Setup></span>
-            <input type="text" class="cmd-input" id="cmd-input" autofocus>
+            <input id="cmd-input" class="cmd-input" type="text">
         </div>
     </div>
 </div>
 
-<!-- Pulpit -->
 <div id="desktop">
     <div class="desktop-area">
         <div class="desktop-icon"><div class="di-icon">📁</div><div class="di-txt">Pliki</div></div>
         <div class="desktop-icon"><div class="di-icon">🌐</div><div class="di-txt">Przeglądarka</div></div>
         <div class="desktop-icon"><div class="di-icon">⚙️</div><div class="di-txt">Ustawienia</div></div>
-        <div class="desktop-icon"><div class="di-icon">🏦</div><div class="di-txt">Bank ONL</div></div>
+        <div class="desktop-icon" onclick="window.open('bank.html','_blank')"><div class="di-icon">🏦</div><div class="di-txt">Bank ONL</div></div>
     </div>
     <div class="taskbar">
-        <div style="font-weight:700">NewOS</div>
+        <div><strong>NewOS</strong></div>
         <div><span id="desktop-user"></span> | <span id="desktop-clock"></span></div>
     </div>
 </div>
 
-<!-- Ekran Blokady -->
 <div id="lockscreen">
     <div class="lock-time" id="lock-time">12:00</div>
     <div class="lock-date" id="lock-date"></div>
-    <input type="password" class="lock-input" id="lock-input" placeholder="Hasło">
+    <input id="lock-input" class="lock-input" type="password" placeholder="Hasło">
 </div>
-    <script>
-const greetings = ["Cześć","Hello","你好","Привет","Привіт","Hola","Bonjour","Hallo","Ciao","こんにちは","안녕하세요","Olá","مرحبا","Merhaba"];
+<script>
+const greetings=[
+    "Cześć","Hello","你好","Привет","Привіт","Hola","Bonjour",
+    "Hallo","Ciao","こんにちは","안녕하세요","Olá","مرحبا","Merhaba"
+];
 
-// Elementy
-const logoEl = document.getElementById('logo');
-const greetingEl = document.getElementById('greeting');
-const bodyEl = document.body;
-const effectsEl = document.getElementById('effects');
-const fontPickerEl = document.getElementById('font-picker');
-const overlayEl = document.getElementById('transition-overlay');
-const flashEl = document.getElementById('flash');
-const nextBtnEl = document.getElementById('next-btn');
-const subScreenEl = document.getElementById('subscription-screen');
-const bankModalEl = document.getElementById('bank-modal');
-const bankPlanLabel = document.getElementById('bank-plan-label');
-const bankCodeInput = document.getElementById('bank-code');
-const setupSurface = document.getElementById('setup-surface');
-const setupContent = document.getElementById('setup-content');
-const cmdOverlay = document.getElementById('cmd-overlay');
-const cmdOutput = document.getElementById('cmd-output');
-const cmdInput = document.getElementById('cmd-input');
-const desktopEl = document.getElementById('desktop');
-const lockscreenEl = document.getElementById('lockscreen');
+const logoEl=document.getElementById("logo");
+const greetingEl=document.getElementById("greeting");
+const bodyEl=document.body;
+const effectsEl=document.getElementById("effects");
+const fontPickerEl=document.getElementById("font-picker");
+const overlayEl=document.getElementById("transition-overlay");
+const flashEl=document.getElementById("flash");
+const nextBtnEl=document.getElementById("next-btn");
+const subScreenEl=document.getElementById("subscription-screen");
+const bankModalEl=document.getElementById("bank-modal");
+const bankPlanLabel=document.getElementById("bank-plan-label");
+const bankCodeInput=document.getElementById("bank-code");
+const setupSurface=document.getElementById("setup-surface");
+const setupContent=document.getElementById("setup-content");
+const cmdOverlay=document.getElementById("cmd-overlay");
+const cmdOutput=document.getElementById("cmd-output");
+const cmdInput=document.getElementById("cmd-input");
+const desktopEl=document.getElementById("desktop");
+const lockscreenEl=document.getElementById("lockscreen");
 
-let currentGreetingIndex = 0;
-let selectedPlan = null;
-let selectedPrice = null;
-let osData = { theme: 'ciemny', user: '', pass: '', pcName: 'NEW-PC' };
-let cmdActive = false;
+let currentGreetingIndex=0;
+let selectedPlan=null;
+let selectedPrice=null;
+let cmdActive=false;
 
-// Nasłuch płatności z banku (inna karta)
-window.addEventListener('storage', (e) => {
-    if (e.key === 'onl_paid' && e.newValue === 'true') {
-        const plan = localStorage.getItem('onl_plan');
-        const price = localStorage.getItem('onl_price');
-        localStorage.removeItem('onl_paid');
-        bankModalEl.classList.remove('visible');
-        subScreenEl.classList.remove('visible');
-        startSetupSequence(plan, price);
+let osData={
+    theme:"ciemny",
+    user:"",
+    pass:"",
+    pcName:"NEW-PC"
+};
+
+const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+
+window.addEventListener("storage",(e)=>{
+    if(e.key==="onl_paid" && e.newValue==="true"){
+        localStorage.removeItem("onl_paid");
+        bankModalEl.classList.remove("visible");
+        subScreenEl.classList.remove("visible");
+        startSetupSequence();
     }
-    if (e.key === 'onl_rejected' && e.newValue === 'true') {
-        localStorage.removeItem('onl_rejected');
-        bankModalEl.querySelector('.bank-box').innerHTML = '<h2>Odrzucono</h2><p>Płatność anulowana w banku.</p>';
+
+    if(e.key==="onl_rejected" && e.newValue==="true"){
+        localStorage.removeItem("onl_rejected");
+        bankModalEl.querySelector(".bank-box").innerHTML=`
+            <h2>Płatność odrzucona</h2>
+            <p>Płatność została anulowana w banku.</p>
+            <button class="bank-cancel" onclick="location.reload()">Zamknij</button>
+        `;
     }
 });
 
-// Efekty
-function createParticles() {
-    for (let i = 0; i < 20; i++) {
-        setTimeout(() => {
-            const p = document.createElement('div');
-            p.className = 'particle';
-            const s = Math.random() * 15 + 5;
-            p.style.width = s + 'px'; p.style.height = s + 'px';
-            p.style.left = Math.random() * 100 + '%';
-            p.style.setProperty('--drift', (Math.random() - 0.5) * 400 + 'px');
-            p.style.animationDuration = (Math.random() * 10 + 15) + 's';
+function createParticles(){
+    for(let i=0;i<25;i++){
+        setTimeout(()=>{
+            const p=document.createElement("div");
+            p.className="particle";
+            const size=Math.random()*14+6;
+            p.style.width=size+"px";
+            p.style.height=size+"px";
+            p.style.left=Math.random()*100+"%";
+            p.style.setProperty("--drift",(Math.random()-.5)*400+"px");
+            p.style.animationDuration=(Math.random()*10+15)+"s";
             effectsEl.appendChild(p);
-        }, i * 200);
+        },i*160);
     }
 }
 
-function createClouds() {
-    for (let i = 0; i < 4; i++) {
-        const c = document.createElement('div');
-        c.className = 'cloud';
-        c.style.top = (Math.random() * 70 + 5) + '%';
-        c.style.animationDuration = (Math.random() * 20 + 25) + 's';
-        c.style.animationDelay = (Math.random() * -30) + 's';
+function createClouds(){
+    for(let i=0;i<6;i++){
+        const c=document.createElement("div");
+        c.className="cloud";
+        c.style.top=(Math.random()*70+8)+"%";
+        c.style.animationDuration=(Math.random()*20+25)+"s";
+        c.style.animationDelay=(Math.random()*-30)+"s";
         effectsEl.appendChild(c);
         makeDraggable(c);
     }
 }
 
-function makeDraggable(cloud) {
-    let d = false, ox = 0, oy = 0;
-    function start(e) {
-        d = true; cloud.classList.add('dragging');
-        const r = cloud.getBoundingClientRect();
-        cloud.style.left = r.left + 'px'; cloud.style.top = r.top + 'px';
-        cloud.style.animation = 'none';
-        const x = e.clientX || (e.touches && e.touches[0].clientX);
-        const y = e.clientY || (e.touches && e.touches[0].clientY);
-        ox = x - r.left; oy = y - r.top; e.preventDefault();
+function makeDraggable(cloud){
+    let dragging=false,offsetX=0,offsetY=0;
+
+    function start(e){
+        dragging=true;
+        cloud.classList.add("dragging");
+        const rect=cloud.getBoundingClientRect();
+        cloud.style.left=rect.left+"px";
+        cloud.style.top=rect.top+"px";
+        cloud.style.animation="none";
+
+        const x=e.clientX || (e.touches && e.touches[0].clientX);
+        const y=e.clientY || (e.touches && e.touches[0].clientY);
+        offsetX=x-rect.left;
+        offsetY=y-rect.top;
+        e.preventDefault();
     }
-    function move(e) {
-        if (!d) return;
-        const x = e.clientX || (e.touches && e.touches[0].clientX);
-        const y = e.clientY || (e.touches && e.touches[0].clientY);
-        cloud.style.left = (x - ox) + 'px'; cloud.style.top = (y - oy) + 'px'; e.preventDefault();
+
+    function move(e){
+        if(!dragging)return;
+        const x=e.clientX || (e.touches && e.touches[0].clientX);
+        const y=e.clientY || (e.touches && e.touches[0].clientY);
+        cloud.style.left=(x-offsetX)+"px";
+        cloud.style.top=(y-offsetY)+"px";
+        e.preventDefault();
     }
-    function end() { if (!d) return; d = false; cloud.classList.remove('dragging'); }
-    cloud.addEventListener('mousedown', start);
-    document.addEventListener('mousemove', move);
-    document.addEventListener('mouseup', end);
+
+    function end(){
+        dragging=false;
+        cloud.classList.remove("dragging");
+    }
+
+    cloud.addEventListener("mousedown",start);
+    document.addEventListener("mousemove",move);
+    document.addEventListener("mouseup",end);
+
+    cloud.addEventListener("touchstart",start,{passive:false});
+    document.addEventListener("touchmove",move,{passive:false});
+    document.addEventListener("touchend",end);
 }
 
-// Boot
-setTimeout(() => {
-    logoEl.classList.add('fade-out');
-    setTimeout(() => {
-        flashEl.classList.add('flashing');
-        overlayEl.classList.add('blooming');
-        bodyEl.classList.add('animated-bg');
-    }, 700);
-}, 6000);
+setTimeout(()=>{
+    logoEl.classList.add("fade-out");
 
-setTimeout(() => {
-    logoEl.classList.add('hidden');
-    overlayEl.style.opacity = '0';
-    effectsEl.classList.add('visible');
-    createParticles(); createClouds();
-    setTimeout(() => { fontPickerEl.classList.add('visible'); }, 800);
-}, 9200);
+    setTimeout(()=>{
+        flashEl.classList.add("flashing");
+        overlayEl.classList.add("blooming");
+        bodyEl.classList.add("animated-bg");
+    },700);
 
-// Wybór czcionki
-document.querySelectorAll('.font-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-        if (btn.getAttribute('data-font') === 'cherry') greetingEl.classList.add('font-cherry');
-        fontPickerEl.classList.remove('visible');
-        setTimeout(() => {
-            showGreeting(); setInterval(changeGreeting, 3000);
-            nextBtnEl.classList.add('visible');
-        }, 700);
+},6000);
+
+setTimeout(()=>{
+    logoEl.classList.add("hidden");
+    overlayEl.style.opacity="0";
+    effectsEl.classList.add("visible");
+    createParticles();
+    createClouds();
+
+    setTimeout(()=>{
+        fontPickerEl.classList.add("visible");
+    },800);
+
+},9200);
+
+document.querySelectorAll(".font-btn").forEach(btn=>{
+    btn.addEventListener("click",()=>{
+        if(btn.dataset.font==="cherry"){
+            greetingEl.classList.add("font-cherry");
+        }
+
+        fontPickerEl.classList.remove("visible");
+
+        setTimeout(()=>{
+            showGreeting();
+            setInterval(changeGreeting,3000);
+            nextBtnEl.classList.add("visible");
+        },700);
     });
 });
 
-function showGreeting() {
-    greetingEl.textContent = greetings[currentGreetingIndex];
-    greetingEl.classList.remove('animate-out'); greetingEl.classList.add('animate-in');
-}
-function changeGreeting() {
-    greetingEl.classList.remove('animate-in'); greetingEl.classList.add('animate-out');
-    setTimeout(() => {
-        currentGreetingIndex = (currentGreetingIndex + 1) % greetings.length;
-        greetingEl.textContent = greetings[currentGreetingIndex];
-        greetingEl.classList.remove('animate-out'); greetingEl.classList.add('animate-in');
-    }, 500);
+function showGreeting(){
+    greetingEl.textContent=greetings[currentGreetingIndex];
+    greetingEl.classList.remove("animate-out");
+    greetingEl.classList.add("animate-in");
 }
 
-// Przycisk i subskrypcje
-nextBtnEl.addEventListener('click', () => { subScreenEl.classList.add('visible'); });
-document.querySelectorAll('.buy-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-        selectedPlan = btn.getAttribute('data-plan');
-        selectedPrice = btn.getAttribute('data-price');
-        bankPlanLabel.textContent = `${selectedPlan} — $${selectedPrice}`;
-        bankCodeInput.value = '';
-        bankModalEl.classList.add('visible');
+function changeGreeting(){
+    greetingEl.classList.remove("animate-in");
+    greetingEl.classList.add("animate-out");
+
+    setTimeout(()=>{
+        currentGreetingIndex=(currentGreetingIndex+1)%greetings.length;
+        greetingEl.textContent=greetings[currentGreetingIndex];
+        greetingEl.classList.remove("animate-out");
+        greetingEl.classList.add("animate-in");
+    },500);
+}
+
+nextBtnEl.addEventListener("click",()=>{
+    subScreenEl.classList.add("visible");
+});
+
+document.querySelectorAll(".buy-btn").forEach(btn=>{
+    btn.addEventListener("click",()=>{
+        selectedPlan=btn.dataset.plan;
+        selectedPrice=btn.dataset.price;
+
+        bankPlanLabel.textContent=`${selectedPlan} — $${selectedPrice}`;
+        bankCodeInput.value="";
+        bankModalEl.classList.add("visible");
     });
 });
-document.getElementById('bank-cancel').addEventListener('click', () => { bankModalEl.classList.remove('visible'); });
 
-document.getElementById('bank-connect').addEventListener('click', () => {
-    const code = bankCodeInput.value.trim();
-    if (code.length < 4) { bankCodeInput.style.borderColor = '#ef4444'; return; }
-    localStorage.setItem('onl_plan', selectedPlan);
-    localStorage.setItem('onl_price', selectedPrice);
-    localStorage.setItem('onl_code', code);
-    localStorage.removeItem('onl_paid'); localStorage.removeItem('onl_rejected');
-    
-    // Otwórz bank w nowej karcie
-    window.open('bank.html', '_blank');
-    
-    bankModalEl.querySelector('.bank-box').innerHTML = `
+document.getElementById("bank-cancel").addEventListener("click",()=>{
+    bankModalEl.classList.remove("visible");
+});
+
+document.getElementById("bank-connect").addEventListener("click",()=>{
+    const code=bankCodeInput.value.trim();
+
+    if(code.length<4){
+        bankCodeInput.style.borderColor="#ef4444";
+        return;
+    }
+
+    localStorage.setItem("onl_plan",selectedPlan);
+    localStorage.setItem("onl_price",selectedPrice);
+    localStorage.setItem("onl_code",code);
+    localStorage.removeItem("onl_paid");
+    localStorage.removeItem("onl_rejected");
+    localStorage.removeItem("onl_sub_key");
+
+    window.open("bank.html","_blank");
+
+    bankModalEl.querySelector(".bank-box").innerHTML=`
         <h2>Oczekiwanie na płatność...</h2>
-        <p>Bank ONL otwarty w nowej karcie.<br>Potwierdź płatność, aby kontynuować.</p>
-        <div style="color:#c084fc;font-weight:700;font-size:1.2rem;margin:20px 0">${selectedPlan} — $${selectedPrice}</div>
-        <div style="font-size:2.5rem; animation: nextPulse 1.5s infinite;">🏦 ➡️ 💳</div>
+        <p>
+            Bank ONL został otwarty w nowej karcie.<br>
+            Potwierdź płatność, skopiuj klucz i wróć tutaj.
+        </p>
+        <div style="color:#c084fc;font-size:1.2rem;font-weight:800;margin:20px 0">
+            ${selectedPlan} — $${selectedPrice}
+        </div>
+        <div style="font-size:2.5rem;animation:nextPulse 1.5s infinite">🏦 ➜ 💳</div>
     `;
 });
 
-// ===== SETUP WIZARD =====
-const wait = ms => new Promise(r => setTimeout(r, ms));
-
-// CMD (F10)
-window.addEventListener('keydown', async (e) => {
-    if (e.key === 'F10' && setupSurface.classList.contains('visible') && !cmdActive) {
+window.addEventListener("keydown",async(e)=>{
+    if(e.key==="F10" && setupSurface.classList.contains("visible") && !cmdActive){
         e.preventDefault();
-        cmdActive = true;
-        cmdOverlay.classList.add('visible');
+        cmdActive=true;
+        cmdOverlay.classList.add("visible");
         cmdInput.focus();
     }
 });
 
-cmdInput.addEventListener('keydown', async (e) => {
-    if (e.key === 'Enter') {
-        const val = cmdInput.value.trim();
-        cmdOutput.textContent += `C:\\Setup>${val}\n`;
-        cmdInput.value = '';
-        
-        if (val.toLowerCase() === 'wifi services off') {
-            cmdOutput.textContent += 'Wyłączanie usług WiFi...\nUruchamianie ponownie...\n';
+cmdInput.addEventListener("keydown",async(e)=>{
+    if(e.key==="Enter"){
+        const value=cmdInput.value.trim();
+        cmdOutput.textContent+=`C:\\Setup>${value}\n`;
+        cmdInput.value="";
+
+        if(value.toLowerCase()==="wifi services off"){
+            cmdOutput.textContent+="Wyłączanie usług WiFi...\nUruchamianie ponownie...\n";
             await wait(4000);
-            cmdOverlay.classList.remove('visible');
-            cmdActive = false;
-            setupSurface.style.background = '#000';
-            setupContent.innerHTML = '<h1 style="font-family:Cherry Bomb One,cursive;color:#fff">Metal Nothing + NewOS</h1>';
+            cmdOverlay.classList.remove("visible");
+            cmdActive=false;
+
+            setupSurface.style.background="#000";
+            setupContent.innerHTML=`
+                <h1 style="font-family:'Cherry Bomb One',cursive;color:#fff">
+                    Metal Nothing + NewOS
+                </h1>
+            `;
+
             await wait(7000);
-            showStep('hyper');
+            showStep("hyper");
         }
     }
 });
 
-async function startSetupSequence(plan, price) {
-    document.querySelectorAll('#effects,#greeting,#next-btn,#logo').forEach(e => e.style.display = 'none');
-    setupSurface.classList.add('visible');
-    setupSurface.style.background = '#000';
-    
-    setupContent.innerHTML = '<h1 style="color:#fff;font-size:1.5rem">Uruchamianie ponownie<br>stosowanie pakietu...</h1>';
+async function startSetupSequence(){
+    document.querySelectorAll("#effects,#greeting,#next-btn,#logo,#font-picker").forEach(el=>{
+        el.style.display="none";
+    });
+
+    setupSurface.classList.add("visible");
+    setupSurface.style.background="#000";
+    setupSurface.className="visible";
+
+    setupContent.innerHTML=`
+        <h1 style="color:#fff;font-size:1.6rem">
+            Uruchamianie ponownie<br>
+            stosowanie pakietu...
+        </h1>
+    `;
+
     await wait(3000);
-    
-    setupContent.innerHTML = '<h1 style="font-family:Cherry Bomb One,cursive;color:#fff">Metal Nothing + NewOS</h1>';
+
+    setupContent.innerHTML=`
+        <h1 style="font-family:'Cherry Bomb One',cursive;color:#fff">
+            Metal Nothing + NewOS
+        </h1>
+    `;
+
     await wait(7000);
-    
-    setupSurface.style.background = '#f3f4f6';
-    setupSurface.classList.add('white');
-    setupContent.innerHTML = `
+
+    setupSurface.style.background="#f3f4f6";
+    setupSurface.className="visible white";
+
+    setupContent.innerHTML=`
         <h1 style="color:#111">Wybierz Motyw</h1>
         <div class="setup-options">
             <div class="opt-card" data-theme="ciemny" style="background:#222;color:#fff">🌑 Ciemny</div>
@@ -554,388 +960,257 @@ async function startSetupSequence(plan, price) {
             <div class="opt-card" data-theme="fioletowy" style="background:#6b2fb5;color:#fff">🔮 Fioletowy</div>
         </div>
     `;
-    
-    document.querySelectorAll('.opt-card').forEach(c => c.addEventListener('click', () => {
-        document.querySelectorAll('.opt-card').forEach(x => x.classList.remove('selected'));
-        c.classList.add('selected');
-        osData.theme = c.getAttribute('data-theme');
-        setTimeout(() => showStep('partition'), 500);
-    }));
+
+    document.querySelectorAll(".opt-card").forEach(card=>{
+        card.addEventListener("click",()=>{
+            osData.theme=card.dataset.theme;
+            document.querySelectorAll(".opt-card").forEach(c=>c.classList.remove("selected"));
+            card.classList.add("selected");
+            setTimeout(()=>showStep("partition"),500);
+        });
+    });
 }
 
-function showStep(step) {
-    cmdActive = false; cmdOverlay.classList.remove('visible');
-    const bg = () => osData.theme === 'biały' ? '#f3f4f6' : osData.theme === 'fioletowy' ? 'linear-gradient(135deg,#2d1b69,#a855f7)' : '#111';
-    const clr = () => osData.theme === 'biały' ? '#111' : '#fff';
-    
-    setupSurface.style.background = bg();
-    setupSurface.className = osData.theme === 'biały' ? 'visible white' : osData.theme === 'fioletowy' ? 'visible purple' : 'visible';
+function applyTheme(){
+    if(osData.theme==="biały"){
+        setupSurface.className="visible white";
+        setupSurface.style.background="#f3f4f6";
+        return "#111";
+    }
 
-    if (step === 'partition') {
-        setupContent.innerHTML = `
-            <h1 style="color:${clr()}">Wybierz partycję</h1>
+    if(osData.theme==="fioletowy"){
+        setupSurface.className="visible purple";
+        setupSurface.style.background="linear-gradient(135deg,#2d1b69,#a855f7)";
+        return "#fff";
+    }
+
+    setupSurface.className="visible";
+    setupSurface.style.background="#111";
+    return "#fff";
+}
+
+function showStep(step){
+    cmdOverlay.classList.remove("visible");
+    cmdActive=false;
+
+    const color=applyTheme();
+
+    if(step==="partition"){
+        setupContent.innerHTML=`
+            <h1 style="color:${color}">Wybierz partycję do zainstalowania</h1>
             <div class="setup-options">
-                <div class="opt-card selected" style="background:rgba(255,255,255,0.1)">💾 Dysk 0<br><small>Partycja 1 (500GB)</small></div>
+                <div class="opt-card selected">💾 Dysk 0<br><small>Partycja 1 — 500GB</small></div>
+                <div class="opt-card">💾 Dysk 1<br><small>Partycja 2 — 1TB</small></div>
             </div>
             <button class="setup-btn" onclick="showStep('key')">Dalej</button>
         `;
-    } else if (step === 'key') {
-        setupContent.innerHTML = `
-            <h1 style="color:${clr()}">Klucz Bezpieczeństwa Subskrypcji</h1>
-            <p style="opacity:0.7;margin-bottom:15px">Skopiuj klucz z Banku ONL (zakładka Klucze)</p>
-            <input type="text" class="setup-input" id="key-input" placeholder="Wklej klucz z banku">
-            <button class="setup-btn" id="key-btn">Odszyfruj i kontynuuj</button>
+    }
+
+    if(step==="key"){
+        setupContent.innerHTML=`
+            <h1 style="color:${color}">Kod Bezpieczeństwa Subskrypcji</h1>
+            <p style="opacity:.75;margin-bottom:15px">
+                Skopiuj klucz z Banku ONL i wklej tutaj.
+            </p>
+            <input id="sub-key-input" class="setup-input" placeholder="Wklej klucz subskrypcji">
+            <button id="decrypt-btn" class="setup-btn">Odszyfruj</button>
         `;
-        document.getElementById('key-btn').addEventListener('click', async () => {
-            const k = document.getElementById('key-input').value.trim();
-            if (k.length < 5) { alert('Wklej poprawny klucz!'); return; }
-            
-            setupSurface.style.background = '#000'; setupSurface.classList.remove('white');
-            setupContent.innerHTML = '<h1 style="color:#a855f7">Odszyfrowywanie...</h1>';
+
+        document.getElementById("decrypt-btn").addEventListener("click",async()=>{
+            const key=document.getElementById("sub-key-input").value.trim();
+            const bankKey=localStorage.getItem("onl_sub_key");
+
+            if(key.length<5){
+                alert("Wklej poprawny klucz.");
+                return;
+            }
+
+            if(bankKey && key!==bankKey){
+                alert("Ten klucz nie pasuje do subskrypcji.");
+                return;
+            }
+
+            setupSurface.className="visible";
+            setupSurface.style.background="#000";
+            setupContent.innerHTML=`<h1 style="color:#a855f7">Odszyfrowywanie...</h1>`;
+
             await wait(4000);
-            
-            setupSurface.style.background = '#000'; setupContent.innerHTML = '';
-            await wait(4000); // Nagły czarny ekran
-            
-            setupContent.innerHTML = '<h1 style="font-family:Cherry Bomb One,cursive;color:#fff">Metal Nothing + NewOS</h1>';
+
+            setupContent.innerHTML="";
+            setupSurface.style.background="#000";
+
+            await wait(4000);
+
+            setupContent.innerHTML=`
+                <h1 style="font-family:'Cherry Bomb One',cursive;color:#fff">
+                    Metal Nothing + NewOS
+                </h1>
+            `;
+
             await wait(7000);
-            showStep('locale');
+
+            showStep("locale");
         });
-    } else if (step === 'locale') {
-        setupContent.innerHTML = `
-            <h1 style="color:${clr()}">Kraj i Język</h1>
-            <select class="setup-input"><option>Polska</option><option>USA</option></select>
-            <select class="setup-input"><option>Polski</option><option>English</option></select>
+    }
+
+    if(step==="locale"){
+        setupContent.innerHTML=`
+            <h1 style="color:${color}">Kraj i język klawiatury</h1>
+            <select class="setup-input">
+                <option>Polska</option>
+                <option>USA</option>
+                <option>Niemcy</option>
+                <option>Ukraina</option>
+            </select>
+            <select class="setup-input">
+                <option>Polski programisty</option>
+                <option>English US</option>
+                <option>Deutsch</option>
+            </select>
             <button class="setup-btn" onclick="showStep('wifi')">Dalej</button>
         `;
-    } else if (step === 'wifi') {
-        setupContent.innerHTML = `
-            <h1 style="color:${clr()}">Połącz z WiFi</h1>
-            <p style="opacity:0.7;font-size:0.9rem;margin-bottom:15px">Naciśnij F10, aby otworzyć CMD i pominąć WiFi</p>
+    }
+
+    if(step==="wifi"){
+        setupContent.innerHTML=`
+            <h1 style="color:${color}">Połącz z WiFi</h1>
+            <p style="opacity:.75;margin-bottom:15px">
+                Naciśnij <strong>F10</strong>, aby otworzyć CMD.<br>
+                Komenda: <strong>wifi services off</strong> pomija WiFi.
+            </p>
+
             <div class="setup-options">
-                <div class="opt-card" style="background:rgba(255,255,255,0.1)">📶 HomeNet</div>
-                <div class="opt-card" style="background:rgba(255,255,255,0.1)">📶 5G-Network</div>
+                <div class="opt-card">📶 HomeNet</div>
+                <div class="opt-card">📶 5G-Network</div>
+                <div class="opt-card">➕ Dodaj WiFi</div>
             </div>
-            <input type="password" class="setup-input" id="wifi-pass" placeholder="Hasło WiFi">
-            <button class="setup-btn" onclick="showStep('hyper')">Połącz</button>
+
+            <input class="setup-input" placeholder="Nazwa WiFi">
+            <input class="setup-input" type="password" placeholder="Hasło WiFi">
+
+            <button class="setup-btn" onclick="showStep('hyper')">Dalej</button>
         `;
-    } else if (step === 'hyper') {
-        setupContent.innerHTML = `
-            <h1 style="color:${clr()}">Hyper Account</h1>
-            <input type="text" class="setup-input" placeholder="Login">
-            <input type="password" class="setup-input" placeholder="Hasło">
-            <button class="setup-btn" onclick="showStep('user')">Zaloguj</button><br>
+    }
+
+    if(step==="hyper"){
+        setupContent.innerHTML=`
+            <h1 style="color:${color}">Hyper Account</h1>
+            <input class="setup-input" placeholder="Login">
+            <input class="setup-input" type="password" placeholder="Hasło">
+            <button class="setup-btn" onclick="showStep('user')">Zaloguj</button>
+            <br>
             <span class="setup-link">Nie pamiętam hasła</span><br>
-            <span class="setup-link" onclick="showStep('user')">Zarejestruj się</span><br>
+            <span class="setup-link" onclick="showStep('user')">Zarejestruj, jeśli nie masz konta</span><br>
             <span class="setup-link" style="color:#fbbf24" onclick="showStep('user')">Login Admin</span>
         `;
-    } else if (step === 'user') {
-        setupContent.innerHTML = `
-            <h1 style="color:${clr()}">Nazwa Komputera</h1>
-            <input type="text" class="setup-input" id="pc-name" placeholder="MOJ-KOMPUTER">
-            <h2 style="margin-top:20px">Nazwa Użytkownika</h2>
-            <input type="text" class="setup-input" id="user-name" placeholder="Użytkownik">
-            <h2 style="margin-top:20px">Hasło (zostaw puste, aby pominąć)</h2>
-            <input type="password" class="setup-input" id="user-pass" placeholder="Hasło">
+    }
+
+    if(step==="user"){
+        setupContent.innerHTML=`
+            <h1 style="color:${color}">Nazwa Komputera</h1>
+            <input id="pc-name" class="setup-input" placeholder="Nazwa komputera">
+
+            <h2 style="color:${color}">Nazwa Użytkownika</h2>
+            <input id="user-name" class="setup-input" placeholder="Nazwa użytkownika">
+
+            <h2 style="color:${color}">Hasło</h2>
+            <input id="user-pass" class="setup-input" type="password" placeholder="Zostaw puste, aby pominąć">
+
             <button class="setup-btn" onclick="saveUser()">Dalej</button>
         `;
-    } else if (step === 'install') {
-        setupContent.innerHTML = `
-            <h1 style="color:${clr()}">Instalowanie...</h1>
-            <p id="install-status" style="margin-bottom:10px">Instalowanie Systemu</p>
-            <div class="progress-bar"><div class="fill" id="install-fill"></div></div>
+    }
+
+    if(step==="install"){
+        setupContent.innerHTML=`
+            <h1 style="color:${color}">Instalowanie...</h1>
+            <p id="install-status">Instalowanie Systemu</p>
+            <div class="progress-bar">
+                <div id="install-fill" class="fill"></div>
+            </div>
         `;
         runInstall();
     }
 }
 
-function saveUser() {
-    osData.pcName = document.getElementById('pc-name').value || 'NEW-PC';
-    osData.user = document.getElementById('user-name').value || 'User';
-    osData.pass = document.getElementById('user-pass').value;
-    showStep('install');
+function saveUser(){
+    osData.pcName=document.getElementById("pc-name").value || "NEW-PC";
+    osData.user=document.getElementById("user-name").value || "User";
+    osData.pass=document.getElementById("user-pass").value || "";
+    showStep("install");
 }
 
-async function runInstall() {
-    const fill = document.getElementById('install-fill');
-    const status = document.getElementById('install-status');
-    const steps = [
-        { t: 'Instalowanie Systemu', p: 30 },
-        { t: 'Instalowanie Sterowników', p: 65 },
-        { t: 'Instalowanie Aktualizacji', p: 95 },
-        { t: 'Koniec', p: 100 }
+async function runInstall(){
+    const fill=document.getElementById("install-fill");
+    const status=document.getElementById("install-status");
+
+    const steps=[
+        ["Instalowanie Systemu",30],
+        ["Instalowanie Sterowników",65],
+        ["Instalowanie Aktualizacji",95],
+        ["Koniec",100]
     ];
-    
-    for (let s of steps) {
-        status.textContent = s.t;
-        fill.style.width = s.p + '%';
-        await wait(2000);
+
+    for(const [text,percent] of steps){
+        status.textContent=text;
+        fill.style.width=percent+"%";
+        await wait(2200);
     }
-    
-    // Reboot
-    setupSurface.style.background = '#000'; setupContent.innerHTML = '';
+
+    setupSurface.className="visible";
+    setupSurface.style.background="#000";
+    setupContent.innerHTML="";
+
     await wait(3000);
-    setupContent.innerHTML = '<h1 style="font-family:Cherry Bomb One,cursive;color:#fff">Metal Nothing + NewOS</h1>';
+
+    setupContent.innerHTML=`
+        <h1 style="font-family:'Cherry Bomb One',cursive;color:#fff">
+            Metal Nothing + NewOS
+        </h1>
+    `;
+
     await wait(7000);
-    
-    setupSurface.classList.remove('visible');
-    setupSurface.className = '';
+
+    setupSurface.classList.remove("visible");
     bootDesktop();
 }
 
-function bootDesktop() {
-    if (osData.pass) {
-        // Pokaż ekran blokady
-        lockscreenEl.classList.add('visible');
-        updateLockClock(); setInterval(updateLockClock, 1000);
-        document.getElementById('lock-input').focus();
-        document.getElementById('lock-input').addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' && document.getElementById('lock-input').value === osData.pass) {
-                lockscreenEl.classList.remove('visible');
+function bootDesktop(){
+    if(osData.pass){
+        lockscreenEl.classList.add("visible");
+        updateLockClock();
+        setInterval(updateLockClock,1000);
+
+        const input=document.getElementById("lock-input");
+        input.focus();
+
+        input.addEventListener("keydown",(e)=>{
+            if(e.key==="Enter" && input.value===osData.pass){
+                lockscreenEl.classList.remove("visible");
                 showDesktop();
             }
         });
-    } else {
-        // Autologin
+    }else{
         showDesktop();
     }
 }
 
-function updateLockClock() {
-    const n = new Date();
-    document.getElementById('lock-time').textContent = n.toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit' });
-    document.getElementById('lock-date').textContent = n.toLocaleDateString('pl-PL', { weekday: 'long', day: 'numeric', month: 'long' });
+function updateLockClock(){
+    const now=new Date();
+    document.getElementById("lock-time").textContent=
+        now.toLocaleTimeString("pl-PL",{hour:"2-digit",minute:"2-digit"});
+    document.getElementById("lock-date").textContent=
+        now.toLocaleDateString("pl-PL",{weekday:"long",day:"numeric",month:"long"});
 }
 
-function showDesktop() {
-    desktopEl.classList.add('visible');
-    document.getElementById('desktop-user').textContent = osData.user;
-    setInterval(() => {
-        document.getElementById('desktop-clock').textContent = new Date().toLocaleTimeString('pl-PL');
-    }, 1000);
+function showDesktop(){
+    desktopEl.classList.add("visible");
+    document.getElementById("desktop-user").textContent=osData.user;
+
+    setInterval(()=>{
+        document.getElementById("desktop-clock").textContent=
+            new Date().toLocaleTimeString("pl-PL");
+    },1000);
 }
 </script>
 </body>
-<script>
-/*
-    POPRAWKA BANKU:
-    - bank NIE zamyka się po płatności
-    - pokazuje klucz subskrypcji
-    - można skopiować klucz
-    - przycisk Potwierdź płatność ma nowe działanie
-*/
-
-(function () {
-    function makeSubscriptionKey() {
-        const plan = localStorage.getItem('onl_plan') || 'NEWOS';
-        const cleanPlan = plan.replace(/[^A-Z0-9]/gi, '').toUpperCase();
-
-        return 'SUB-' + cleanPlan + '-' +
-            Math.random().toString(36).substring(2, 10).toUpperCase() + '-' +
-            Math.random().toString(36).substring(2, 6).toUpperCase();
-    }
-
-    function overridePaymentButtons() {
-        const oldConfirmBtn = document.getElementById('pay-confirm');
-        const oldRejectBtn = document.getElementById('pay-reject');
-
-        if (!oldConfirmBtn || !oldRejectBtn) {
-            console.warn('Nie znaleziono przycisków płatności.');
-            return;
-        }
-
-        /*
-            Klonowanie usuwa stare event listenery,
-            czyli usuwa stare zachowanie zamykania banku po 3 sekundach.
-        */
-        const newConfirmBtn = oldConfirmBtn.cloneNode(true);
-        const newRejectBtn = oldRejectBtn.cloneNode(true);
-
-        oldConfirmBtn.parentNode.replaceChild(newConfirmBtn, oldConfirmBtn);
-        oldRejectBtn.parentNode.replaceChild(newRejectBtn, oldRejectBtn);
-
-        newConfirmBtn.addEventListener('click', () => {
-            const plan = localStorage.getItem('onl_plan') || 'Nieznany';
-            const price = parseFloat(localStorage.getItem('onl_price') || '0');
-
-            const account = activeAcc();
-
-            if (account.balance < price) {
-                toast('Za mało środków!', true);
-                closeModal('modal-payment');
-                return;
-            }
-
-            // Pobierz pieniądze
-            account.balance -= price;
-            addTx(account, 'NewOS: ' + plan, price, 'out', '💳');
-
-            saveState();
-            render();
-
-            // Wygeneruj i zapisz klucz
-            const subscriptionKey = makeSubscriptionKey();
-            localStorage.setItem('newos_subscription_key', subscriptionKey);
-
-            // Powiadom NewOS, że płatność gotowa
-            localStorage.setItem('onl_rejected', 'false');
-            localStorage.setItem('onl_paid', 'true');
-
-            closeModal('modal-payment');
-
-            const paymentAlert = document.getElementById('payment-alert');
-            if (paymentAlert) {
-                paymentAlert.classList.remove('visible');
-            }
-
-            const successEl = document.getElementById('pay-success');
-
-            successEl.innerHTML = `
-                <div class="big-check">✅</div>
-
-                <h1>Płatność zatwierdzona!</h1>
-
-                <p style="margin-bottom:20px">
-                    Skopiuj klucz subskrypcji i wklej go w systemie NewOS.
-                </p>
-
-                <div
-                    id="success-key"
-                    style="
-                        background: rgba(0,0,0,0.35);
-                        border: 2px dashed rgba(52,211,153,0.8);
-                        color: #34d399;
-                        padding: 20px;
-                        border-radius: 14px;
-                        font-family: monospace;
-                        font-size: 1.15rem;
-                        letter-spacing: 1px;
-                        max-width: 90%;
-                        word-break: break-all;
-                        margin-bottom: 20px;
-                    "
-                >${subscriptionKey}</div>
-
-                <button
-                    id="copy-success-key"
-                    style="
-                        padding: 14px 30px;
-                        border: none;
-                        border-radius: 12px;
-                        background: #34d399;
-                        color: #003;
-                        font-weight: 800;
-                        cursor: pointer;
-                        margin-bottom: 15px;
-                    "
-                >
-                    📋 Kopiuj klucz
-                </button>
-
-                <br>
-
-                <button
-                    onclick="window.close()"
-                    style="
-                        padding: 14px 30px;
-                        border: none;
-                        border-radius: 12px;
-                        background: rgba(255,255,255,0.15);
-                        color: white;
-                        font-weight: 700;
-                        cursor: pointer;
-                    "
-                >
-                    Zamknij bank
-                </button>
-
-                <p style="margin-top:20px;opacity:0.75;font-size:0.9rem">
-                    Jeśli karta się nie zamknie, zamknij ją ręcznie i wróć do NewOS.
-                </p>
-            `;
-
-            successEl.classList.add('visible');
-
-            document.getElementById('copy-success-key').addEventListener('click', () => {
-                const key = document.getElementById('success-key').textContent;
-
-                navigator.clipboard.writeText(key).then(() => {
-                    toast('Skopiowano klucz!');
-                }).catch(() => {
-                    alert('Klucz: ' + key);
-                });
-            });
-        });
-
-        newRejectBtn.addEventListener('click', () => {
-            localStorage.setItem('onl_rejected', 'true');
-            localStorage.removeItem('onl_paid');
-
-            closeModal('modal-payment');
-            toast('Odrzucono płatność');
-
-            setTimeout(() => {
-                window.close();
-            }, 1500);
-        });
-    }
-
-    /*
-        Poprawka zakładki Klucze:
-        jeśli klucz subskrypcji już istnieje,
-        pokazuje ten sam klucz zamiast generować nowy za każdym razem.
-    */
-    window.renderKeys = function (tab) {
-        const content = document.getElementById('keys-content');
-        const plan = localStorage.getItem('onl_plan') || 'Normal';
-
-        if (!content) return;
-
-        if (tab === 'newos') {
-            const key = localStorage.getItem('newos_system_key') || genKey('NOS');
-            localStorage.setItem('newos_system_key', key);
-
-            content.innerHTML = `
-                <p style="margin-bottom:15px;opacity:0.7">
-                    Klucz systemu NewOS
-                </p>
-                <div class="key-box" id="key-val">${key}</div>
-                <button class="copy-btn" onclick="copyKey()">Kopiuj klucz</button>
-            `;
-        }
-
-        else if (tab === 'sub') {
-            let key = localStorage.getItem('newos_subscription_key');
-
-            if (!key) {
-                key = makeSubscriptionKey();
-                localStorage.setItem('newos_subscription_key', key);
-            }
-
-            content.innerHTML = `
-                <p style="margin-bottom:15px;opacity:0.7">
-                    Klucz subskrypcji: <strong>${plan}</strong>
-                </p>
-                <div class="key-box" id="key-val">${key}</div>
-                <button class="copy-btn" onclick="copyKey()">Kopiuj klucz</button>
-            `;
-        }
-
-        else {
-            const key = localStorage.getItem('newos_boot_key') || genKey('BOT');
-            localStorage.setItem('newos_boot_key', key);
-
-            content.innerHTML = `
-                <p style="margin-bottom:15px;opacity:0.7">
-                    Klucz BootOS 3
-                </p>
-                <div class="key-box" id="key-val">${key}</div>
-                <button class="copy-btn" onclick="copyKey()">Kopiuj klucz</button>
-            `;
-        }
-    };
-
-    // Uruchom poprawkę po załadowaniu strony
-    overridePaymentButtons();
-})();
-</script>
+</html>
