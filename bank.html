@@ -1,3 +1,719 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<title>Bank ONL</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cherry+Bomb+One&display=swap" rel="stylesheet">
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: linear-gradient(135deg, #0a0015, #1a0033, #2d1b69, #6b2fb5, #a855f7, #c084fc);
+    background-size: 400% 400%;
+    animation: gradientShift 12s ease infinite;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+/* LOGO */
+#logo {
+    text-align: center;
+    margin-bottom: 20px;
+    white-space: nowrap;
+}
+
+.metal-nothing {
+    font-family: 'Cherry Bomb One', cursive;
+    font-size: 3vw;
+    animation: glowPulse 3s infinite;
+}
+
+.new-os {
+    font-size: 3vw;
+    font-weight: 300;
+    letter-spacing: 2px;
+}
+
+@keyframes glowPulse {
+    50% { text-shadow: 0 0 25px white; }
+}
+
+@keyframes gradientShift {
+    0%,100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}
+
+/* KONTENER */
+.container {
+    max-width: 1200px;
+    width: 100%;
+    margin: 0 auto;
+}
+
+/* PRZEŁĄCZNIK KONT */
+#accounts-switcher {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 25px;
+    flex-wrap: wrap;
+}
+
+.account-tab {
+    flex: 1;
+    min-width: 180px;
+    padding: 18px;
+    border-radius: 15px;
+    background: rgba(30,10,55,.75);
+    border: 2px solid rgba(168,85,247,.45);
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.account-tab:hover {
+    border-color: white;
+    transform: translateY(-3px);
+}
+
+.account-tab.active {
+    border-color: #a855f7;
+    background: rgba(168,85,247,.25);
+    box-shadow: 0 0 20px rgba(168,85,247,.5);
+}
+
+.account-tab.add-new {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 2rem;
+    font-weight: 700;
+}
+
+.a-name {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 5px;
+}
+
+.a-num {
+    font-size: .85rem;
+    opacity: .7;
+    margin-bottom: 8px;
+}
+
+.a-balance {
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: #c084fc;
+}
+
+/* KARTA SALDA */
+.balance-card {
+    background: rgba(30,10,55,.85);
+    border: 2px solid rgba(168,85,247,.6);
+    border-radius: 20px;
+    padding: 30px;
+    margin-bottom: 25px;
+    text-align: center;
+    backdrop-filter: blur(10px);
+}
+
+.balance-card.gold {
+    background: linear-gradient(135deg, rgba(251,191,36,.15), rgba(245,158,11,.1));
+    border-color: #fbbf24;
+}
+
+.balance-card.green {
+    background: linear-gradient(135deg, rgba(34,197,94,.15), rgba(22,163,74,.1));
+    border-color: #22c55e;
+}
+
+#balance-display {
+    font-size: 3rem;
+    font-weight: 800;
+    color: #c084fc;
+    margin-bottom: 10px;
+}
+
+#card-num {
+    font-size: 1.1rem;
+    opacity: .75;
+    margin-bottom: 15px;
+    letter-spacing: 2px;
+}
+
+#loan-display {
+    font-size: 1rem;
+    color: #fbbf24;
+    margin-top: 10px;
+}
+
+/* BONUS */
+#bonus-banner {
+    display: none;
+    background: linear-gradient(135deg, #a855f7, #c084fc);
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 20px;
+    text-align: center;
+    align-items: center;
+    justify-content: space-between;
+}
+
+#bonus-banner.visible {
+    display: flex;
+}
+
+#bonus-banner p {
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+#claim-bonus {
+    padding: 12px 25px;
+    border: none;
+    border-radius: 10px;
+    background: white;
+    color: #a855f7;
+    font-weight: 800;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+#claim-bonus:hover {
+    transform: scale(1.05);
+}
+
+/* ALERT PŁATNOŚCI */
+#payment-alert {
+    display: none;
+    background: rgba(239,68,68,.2);
+    border: 2px solid #ef4444;
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+#payment-alert.visible {
+    display: block;
+}
+
+#payment-alert p {
+    margin-bottom: 15px;
+    font-size: 1.1rem;
+}
+
+#open-payment {
+    padding: 12px 30px;
+    border: none;
+    border-radius: 10px;
+    background: #ef4444;
+    color: white;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+#open-payment:hover {
+    background: #dc2626;
+}
+
+/* PRZYCISKI AKCJI */
+.action-buttons {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+    margin-bottom: 25px;
+}
+
+.action-btn {
+    padding: 18px;
+    border: none;
+    border-radius: 12px;
+    background: rgba(168,85,247,.2);
+    border: 2px solid rgba(168,85,247,.5);
+    color: white;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.action-btn:hover {
+    background: rgba(168,85,247,.4);
+    border-color: white;
+    transform: translateY(-2px);
+}
+
+/* TRANSAKCJE */
+.transactions-section {
+    background: rgba(30,10,55,.75);
+    border: 2px solid rgba(168,85,247,.45);
+    border-radius: 20px;
+    padding: 25px;
+    margin-bottom: 20px;
+}
+
+.transactions-section h2 {
+    margin-bottom: 20px;
+    font-size: 1.5rem;
+}
+
+.transaction {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    border-radius: 12px;
+    background: rgba(0,0,0,.2);
+    margin-bottom: 10px;
+}
+
+.t-left {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.t-icon {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.3rem;
+}
+
+.t-icon.in {
+    background: rgba(34,197,94,.2);
+}
+
+.t-icon.out {
+    background: rgba(239,68,68,.2);
+}
+
+.t-title {
+    font-weight: 700;
+    margin-bottom: 3px;
+}
+
+.t-date {
+    font-size: .85rem;
+    opacity: .6;
+}
+
+.t-amount {
+    font-size: 1.2rem;
+    font-weight: 800;
+}
+
+.t-amount.in {
+    color: #22c55e;
+}
+
+.t-amount.out {
+    color: #ef4444;
+}
+
+.empty {
+    text-align: center;
+    padding: 30px;
+    opacity: .5;
+}
+
+/* MODALE */
+.modal {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    background: rgba(0,0,0,.8);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(5px);
+}
+
+.modal.visible {
+    display: flex;
+}
+
+.modal-box {
+    width: 90%;
+    max-width: 500px;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 35px;
+    border-radius: 25px;
+    background: rgba(20,5,40,.95);
+    border: 2px solid rgba(168,85,247,.7);
+    text-align: center;
+}
+
+.modal-box h2 {
+    margin-bottom: 20px;
+    font-size: 1.8rem;
+}
+
+.modal-box input,
+.modal-box select {
+    width: 100%;
+    padding: 15px;
+    border-radius: 12px;
+    border: 2px solid rgba(168,85,247,.5);
+    background: rgba(0,0,0,.4);
+    color: white;
+    font-size: 1.1rem;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.modal-btn {
+    width: 100%;
+    padding: 15px;
+    border: none;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #a855f7, #c084fc);
+    color: white;
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.3s;
+    margin-bottom: 10px;
+}
+
+.modal-btn:hover {
+    transform: scale(1.02);
+}
+
+.modal-btn.cancel {
+    background: rgba(255,255,255,.15);
+}
+
+.modal-btn.danger {
+    background: #ef4444;
+}
+
+/* OPCJE LOKAT/POŻYCZEK */
+.opt-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.opt-item {
+    padding: 15px;
+    border-radius: 12px;
+    border: 2px solid rgba(168,85,247,.4);
+    background: rgba(168,85,247,.1);
+    cursor: pointer;
+    transition: 0.3s;
+    text-align: left;
+}
+
+.opt-item:hover {
+    border-color: white;
+}
+
+.opt-item.selected {
+    border-color: #a855f7;
+    background: rgba(168,85,247,.3);
+}
+
+.o-amount {
+    font-weight: 700;
+    font-size: 1.1rem;
+}
+
+.o-desc {
+    font-size: .85rem;
+    opacity: .7;
+    margin-top: 5px;
+}
+
+/* KLUCZE */
+.key-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.key-tab {
+    flex: 1;
+    padding: 12px;
+    border-radius: 10px;
+    border: 2px solid rgba(168,85,247,.4);
+    background: rgba(168,85,247,.1);
+    cursor: pointer;
+    transition: 0.3s;
+    font-weight: 700;
+}
+
+.key-tab:hover {
+    border-color: white;
+}
+
+.key-tab.active {
+    border-color: #a855f7;
+    background: rgba(168,85,247,.3);
+}
+
+.key-box {
+    padding: 20px;
+    border-radius: 12px;
+    background: rgba(0,0,0,.4);
+    border: 2px solid rgba(168,85,247,.5);
+    font-family: 'Courier New', monospace;
+    font-size: 1rem;
+    word-break: break-all;
+    margin-bottom: 15px;
+    color: #c084fc;
+}
+
+.copy-btn {
+    padding: 12px 25px;
+    border: none;
+    border-radius: 10px;
+    background: #22c55e;
+    color: white;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.copy-btn:hover {
+    background: #16a34a;
+}
+
+/* TOAST */
+.toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    padding: 15px 30px;
+    border-radius: 12px;
+    background: rgba(34,197,94,.9);
+    color: white;
+    font-weight: 700;
+    z-index: 2000;
+    opacity: 0;
+    transition: 0.3s;
+}
+
+.toast.visible {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+.toast.error {
+    background: rgba(239,68,68,.9);
+}
+
+/* RESET */
+#btn-reset {
+    width: 100%;
+    padding: 15px;
+    border: none;
+    border-radius: 12px;
+    background: rgba(239,68,68,.2);
+    border: 2px solid #ef4444;
+    color: white;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+#btn-reset:hover {
+    background: rgba(239,68,68,.4);
+}
+</style>
+</head>
+
+<body>
+
+<!-- LOGO -->
+<div id="logo">
+    <span class="metal-nothing">Metal Nothing</span>
+    <span class="new-os">+ NewOS</span>
+</div>
+
+<div class="container">
+
+    <!-- BONUS -->
+    <div id="bonus-banner">
+        <p>🎁 Codzienny bonus: $100</p>
+        <button id="claim-bonus">Odbierz</button>
+    </div>
+
+    <!-- ALERT PŁATNOŚCI -->
+    <div id="payment-alert">
+        <p>⚠️ Oczekuje płatność za subskrypcję:</p>
+        <p id="payment-alert-text" style="font-size:1.3rem;font-weight:800;color:#ef4444"></p>
+        <button id="open-payment">Zapłać teraz</button>
+    </div>
+
+    <!-- PRZEŁĄCZNIK KONT -->
+    <div id="accounts-switcher"></div>
+
+    <!-- KARTA SALDA -->
+    <div id="balance-card" class="balance-card">
+        <div id="balance-display">$0.00</div>
+        <div id="card-num">•••• •••• •••• 0000</div>
+        <div id="loan-display"></div>
+    </div>
+
+    <!-- PRZYCISKI AKCJI -->
+    <div class="action-buttons">
+        <button class="action-btn" id="btn-deposit">💰 Doładuj</button>
+        <button class="action-btn" id="btn-withdraw">💸 Wypłać</button>
+        <button class="action-btn" id="btn-transfer">💱 Przelew</button>
+        <button class="action-btn" id="btn-savings">📈 Lokaty</button>
+        <button class="action-btn" id="btn-loan">🏦 Pożyczka</button>
+        <button class="action-btn" id="btn-repay">✅ Spłać</button>
+        <button class="action-btn" id="btn-keys">🔑 Klucze</button>
+    </div>
+
+    <!-- TRANSAKCJE -->
+    <div class="transactions-section">
+        <h2>Historia transakcji</h2>
+        <div id="transactions"></div>
+    </div>
+
+    <!-- RESET -->
+    <button id="btn-reset">🗑️ Resetuj bank</button>
+
+</div>
+
+<!-- MODAL: KWOTA -->
+<div class="modal" id="modal-amount">
+    <div class="modal-box">
+        <h2 id="amount-title">Kwota</h2>
+        <input type="number" id="amount-input" placeholder="Wpisz kwotę" min="0" step="0.01">
+        <button class="modal-btn" id="amount-confirm">Potwierdź</button>
+        <button class="modal-btn cancel" onclick="closeModal('modal-amount')">Anuluj</button>
+    </div>
+</div>
+
+<!-- MODAL: PRZELEW -->
+<div class="modal" id="modal-transfer">
+    <div class="modal-box">
+        <h2>💱 Przelew</h2>
+        <select id="transfer-target"></select>
+        <input type="text" id="transfer-title" placeholder="Tytuł przelewu">
+        <input type="number" id="transfer-amount" placeholder="Kwota" min="0" step="0.01">
+        <button class="modal-btn" id="transfer-confirm">Wyślij przelew</button>
+        <button class="modal-btn cancel" onclick="closeModal('modal-transfer')">Anuluj</button>
+    </div>
+</div>
+
+<!-- MODAL: LOKATY -->
+<div class="modal" id="modal-savings">
+    <div class="modal-box">
+        <h2>📈 Załóż lokatę</h2>
+        <div class="opt-list" id="savings-options">
+            <div class="opt-item" data-rate="5" data-time="30">
+                <div class="o-amount">5% przez 30 sekund</div>
+                <div class="o-desc">Szybki zysk</div>
+            </div>
+            <div class="opt-item" data-rate="10" data-time="60">
+                <div class="o-amount">10% przez 60 sekund</div>
+                <div class="o-desc">Średni zysk</div>
+            </div>
+            <div class="opt-item" data-rate="20" data-time="120">
+                <div class="o-amount">20% przez 120 sekund</div>
+                <div class="o-desc">Wysoki zysk</div>
+            </div>
+        </div>
+        <input type="number" id="savings-amount" placeholder="Kwota lokaty" min="0" step="0.01">
+        <button class="modal-btn" id="savings-confirm">Załóż lokatę</button>
+        <button class="modal-btn cancel" onclick="closeModal('modal-savings')">Anuluj</button>
+    </div>
+</div>
+
+<!-- MODAL: POŻYCZKA -->
+<div class="modal" id="modal-loan">
+    <div class="modal-box">
+        <h2>🏦 Weź pożyczkę</h2>
+        <div class="opt-list" id="loan-options">
+            <div class="opt-item" data-loan="100">
+                <div class="o-amount">$100</div>
+                <div class="o-desc">Do spłaty: $110</div>
+            </div>
+            <div class="opt-item" data-loan="500">
+                <div class="o-amount">$500</div>
+                <div class="o-desc">Do spłaty: $550</div>
+            </div>
+            <div class="opt-item" data-loan="1000">
+                <div class="o-amount">$1000</div>
+                <div class="o-desc">Do spłaty: $1100</div>
+            </div>
+        </div>
+        <button class="modal-btn" id="loan-confirm">Weź pożyczkę</button>
+        <button class="modal-btn cancel" onclick="closeModal('modal-loan')">Anuluj</button>
+    </div>
+</div>
+
+<!-- MODAL: NOWE KONTO -->
+<div class="modal" id="modal-newaccount">
+    <div class="modal-box">
+        <h2>➕ Nowe konto</h2>
+        <input type="text" id="newaccount-name" placeholder="Nazwa konta">
+        <button class="modal-btn" id="newaccount-confirm">Utwórz konto</button>
+        <button class="modal-btn cancel" onclick="closeModal('modal-newaccount')">Anuluj</button>
+    </div>
+</div>
+
+<!-- MODAL: KLUCZE -->
+<div class="modal" id="modal-keys">
+    <div class="modal-box">
+        <h2>🔑 Klucze</h2>
+        <div class="key-tabs">
+            <div class="key-tab active" data-tab="newos">NewOS</div>
+            <div class="key-tab" data-tab="sub">Subskrypcja</div>
+            <div class="key-tab" data-tab="boot">BootOS 3</div>
+        </div>
+        <div id="keys-content"></div>
+        <button class="modal-btn cancel" onclick="closeModal('modal-keys')">Zamknij</button>
+    </div>
+</div>
+
+<!-- MODAL: PŁATNOŚĆ -->
+<div class="modal" id="modal-payment">
+    <div class="modal-box">
+        <h2>💳 Płatność za subskrypcję</h2>
+        <p style="margin-bottom:10px">Plan: <strong id="pay-plan">—</strong></p>
+        <p style="margin-bottom:10px">Kwota: <strong id="pay-amount" style="color:#c084fc;font-size:1.5rem">$0</strong></p>
+        <p style="margin-bottom:10px">Konto: <strong id="pay-account">—</strong></p>
+        <p style="margin-bottom:20px">Saldo: <strong id="pay-balance">$0</strong></p>
+        <button class="modal-btn" id="pay-confirm">Zapłać</button>
+        <button class="modal-btn danger" id="pay-reject">Odrzuć płatność</button>
+        <button class="modal-btn cancel" onclick="closeModal('modal-payment')">Anuluj</button>
+    </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
 <script>
 function loadState(){
     let accounts=JSON.parse(localStorage.getItem("bank_accounts") || "null");
@@ -65,7 +781,8 @@ function toast(text,error=false){
         t.className="toast";
     },2600);
 }
-    function render(){
+
+function render(){
     const switcher=document.getElementById("accounts-switcher");
 
     switcher.innerHTML=state.accounts.map(account=>`
@@ -127,7 +844,8 @@ function toast(text,error=false){
     checkBonus();
     checkSavings();
 }
-    let amountMode="deposit";
+
+let amountMode="deposit";
 
 document.getElementById("btn-deposit").addEventListener("click",()=>{
     amountMode="deposit";
@@ -211,7 +929,8 @@ document.getElementById("transfer-confirm").addEventListener("click",()=>{
     render();
     closeModal("modal-transfer");
 });
-    let selectedSaving=null;
+
+let selectedSaving=null;
 
 document.getElementById("btn-savings").addEventListener("click",()=>{
     selectedSaving=null;
@@ -372,7 +1091,8 @@ document.getElementById("btn-reset").addEventListener("click",()=>{
         render();
     }
 });
-    function generateKey(prefix){
+
+function generateKey(prefix){
     return prefix+"-"+
         Math.random().toString(36).substring(2,10).toUpperCase()+"-"+
         Math.random().toString(36).substring(2,6).toUpperCase();
@@ -454,7 +1174,8 @@ function copyKey(){
         .then(()=>toast("Klucz skopiowany."))
         .catch(()=>prompt("Skopiuj ręcznie:",key));
 }
-    const pendingPlan=localStorage.getItem("onl_plan");
+
+const pendingPlan=localStorage.getItem("onl_plan");
 const pendingPrice=localStorage.getItem("onl_price");
 const pendingCode=localStorage.getItem("onl_code");
 
@@ -549,7 +1270,6 @@ document.getElementById("claim-bonus").addEventListener("click",()=>{
     render();
 });
 
-// Sprawdzanie lokat
 function checkSavings(){
     state.accounts.forEach(acc=>{
         if(acc.savings && acc.savings.length>0){
@@ -569,3 +1289,5 @@ function checkSavings(){
 
 render();
 </script>
+</body>
+</html>
