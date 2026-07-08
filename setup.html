@@ -76,11 +76,35 @@ body {
     max-width: 700px;
     width: 90%;
     padding: 40px 0;
+    animation: fadeInUp 0.6s ease-out;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .setup-content h1 {
     font-size: 2.2rem;
     margin-bottom: 20px;
+    animation: slideIn 0.5s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
 }
 
 .setup-content h2 {
@@ -99,45 +123,65 @@ body {
 .opt-card {
     min-width: 140px;
     padding: 20px;
-    border-radius: 15px;
+    border-radius: 20px;
     border: 2px solid rgba(128,128,128,.35);
     cursor: pointer;
-    transition: 0.3s;
+    transition: all 0.3s ease;
 }
 
-.opt-card:hover,
-.opt-card.selected {
+.opt-card:hover {
     border-color: #a855f7;
     background: rgba(168,85,247,.2);
-    transform: scale(1.05);
+    transform: scale(1.08) translateY(-5px);
+    box-shadow: 0 10px 30px rgba(168,85,247,.4);
+}
+
+.opt-card.selected {
+    border-color: #a855f7;
+    background: rgba(168,85,247,.3);
+    box-shadow: 0 0 20px rgba(168,85,247,.5);
 }
 
 .setup-input {
     width: 100%;
     padding: 15px;
-    border-radius: 12px;
+    border-radius: 25px;
     border: 2px solid #aaa;
     font-size: 1.05rem;
     margin-bottom: 15px;
     background: rgba(255,255,255,.1);
     color: inherit;
+    transition: all 0.3s ease;
+}
+
+.setup-input:focus {
+    outline: none;
+    border-color: #a855f7;
+    background: rgba(168,85,247,.1);
+    box-shadow: 0 0 15px rgba(168,85,247,.3);
+    transform: scale(1.02);
 }
 
 .setup-btn {
     padding: 15px 40px;
     border: none;
-    border-radius: 12px;
+    border-radius: 30px;
     background: linear-gradient(135deg, #a855f7, #c084fc);
     color: white;
     font-size: 1rem;
     font-weight: 800;
     cursor: pointer;
-    transition: 0.3s;
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 15px rgba(168,85,247,.3);
 }
 
 .setup-btn:hover {
+    transform: scale(1.08) translateY(-3px);
+    box-shadow: 0 10px 30px rgba(168,85,247,.5);
+}
+
+.setup-btn:active {
     transform: scale(1.05);
-    box-shadow: 0 5px 20px rgba(168,85,247,.6);
 }
 
 .setup-link {
@@ -146,21 +190,57 @@ body {
     color: #38bdf8;
     cursor: pointer;
     text-decoration: underline;
+    transition: all 0.3s ease;
+}
+
+.setup-link:hover {
+    color: #0ea5e9;
+    transform: scale(1.05);
+}
+
+/* HYPER ACCOUNT LOGO */
+.hyper-logo {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #a855f7, #c084fc);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 3rem;
+    font-weight: 900;
+    margin: 0 auto 20px;
+    box-shadow: 0 0 30px rgba(168,85,247,.6);
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 0 30px rgba(168,85,247,.6);
+    }
+    50% {
+        transform: scale(1.05);
+        box-shadow: 0 0 50px rgba(168,85,247,.8);
+    }
 }
 
 .progress-bar {
     width: 100%;
-    height: 10px;
+    height: 15px;
     background: rgba(255,255,255,.2);
-    border-radius: 20px;
+    border-radius: 30px;
     overflow: hidden;
+    box-shadow: inset 0 2px 5px rgba(0,0,0,.3);
 }
 
 .fill {
     height: 100%;
     width: 0;
-    background: #a855f7;
-    transition: .5s;
+    background: linear-gradient(90deg, #a855f7, #c084fc, #e9d5ff);
+    border-radius: 30px;
+    transition: width 0.5s ease;
+    box-shadow: 0 0 10px rgba(168,85,247,.5);
 }
 
 .cmd-overlay {
@@ -176,10 +256,21 @@ body {
     display: none;
     flex-direction: column;
     z-index: 120;
+    border-top: 2px solid #0f0;
 }
 
 .cmd-overlay.visible {
     display: flex;
+    animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(100%);
+    }
+    to {
+        transform: translateY(0);
+    }
 }
 
 .cmd-output {
@@ -291,7 +382,10 @@ let osData = {
     theme: "ciemny",
     user: "",
     pass: "",
-    pcName: "NEW-PC"
+    pcName: "NEW-PC",
+    hyperLogin: "",
+    hyperPass: "",
+    skipHyper: false
 };
 
 let cmdActive = false;
@@ -408,7 +502,7 @@ function showStep(step) {
                 id="key-wait-box"
                 style="
                     padding:18px;
-                    border-radius:14px;
+                    border-radius:20px;
                     background:rgba(168,85,247,.15);
                     border:1px solid rgba(168,85,247,.45);
                     margin-bottom:18px;
@@ -560,12 +654,15 @@ function showStep(step) {
 
     if (step === "hyper") {
         setupContent.innerHTML = `
+            <div class="hyper-logo">H</div>
             <h1 style="color:${color}">Hyper Account</h1>
 
-            <input class="setup-input" placeholder="Login">
-            <input class="setup-input" type="password" placeholder="Hasło">
+            <input id="hyper-login" class="setup-input" placeholder="Login">
+            <input id="hyper-pass" class="setup-input" type="password" placeholder="Hasło">
 
-            <button class="setup-btn" onclick="showStep('user')">Zaloguj</button>
+            <button class="setup-btn" onclick="validateHyper()">Zaloguj</button>
+            <br>
+            <button class="setup-btn" style="background:rgba(168,85,247,.3);margin-top:10px" onclick="skipHyper()">Pomiń logowanie</button>
             <br>
 
             <span class="setup-link">Nie pamiętam hasła</span><br>
@@ -589,6 +686,42 @@ function showStep(step) {
         `;
     }
 
+    if (step === "updates") {
+        setupContent.innerHTML = `
+            <h1 style="color:${color}">Sprawdzanie aktualizacji...</h1>
+            <p style="opacity:.75;margin-bottom:20px">Pobieranie najnowszych poprawek bezpieczeństwa</p>
+            
+            <div class="progress-bar">
+                <div id="updates-fill" class="fill"></div>
+            </div>
+            <p id="updates-status" style="margin-top:15px;opacity:.7">Przygotowywanie...</p>
+        `;
+
+        runUpdates();
+    }
+
+    if (step === "personalization") {
+        setupContent.innerHTML = `
+            <h1 style="color:${color}">Personalizacja</h1>
+            
+            <div class="setup-options">
+                <div class="opt-card" data-personal="gaming">🎮 Gaming</div>
+                <div class="opt-card" data-personal="work">💼 Praca</div>
+                <div class="opt-card" data-personal="creative">🎨 Kreatywny</div>
+            </div>
+
+            <button class="setup-btn" onclick="showStep('install')">Dalej</button>
+        `;
+
+        document.querySelectorAll(".opt-card").forEach(card => {
+            card.addEventListener("click", () => {
+                document.querySelectorAll(".opt-card").forEach(c => c.classList.remove("selected"));
+                card.classList.add("selected");
+                osData.personalization = card.dataset.personal;
+            });
+        });
+    }
+
     if (step === "install") {
         setupContent.innerHTML = `
             <h1 style="color:${color}">Instalowanie...</h1>
@@ -604,12 +737,94 @@ function showStep(step) {
     }
 }
 
-function saveUser() {
-    osData.pcName = document.getElementById("pc-name").value || "NEW-PC";
-    osData.user = document.getElementById("user-name").value || "User";
-    osData.pass = document.getElementById("user-pass").value || "";
+function validateHyper() {
+    const login = document.getElementById("hyper-login").value.trim();
+    const pass = document.getElementById("hyper-pass").value.trim();
 
-    showStep("install");
+    if (!login) {
+        alert("Wpisz login Hyper Account!");
+        return;
+    }
+
+    if (!pass) {
+        alert("Wpisz hasło Hyper Account!");
+        return;
+    }
+
+    if (login.length < 3) {
+        alert("Login musi mieć minimum 3 znaki!");
+        return;
+    }
+
+    if (pass.length < 4) {
+        alert("Hasło musi mieć minimum 4 znaki!");
+        return;
+    }
+
+    osData.hyperLogin = login;
+    osData.hyperPass = pass;
+    osData.skipHyper = false;
+
+    showStep("user");
+}
+
+function skipHyper() {
+    osData.skipHyper = true;
+    showStep("user");
+}
+
+function saveUser() {
+    const pcName = document.getElementById("pc-name").value.trim();
+    const userName = document.getElementById("user-name").value.trim();
+    const userPass = document.getElementById("user-pass").value;
+
+    if (!pcName) {
+        alert("Wpisz nazwę komputera!");
+        return;
+    }
+
+    if (!userName) {
+        alert("Wpisz nazwę użytkownika!");
+        return;
+    }
+
+    if (pcName.length < 3) {
+        alert("Nazwa komputera musi mieć minimum 3 znaki!");
+        return;
+    }
+
+    if (userName.length < 2) {
+        alert("Nazwa użytkownika musi mieć minimum 2 znaki!");
+        return;
+    }
+
+    osData.pcName = pcName;
+    osData.user = userName;
+    osData.pass = userPass;
+
+    showStep("updates");
+}
+
+async function runUpdates() {
+    const fill = document.getElementById("updates-fill");
+    const status = document.getElementById("updates-status");
+
+    const steps = [
+        ["Sprawdzanie serwera...", 20],
+        ["Pobieranie listy aktualizacji...", 40],
+        ["Pobieranie poprawek bezpieczeństwa...", 70],
+        ["Instalowanie aktualizacji...", 90],
+        ["Zakończono", 100]
+    ];
+
+    for (const [text, percent] of steps) {
+        status.textContent = text;
+        fill.style.width = percent + "%";
+        await wait(1500);
+    }
+
+    await wait(1000);
+    showStep("personalization");
 }
 
 async function runInstall() {
@@ -617,16 +832,18 @@ async function runInstall() {
     const status = document.getElementById("install-status");
 
     const steps = [
-        ["Instalowanie Systemu", 30],
-        ["Instalowanie Sterowników", 65],
-        ["Instalowanie Aktualizacji", 95],
+        ["Instalowanie Systemu", 20],
+        ["Konfiguracja sterowników", 40],
+        ["Instalowanie aktualizacji", 60],
+        ["Optymalizacja systemu", 80],
+        ["Finalizacja instalacji", 95],
         ["Koniec", 100]
     ];
 
     for (const [text, percent] of steps) {
         status.textContent = text;
         fill.style.width = percent + "%";
-        await wait(2200);
+        await wait(2000);
     }
 
     setupSurface.className = "";
@@ -687,6 +904,7 @@ function goToDesktop() {
     localStorage.setItem("newos_pc", osData.pcName || "NEW-PC");
     localStorage.setItem("newos_theme", osData.theme || "ciemny");
     localStorage.setItem("newos_plan", localStorage.getItem("onl_plan") || "Normal");
+    localStorage.setItem("newos_personalization", osData.personalization || "gaming");
 
     window.location.href = "pulpitdeluxe.html";
 }
@@ -707,19 +925,28 @@ cmdInput.addEventListener("keydown", async (e) => {
         cmdInput.value = "";
 
         if (value.toLowerCase() === "wifi services off") {
-            cmdOutput.textContent += "Wyłączanie usług WiFi...\nUruchamianie ponownie...\n";
-
-            await wait(4000);
+            cmdOutput.textContent += "Wyłączanie usług WiFi...\n";
+            await wait(1000);
+            cmdOutput.textContent += "Usługi WiFi wyłączone pomyślnie.\n";
+            await wait(1000);
+            cmdOutput.textContent += "Pomijanie konfiguracji WiFi...\n";
+            await wait(1500);
 
             cmdOverlay.classList.remove("visible");
             cmdActive = false;
 
             setupSurface.style.background = "#000";
-
-            // POKAŻ LOGO PONOWNIE
+            
+            // POKAŻ LOGO
             logoEl.style.display = "block";
 
-            await wait(7000);
+            setupContent.innerHTML = `
+                <h1 style="font-family:'Cherry Bomb One',cursive;color:#fff">
+                    Metal Nothing + NewOS
+                </h1>
+            `;
+
+            await wait(3000);
 
             // UKRYJ LOGO
             logoEl.style.display = "none";
