@@ -23,7 +23,24 @@ body { font-family: 'Segoe UI', Arial, sans-serif; background: transparent; colo
 .result-url { font-size: 0.85rem; opacity: 0.6; margin-bottom: 10px; }
 .result-desc { font-size: 0.95rem; opacity: 0.8; }
 
-.hypersklep-frame { width: 100%; height: 100%; border: none; background: white; border-radius: 15px; }
+/* LIVERY SETTINGS - W PRZEGLĄDARCE */
+.livery-settings-box { background: rgba(30,10,55,.75); border: 2px solid rgba(168,85,247,.45); border-radius: 20px; padding: 30px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; margin-top: 20px; }
+.livery-settings-info { flex: 1; min-width: 250px; }
+.livery-settings-info h3 { font-size: 1.4rem; margin-bottom: 10px; color: white; }
+.livery-settings-info p { opacity: 0.85; line-height: 1.6; font-size: 1rem; }
+.livery-settings-btn { padding: 18px 40px; background: linear-gradient(135deg, #22c55e, #16a34a); border: none; border-radius: 25px; color: white; font-weight: 800; font-size: 1.2rem; cursor: pointer; transition: all 0.3s ease; }
+.livery-settings-btn:hover { transform: scale(1.05); box-shadow: 0 10px 30px rgba(34,197,94,.6); }
+.livery-settings-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.modal { position: fixed; inset: 0; background: rgba(0,0,0,.85); display: none; justify-content: center; align-items: center; z-index: 9999; backdrop-filter: blur(15px); }
+.modal.visible { display: flex; }
+.modal-box { width: 90%; max-width: 500px; padding: 40px; background: rgba(20,5,40,.95); border: 2px solid rgba(168,85,247,.7); border-radius: 28px; text-align: center; color: white; box-shadow: 0 20px 60px rgba(0,0,0,.7); }
+.modal-box h2 { margin-bottom: 20px; font-size: 1.8rem; }
+.modal-box p { margin-bottom: 20px; opacity: 0.85; line-height: 1.6; }
+.modal-btn { padding: 15px 40px; border: none; border-radius: 30px; background: linear-gradient(135deg, #a855f7, #c084fc); color: white; font-size: 1rem; font-weight: 800; cursor: pointer; transition: transform 0.2s ease; margin: 5px; }
+.modal-btn:hover { transform: scale(1.05); }
+.modal-btn.danger { background: linear-gradient(135deg, #ef4444, #dc2626); }
+.modal-btn.success { background: linear-gradient(135deg, #22c55e, #16a34a); }
 
 body.special-anims .search-result { animation: resultAppear 0.5s ease-out backwards; transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55); }
 body.special-anims .search-result:nth-child(1) { animation-delay: 0.1s; }
@@ -33,10 +50,8 @@ body.special-anims .search-result:hover { transform: scale(1.03) translateX(10px
 body.special-anims .search-result { position: relative; overflow: hidden; }
 body.special-anims .search-result::before { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(168,85,247,.2), transparent); transition: left 0.6s; }
 body.special-anims .search-result:hover::before { left: 100%; }
-body.special-anims .browser-input:focus { box-shadow: 0 0 20px rgba(168,85,247,.5), inset 0 0 10px rgba(168,85,247,.2); transform: scale(1.02); }
-body.special-anims .browser-btn { position: relative; overflow: hidden; }
-body.special-anims .browser-btn::before { content: ''; position: absolute; top: 50%; left: 50%; width: 0; height: 0; background: rgba(255,255,255,.3); border-radius: 50%; transform: translate(-50%, -50%); transition: width 0.6s, height 0.6s; }
-body.special-anims .browser-btn:hover::before { width: 300px; height: 300px; }
+body.special-anims .livery-settings-btn { animation: btnPulse 2s infinite; }
+@keyframes btnPulse { 0%, 100% { box-shadow: 0 5px 20px rgba(34,197,94,.4); } 50% { box-shadow: 0 10px 40px rgba(34,197,94,.8); } }
 </style>
 </head>
 <body>
@@ -50,21 +65,44 @@ body.special-anims .browser-btn:hover::before { width: 300px; height: 300px; }
     <p style="opacity:0.7">Wpisz coś w wyszukiwarkę aby rozpocząć.</p>
 </div>
 
+<!-- MODAL: REJESTR (dla Livery Settings) -->
+<div class="modal" id="registry-modal">
+    <div class="modal-box">
+        <h2>⚠️ Zmiana rejestru</h2>
+        <p>Ta operacja zmieni rejestr systemu i zainstaluje usługi tapet. Kontynuować?</p>
+        <button class="modal-btn danger" onclick="acceptRegistryChange()">Akceptuję</button>
+        <button class="modal-btn" onclick="closeModal('registry-modal')">Anuluj</button>
+    </div>
+</div>
+
 <script>
-let state = {};
+const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+let state = {
+    metalSecurity: true,
+    wallpaperUnlocked: localStorage.getItem("newos_wallpaperUnlocked") === "true",
+    specialAnimations: localStorage.getItem("newos_specialAnimations") === "true"
+};
 
 window.addEventListener("message", (e) => {
-    if (e.data && e.data.type === "state") { state = e.data.state; applySpecialAnims(); }
-    if (e.data && e.data.type === "openHypersklep") { openHypersklep(); }
-});
-
-window.parent.postMessage({ type: "getState", from: "browser-iframe" }, "*");
-
-window.addEventListener("storage", (e) => {
-    if (e.key === "newos_specialAnimations") {
-        window.parent.postMessage({ type: "getState", from: "browser-iframe" }, "*");
+    if (e.data && e.data.type === "state") {
+        state = { ...state, ...e.data.state };
+        applySpecialAnims();
+        updateLiveryBtn();
     }
 });
+window.parent.postMessage({ type: "getState", from: "browser-iframe" }, "*");
+window.addEventListener("storage", (e) => {
+    if (e.key.startsWith("newos_")) {
+        loadState();
+        updateLiveryBtn();
+    }
+});
+
+function loadState() {
+    state.wallpaperUnlocked = localStorage.getItem("newos_wallpaperUnlocked") === "true";
+    state.specialAnimations = localStorage.getItem("newos_specialAnimations") === "true";
+}
 
 function applySpecialAnims() {
     if (state.specialAnimations) document.body.classList.add("special-anims");
@@ -81,14 +119,24 @@ function performSearch() {
             <div class="search-result" onclick="clickFirstLink()">
                 <div class="result-title">NewOS BLOCK - Oficjalna strona</div>
                 <div class="result-url">https://newos-block.official.com</div>
-                <div class="result-desc">Oficjalna strona NewOS BLOCK - Livery Settings, aplikacje i więcej.</div>
+                <div class="result-desc">Oficjalna strona NewOS BLOCK - Livery Settings i więcej.</div>
             </div>
             <div class="search-result" onclick="clickSecondLink()">
                 <div class="result-title">Free Wallpaper Pack 2026</div>
                 <div class="result-url">https://free-wallpapers-2026.download/pack</div>
                 <div class="result-desc">Najnowsze tapety w wysokiej jakości. Pobierz teraz!</div>
             </div>
+            
+            <!-- LIVERY SETTINGS - TUTAJ W PRZEGLĄDARCE -->
+            <div class="livery-settings-box">
+                <div class="livery-settings-info">
+                    <h3>⚙️ Livery Settings</h3>
+                    <p>Wpłać symboliczne <strong>$3</strong> na rozwój projektu NewOS i odblokuj opcję Animowanej Tapety w Ustawieniach → Wygląd.</p>
+                </div>
+                <button class="livery-settings-btn" id="livery-settings-btn" onclick="openLiverySettings()">Wpłać $3</button>
+            </div>
         `;
+        updateLiveryBtn();
     } else {
         c.innerHTML = `<h2>Brak wyników dla "${q}"</h2><p style="opacity:0.7;margin-top:10px">Spróbuj wpisać: newos block</p>`;
     }
@@ -98,6 +146,18 @@ document.getElementById("browser-search").addEventListener("keypress", e => {
     if (e.key === "Enter") performSearch();
 });
 
+function updateLiveryBtn() {
+    const btn = document.getElementById("livery-settings-btn");
+    if (!btn) return;
+    if (state.wallpaperUnlocked) {
+        btn.textContent = "✅ Odblokowane";
+        btn.disabled = true;
+    } else {
+        btn.textContent = "Wpłać $3";
+        btn.disabled = false;
+    }
+}
+
 function clickFirstLink() {
     window.parent.postMessage({ type: "securityBlock" }, "*");
 }
@@ -106,10 +166,53 @@ function clickSecondLink() {
     window.parent.postMessage({ type: "virusDetected" }, "*");
 }
 
-function openHypersklep() {
-    const c = document.getElementById("browser-content");
-    c.innerHTML = `<iframe class="hypersklep-frame" src="hypersklep.html"></iframe>`;
+// LIVERY SETTINGS - W PRZEGLĄDARCE
+function openLiverySettings() {
+    if (state.wallpaperUnlocked) {
+        window.parent.postMessage({ type: "showToast", text: "Animowane tapety są już odblokowane!" }, "*");
+        return;
+    }
+    document.getElementById("registry-modal").classList.add("visible");
 }
+
+function acceptRegistryChange() {
+    closeModal("registry-modal");
+    runUnlockCMD();
+}
+
+async function runUnlockCMD() {
+    window.parent.postMessage({ type: "showCMD" }, "*");
+    await wait(500);
+    
+    const cmds = [
+        "C:\\Windows\\System32> net stop WallpaperSvc", "Zatrzymano usługę.", "",
+        "C:\\> reg add \"HKLM\\SOFTWARE\\NewOS\\Wallpaper\" /v Enabled /t REG_DWORD /d 1 /f", "Operacja ukończona.", "",
+        "C:\\> reg add \"HKLM\\SOFTWARE\\NewOS\\Wallpaper\" /v LiveryInstalled /t REG_DWORD /d 1 /f", "Wartość zapisana.", "",
+        "C:\\> echo Odblokowano Animowane Tapety!", "Odblokowano Animowane Tapety!", "",
+        "C:\\> net start NewOSWallpaper", "Usługa uruchomiona.", "",
+        "C:\\> exit"
+    ];
+    
+    for (const l of cmds) {
+        window.parent.postMessage({ type: "cmdLine", line: l }, "*");
+        await wait(600);
+    }
+    
+    await wait(1500);
+    window.parent.postMessage({ type: "hideCMD" }, "*");
+    
+    state.wallpaperUnlocked = true;
+    localStorage.setItem("newos_wallpaperUnlocked", "true");
+    updateLiveryBtn();
+    
+    window.parent.postMessage({ type: "setState", state: { wallpaperUnlocked: true } }, "*");
+    window.parent.postMessage({ type: "showToast", text: "✅ Animowane Tapety odblokowane! Włącz je w Ustawieniach → Wygląd." }, "*");
+}
+
+function closeModal(id) { document.getElementById(id).classList.remove("visible"); }
+
+applySpecialAnims();
+updateLiveryBtn();
 </script>
 </body>
 </html>
