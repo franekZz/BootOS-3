@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Segoe UI', Arial, sans-serif; background: transparent; color: white; padding: 20px; overflow-y: auto; }
+body::-webkit-scrollbar { width: 8px; }
+body::-webkit-scrollbar-track { background: rgba(0,0,0,.2); border-radius: 10px; }
+body::-webkit-scrollbar-thumb { background: rgba(168,85,247,.5); border-radius: 10px; }
+
+.settings-tabs { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+.settings-tab { padding: 12px 25px; background: rgba(168,85,247,.2); border: 2px solid rgba(168,85,247,.4); border-radius: 25px; color: white; cursor: pointer; transition: background 0.3s ease; font-weight: 700; }
+.settings-tab:hover { background: rgba(168,85,247,.4); }
+.settings-tab.active { background: linear-gradient(135deg, #a855f7, #c084fc); border-color: #c084fc; }
+
+.settings-option { padding: 20px; background: rgba(168,85,247,.1); border: 2px solid rgba(168,85,247,.3); border-radius: 18px; margin-bottom: 15px; cursor: pointer; transition: background 0.3s ease, border-color 0.3s ease; position: relative; overflow: hidden; }
+.settings-option:hover { background: rgba(168,85,247,.2); border-color: #a855f7; }
+.settings-option.locked { opacity: 0.6; }
+.settings-option.locked::after { content: '🔒'; position: absolute; right: 20px; top: 50%; transform: translateY(-50%); font-size: 1.5rem; }
+.settings-option.enabled { border-color: #22c55e; background: rgba(34,197,94,.15); }
+.settings-option.enabled::after { content: '✅'; position: absolute; right: 20px; top: 50%; transform: translateY(-50%); font-size: 1.5rem; }
+.option-title { font-size: 1.2rem; font-weight: 700; margin-bottom: 5px; }
+.option-desc { font-size: 0.9rem; opacity: 0.7; }
+.option-price { display: inline-block; margin-top: 10px; padding: 5px 15px; background: rgba(251,191,36,.2); border: 1px solid #fbbf24; border-radius: 20px; color: #fbbf24; font-weight: 700; }
+
+body.special-anims .settings-tab.active { animation: tabPulse 2s infinite; }
+@keyframes tabPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+body.special-anims .settings-option { animation: optionAppear 0.6s ease-out backwards; transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55); }
+body.special-anims .settings-option:nth-child(1) { animation-delay: 0.1s; }
+body.special-anims .settings-option:nth-child(2) { animation-delay: 0.2s; }
+body.special-anims .settings-option:nth-child(3) { animation-delay: 0.3s; }
+@keyframes optionAppear { from { opacity: 0; transform: translateX(-30px); } to { opacity: 1; transform: translateX(0); } }
+body.special-anims .settings-option:hover { transform: scale(1.03) translateX(10px); box-shadow: 0 5px 20px rgba(168,85,247,.4); }
+body.special-anims .settings-option::before { content: ''; position: absolute; top: 50%; left: 50%; width: 0; height: 0; background: radial-gradient(circle, rgba(168,85,247,.3), transparent); transform: translate(-50%, -50%); transition: width 0.6s, height 0.6s; border-radius: 50%; }
+body.special-anims .settings-option:hover::before { width: 400px; height: 400px; }
+body.special-anims .settings-option.locked::after { animation: lockShake 2s ease-in-out infinite; }
+@keyframes lockShake { 0%, 100% { transform: translateY(-50%) rotate(0); } 25% { transform: translateY(-50%) rotate(-5deg); } 75% { transform: translateY(-50%) rotate(5deg); } }
+body.special-anims .option-price { animation: pricePulse 2s infinite; }
+@keyframes pricePulse { 0%, 100% { box-shadow: 0 0 10px rgba(251,191,36,.3); } 50% { box-shadow: 0 0 25px rgba(251,191,36,.6); } }
+</style>
+</head>
+<body>
+
+<div class="settings-tabs">
+    <div class="settings-tab active" onclick="switchTab(this, 'system')">System</div>
+    <div class="settings-tab" onclick="switchTab(this, 'appearance')">Wygląd</div>
+    <div class="settings-tab" onclick="switchTab(this, 'about')">O systemie</div>
+</div>
+<div id="settings-content"></div>
+
+<script>
+let state = {};
+
+window.addEventListener("message", (e) => {
+    if (e.data && e.data.type === "state") { state = e.data.state; renderCurrentTab(); }
+});
+window.parent.postMessage({ type: "getState", from: "settings-iframe" }, "*");
+window.addEventListener("storage", (e) => { if (e.key && e.key.startsWith("newos_")) window.parent.postMessage({ type: "getState", from: "settings-iframe" }, "*"); });
+
+let currentTab = "system";
+
+function switchTab(el, tab) {
+    document.querySelectorAll(".settings-tab").forEach(t => t.classList.remove("active"));
+    el.classList.add("active");
+    currentTab = tab;
+    renderCurrentTab();
+}
+
+function renderCurrentTab() {
+    const c = document.getElementById("settings-content");
+    
+    if (currentTab === "system") {
+        c.innerHTML = `
+            <div class="settings-option"><div class="option-title">🖥️ Nazwa komputera</div><div class="option-desc">${localStorage.getItem("newos_pc") || "NEW-PC"}</div></div>
+            <div class="settings-option"><div class="option-title">👤 Użytkownik</div><div class="option-desc">${localStorage.getItem("newos_user") || "User"}</div></div>
+            <div class="settings-option"><div class="option-title">💾 Subskrypcja</div><div class="option-desc">${localStorage.getItem("newos_plan") || "Normal"}</div></div>
+        `;
+    }
+    
+    if (currentTab === "appearance") {
+        c.innerHTML = `
+            <div class="settings-option ${state.specialAnimations ? 'enabled' : ''}" onclick="toggleSpecialAnims()">
+                <div class="option-title">✨ Animacje Specjalne</div>
+                <div class="option-desc">${state.specialAnimations ? 'Włączone - wszystkie efekty wizualne aktywne' : 'Wyłączone - kliknij aby włączyć zaawansowane animacje'}</div>
+            </div>
+            <div class="settings-option ${state.wallpaperUnlocked ? '' : 'locked'}" onclick="toggleAnimWallpaper()">
+                <div class="option-title">🎬 Animowana Tapeta</div>
+                <div class="option-desc">${state.wallpaperUnlocked ? 'Dynamiczne, animowane tło pulpitu' : 'Odblokuj za $70 lub przez NewOS BLOCK w przeglądarce'}</div>
+                ${!state.wallpaperUnlocked ? '<div class="option-price">$70</div>' : ''}
+            </div>
+        `;
+    }
+    
+    if (currentTab === "about") {
+        c.innerHTML = `
+            <div class="settings-option"><div class="option-title">📋 NewOS</div><div class="option-desc">Wersja: 3.0 BootOS</div></div>
+            <div class="settings-option"><div class="option-title">🏢 Metal Nothing Corporation</div><div class="option-desc">© 2026 Wszystkie prawa zastrzeżone</div></div>
+            <div class="settings-option"><div class="option-title">💻 System</div><div class="option-desc">BootOS 3 - Metal Nothing Edition</div></div>
+        `;
+    }
+}
+
+function toggleSpecialAnims() {
+    state.specialAnimations = !state.specialAnimations;
+    window.parent.postMessage({ type: "setState", state: { specialAnimations: state.specialAnimations } }, "*");
+    renderCurrentTab();
+}
+
+function toggleAnimWallpaper() {
+    if (!state.wallpaperUnlocked) {
+        window.parent.postMessage({ type: "openModal", modalId: "wallpaper-payment-modal" }, "*");
+        return;
+    }
+    state.animatedWallpaperActive = !state.animatedWallpaperActive;
+    window.parent.postMessage({ type: "setState", state: { animatedWallpaperActive: state.animatedWallpaperActive } }, "*");
+    window.parent.postMessage({ type: "showToast", text: state.animatedWallpaperActive ? "🎬 Tapeta animowana włączona!" : "🖼️ Domyślna tapeta przywrócona." }, "*");
+}
+</script>
+</body>
+</html>
