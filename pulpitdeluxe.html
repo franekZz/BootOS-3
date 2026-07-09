@@ -11,20 +11,23 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html, body { width: 100%; height: 100%; overflow: hidden; font-family: 'Segoe UI', Arial, sans-serif; }
 
-/* ===== BOOT SCREEN - PODSTAWOWY (BEZ ANIMACJI) ===== */
+/* BOOT SCREEN */
 #boot-screen {
-    position: fixed; inset: 0;
-    background: #000;
+    position: fixed; inset: 0; background: #000;
     display: flex; flex-direction: column; justify-content: center; align-items: center;
     z-index: 10000;
 }
-#boot-logo { text-align: center; position: relative; z-index: 2; }
-.boot-metal { font-family: 'Cherry Bomb One', cursive; font-size: 4vw; color: white; display: block; letter-spacing: 2px; }
-.boot-newos { font-size: 4vw; font-weight: 300; color: white; letter-spacing: 4px; display: block; margin-top: 10px; }
+#boot-logo {
+    text-align: center; position: relative; z-index: 2;
+    display: flex; align-items: center; justify-content: center;
+    gap: 15px; white-space: nowrap;
+}
+.boot-metal { font-family: 'Cherry Bomb One', cursive; font-size: 4vw; color: white; letter-spacing: 2px; }
+.boot-newos { font-size: 4vw; font-weight: 300; color: white; letter-spacing: 4px; }
 .boot-particles { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 1; display: none; }
 .boot-ring { position: absolute; width: 300px; height: 300px; border: 2px solid rgba(168,85,247,.3); border-radius: 50%; z-index: 1; display: none; }
 
-/* ===== PULPIT - PODSTAWOWY ===== */
+/* PULPIT */
 #desktop {
     position: absolute; inset: 0;
     background: linear-gradient(135deg, #0a0015, #1a0033, #2d1b69, #6b2fb5, #a855f7);
@@ -32,47 +35,25 @@ html, body { width: 100%; height: 100%; overflow: hidden; font-family: 'Segoe UI
 }
 #desktop.visible { display: block; }
 
-/* ===== DOMYŚLNA TAPETA "I love BootOS 3" ===== */
+/* DOMYŚLNA TAPETA */
 #default-wallpaper {
     position: absolute; inset: 0;
-    display: flex; flex-direction: column;
-    justify-content: center; align-items: center;
+    display: flex; flex-direction: column; justify-content: center; align-items: center;
     background: linear-gradient(135deg, #1a0033 0%, #2d1b69 50%, #6b2fb5 100%);
-    z-index: 0;
-    pointer-events: none;
+    z-index: 0; pointer-events: none;
 }
 #default-wallpaper.hidden { display: none; }
-
 .default-wall-text {
-    font-family: 'Cherry Bomb One', cursive;
-    font-size: 6vw;
-    color: white;
+    font-family: 'Cherry Bomb One', cursive; font-size: 6vw; color: white;
     text-shadow: 0 0 30px rgba(168,85,247,.8), 0 0 60px rgba(168,85,247,.5);
-    text-align: center;
-    letter-spacing: 3px;
-    padding: 20px;
+    text-align: center; letter-spacing: 3px; padding: 20px;
 }
 .default-wall-text .heart {
-    display: inline-block;
-    color: #ef4444;
+    display: inline-block; color: #ef4444;
     text-shadow: 0 0 20px rgba(239,68,68,.8), 0 0 40px rgba(239,68,68,.5);
     margin: 0 15px;
 }
-.default-wall-subtitle {
-    font-size: 1.5vw;
-    color: rgba(255,255,255,.6);
-    margin-top: 20px;
-    letter-spacing: 2px;
-}
-.default-wall-version {
-    position: absolute;
-    bottom: 80px;
-    font-size: 1rem;
-    color: rgba(255,255,255,.4);
-    letter-spacing: 1px;
-}
 
-/* ===== ANIMOWANA TAPETA ===== */
 #desktop.animated-wallpaper {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #4facfe 75%, #00f2fe 100%);
     background-size: 400% 400%;
@@ -80,12 +61,12 @@ html, body { width: 100%; height: 100%; overflow: hidden; font-family: 'Segoe UI
 
 .desktop-particles { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 1; display: none; }
 
-/* ===== IKONY PULPITU ===== */
+/* IKONY */
 .desktop-icons { position: absolute; top: 20px; left: 20px; display: flex; flex-direction: column; gap: 15px; z-index: 10; }
 .desktop-icon {
-    width: 85px; height: 85px;
-    background: rgba(255,255,255,.1); border: 2px solid rgba(255,255,255,.2);
-    border-radius: 18px; display: flex; flex-direction: column; justify-content: center; align-items: center;
+    width: 85px; height: 85px; background: rgba(255,255,255,.1);
+    border: 2px solid rgba(255,255,255,.2); border-radius: 18px;
+    display: flex; flex-direction: column; justify-content: center; align-items: center;
     cursor: pointer; transition: background 0.3s ease, border-color 0.3s ease;
     backdrop-filter: blur(10px); position: relative; overflow: hidden;
 }
@@ -94,7 +75,7 @@ html, body { width: 100%; height: 100%; overflow: hidden; font-family: 'Segoe UI
 .icon-emoji { font-size: 2.2rem; margin-bottom: 5px; }
 .icon-label { font-size: 0.75rem; color: white; text-align: center; font-weight: 600; }
 
-/* ===== PASEK ZADAŃ ===== */
+/* PASEK */
 #taskbar {
     position: absolute; bottom: 0; left: 0; right: 0; height: 65px;
     background: rgba(0,0,0,.75); backdrop-filter: blur(25px);
@@ -102,14 +83,14 @@ html, body { width: 100%; height: 100%; overflow: hidden; font-family: 'Segoe UI
     border-top: 1px solid rgba(255,255,255,.15); z-index: 50;
 }
 .taskbar-btn {
-    width: 52px; height: 52px;
-    background: rgba(255,255,255,.1); border: 2px solid rgba(255,255,255,.2);
-    border-radius: 14px; display: flex; justify-content: center; align-items: center;
+    width: 52px; height: 52px; background: rgba(255,255,255,.1);
+    border: 2px solid rgba(255,255,255,.2); border-radius: 14px;
+    display: flex; justify-content: center; align-items: center;
     cursor: pointer; transition: background 0.3s ease, border-color 0.3s ease; font-size: 1.5rem;
 }
 .taskbar-btn:hover { background: rgba(168,85,247,.3); border-color: #a855f7; }
 
-/* ===== OKNA ===== */
+/* OKNA */
 .app-window {
     position: absolute; background: rgba(20,5,40,.95); border: 2px solid rgba(168,85,247,.5);
     border-radius: 22px; backdrop-filter: blur(25px); display: none; flex-direction: column;
@@ -120,277 +101,89 @@ html, body { width: 100%; height: 100%; overflow: hidden; font-family: 'Segoe UI
 .window-title { font-size: 1.1rem; font-weight: 700; color: white; }
 .window-close { width: 32px; height: 32px; background: rgba(239,68,68,.3); border: none; border-radius: 50%; color: white; font-size: 1.2rem; cursor: pointer; transition: background 0.3s ease; }
 .window-close:hover { background: #ef4444; }
-.window-content { flex: 1; padding: 20px; overflow-y: auto; color: white; }
-.window-content::-webkit-scrollbar { width: 8px; }
-.window-content::-webkit-scrollbar-track { background: rgba(0,0,0,.2); border-radius: 10px; }
-.window-content::-webkit-scrollbar-thumb { background: rgba(168,85,247,.5); border-radius: 10px; }
+.window-content { flex: 1; padding: 0; overflow: hidden; color: white; position: relative; }
+.window-content iframe { width: 100%; height: 100%; border: none; background: transparent; }
 
-/* ===== USTAWIENIA ===== */
 #settings-window { width: 80%; height: 80%; top: 10%; left: 10%; }
-.settings-tabs { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
-.settings-tab { padding: 12px 25px; background: rgba(168,85,247,.2); border: 2px solid rgba(168,85,247,.4); border-radius: 25px; color: white; cursor: pointer; transition: background 0.3s ease; font-weight: 700; }
-.settings-tab:hover { background: rgba(168,85,247,.4); }
-.settings-tab.active { background: linear-gradient(135deg, #a855f7, #c084fc); border-color: #c084fc; }
-.settings-option { padding: 20px; background: rgba(168,85,247,.1); border: 2px solid rgba(168,85,247,.3); border-radius: 18px; margin-bottom: 15px; cursor: pointer; transition: background 0.3s ease, border-color 0.3s ease; position: relative; overflow: hidden; }
-.settings-option:hover { background: rgba(168,85,247,.2); border-color: #a855f7; }
-.settings-option.locked { opacity: 0.6; }
-.settings-option.locked::after { content: '🔒'; position: absolute; right: 20px; top: 50%; transform: translateY(-50%); font-size: 1.5rem; }
-.settings-option.enabled { border-color: #22c55e; background: rgba(34,197,94,.15); }
-.settings-option.enabled::after { content: '✅'; position: absolute; right: 20px; top: 50%; transform: translateY(-50%); font-size: 1.5rem; }
-.option-title { font-size: 1.2rem; font-weight: 700; margin-bottom: 5px; }
-.option-desc { font-size: 0.9rem; opacity: 0.7; }
-.option-price { display: inline-block; margin-top: 10px; padding: 5px 15px; background: rgba(251,191,36,.2); border: 1px solid #fbbf24; border-radius: 20px; color: #fbbf24; font-weight: 700; }
-
-/* ===== PRZEGLĄDARKA ===== */
 #browser-window { width: 85%; height: 85%; top: 7.5%; left: 7.5%; }
-.browser-bar { padding: 15px; background: rgba(0,0,0,.5); display: flex; gap: 10px; border-bottom: 1px solid rgba(168,85,247,.3); }
-.browser-input { flex: 1; padding: 12px 20px; background: rgba(255,255,255,.1); border: 2px solid rgba(168,85,247,.4); border-radius: 25px; color: white; font-size: 1rem; transition: border-color 0.3s ease; }
-.browser-input:focus { outline: none; border-color: #a855f7; }
-.browser-btn { padding: 12px 25px; background: linear-gradient(135deg, #a855f7, #c084fc); border: none; border-radius: 25px; color: white; font-weight: 700; cursor: pointer; transition: transform 0.2s ease; }
-.browser-btn:hover { transform: scale(1.05); }
-.browser-content { flex: 1; padding: 30px; overflow-y: auto; }
-.search-result { padding: 20px; background: rgba(168,85,247,.1); border: 2px solid rgba(168,85,247,.3); border-radius: 18px; margin-bottom: 15px; cursor: pointer; transition: background 0.3s ease; }
-.search-result:hover { background: rgba(168,85,247,.2); border-color: #a855f7; }
-.result-title { font-size: 1.2rem; font-weight: 700; color: #c084fc; margin-bottom: 5px; }
-.result-url { font-size: 0.85rem; opacity: 0.6; margin-bottom: 10px; }
-.result-desc { font-size: 0.95rem; opacity: 0.8; }
-
-/* ===== NEWOS BLOCK STRONA ===== */
-.newos-block-page { padding: 30px; }
-.newos-block-header { text-align: center; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 2px solid rgba(168,85,247,.3); }
-.newos-block-header h1 { font-size: 2.5rem; color: #c084fc; margin-bottom: 10px; }
-.newos-block-header p { opacity: 0.7; font-size: 1rem; }
-.newos-block-section { margin-bottom: 30px; padding: 20px; background: rgba(168,85,247,.08); border: 2px solid rgba(168,85,247,.3); border-radius: 20px; }
-.newos-block-section h2 { font-size: 1.5rem; margin-bottom: 15px; color: #c084fc; display: flex; align-items: center; gap: 10px; }
-
-.livery-settings-box { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; }
-.livery-settings-info { flex: 1; min-width: 250px; }
-.livery-settings-info h3 { font-size: 1.3rem; margin-bottom: 8px; color: white; }
-.livery-settings-info p { opacity: 0.8; line-height: 1.5; }
-.livery-settings-btn { padding: 15px 35px; background: linear-gradient(135deg, #22c55e, #16a34a); border: none; border-radius: 25px; color: white; font-weight: 800; font-size: 1.1rem; cursor: pointer; transition: transform 0.2s ease; }
-.livery-settings-btn:hover { transform: scale(1.05); }
-
-.livery-app-box { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
-.livery-app-icon-big { font-size: 4rem; }
-.livery-app-info { flex: 1; min-width: 250px; }
-.livery-app-info h3 { font-size: 1.3rem; margin-bottom: 8px; }
-.livery-app-info p { opacity: 0.8; line-height: 1.5; margin-bottom: 10px; }
-.livery-app-btn { padding: 12px 30px; background: linear-gradient(135deg, #a855f7, #c084fc); border: none; border-radius: 25px; color: white; font-weight: 700; cursor: pointer; transition: transform 0.2s ease; }
-.livery-app-btn:hover { transform: scale(1.05); }
-.livery-app-btn.disabled { opacity: 0.5; cursor: not-allowed; }
-
-/* ===== METAL APP ===== */
 #metalapp-window { width: 70%; height: 75%; top: 12.5%; left: 15%; }
-.metal-apps { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; }
-.metal-app { padding: 25px; background: rgba(168,85,247,.1); border: 2px solid rgba(168,85,247,.3); border-radius: 22px; text-align: center; cursor: pointer; transition: background 0.3s ease, border-color 0.3s ease; }
-.metal-app:hover { background: rgba(168,85,247,.3); border-color: #a855f7; }
-.metal-app-icon { font-size: 2.8rem; margin-bottom: 10px; }
-.metal-app-name { font-weight: 700; font-size: 1.1rem; }
 
-/* ===== LIVERY APP ===== */
-#livery-window { width: 75%; height: 80%; top: 10%; left: 12.5%; }
-.livery-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
-.livery-item { padding: 20px; background: rgba(168,85,247,.1); border: 2px solid rgba(168,85,247,.3); border-radius: 22px; text-align: center; cursor: pointer; transition: background 0.3s ease, border-color 0.3s ease; }
-.livery-item:hover { background: rgba(168,85,247,.3); border-color: #a855f7; }
-.livery-preview { width: 100%; height: 120px; background-size: 400% 400%; border-radius: 15px; margin-bottom: 15px; }
-.livery-name { font-weight: 700; margin-bottom: 10px; }
-.livery-btn { padding: 10px 25px; background: linear-gradient(135deg, #a855f7, #c084fc); border: none; border-radius: 22px; color: white; font-weight: 700; cursor: pointer; transition: transform 0.2s ease; }
-.livery-btn:hover { transform: scale(1.05); }
-
-/* ===== MODALE ===== */
+/* MODALE */
 .modal { position: fixed; inset: 0; background: rgba(0,0,0,.85); display: none; justify-content: center; align-items: center; z-index: 9999; backdrop-filter: blur(15px); }
 .modal.visible { display: flex; }
-.modal-box { width: 90%; max-width: 500px; padding: 40px; background: rgba(20,5,40,.95); border: 2px solid rgba(168,85,247,.7); border-radius: 28px; text-align: center; color: white; box-shadow: 0 20px 60px rgba(0,0,0,.7); position: relative; overflow: hidden; }
+.modal-box { width: 90%; max-width: 500px; padding: 40px; background: rgba(20,5,40,.95); border: 2px solid rgba(168,85,247,.7); border-radius: 28px; text-align: center; color: white; box-shadow: 0 20px 60px rgba(0,0,0,.7); }
 .modal-box h2 { margin-bottom: 20px; font-size: 1.8rem; }
 .modal-box p { margin-bottom: 20px; opacity: 0.85; line-height: 1.6; }
 .modal-btn { padding: 15px 40px; border: none; border-radius: 30px; background: linear-gradient(135deg, #a855f7, #c084fc); color: white; font-size: 1rem; font-weight: 800; cursor: pointer; transition: transform 0.2s ease; margin: 5px; }
 .modal-btn:hover { transform: scale(1.05); }
-.modal-btn.danger { background: linear-gradient(135deg, #ef4444, #dc2626); }
 .modal-btn.success { background: linear-gradient(135deg, #22c55e, #16a34a); }
 
-/* ===== CMD ===== */
+/* CMD */
 #cmd-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.97); color: #0f0; font-family: 'Courier New', monospace; padding: 40px; display: none; flex-direction: column; z-index: 9998; }
 #cmd-overlay.visible { display: flex; }
 .cmd-output { flex: 1; white-space: pre-wrap; overflow-y: auto; font-size: 1rem; line-height: 1.6; }
 
-/* ===== TOAST ===== */
-.toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(100px); padding: 15px 30px; background: rgba(34,197,94,.95); color: white; border-radius: 28px; font-weight: 700; z-index: 9997; opacity: 0; transition: opacity 0.3s ease, transform 0.3s ease; max-width: 90%; text-align: center; }
+/* TOAST */
+.toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(100px); padding: 15px 30px; background: rgba(34,197,94,.95); color: white; border-radius: 28px; font-weight: 700; z-index: 9997; opacity: 0; transition: opacity 0.3s ease, transform 0.3s ease; max-width: 90%; text-align: center; pointer-events: none; }
 .toast.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
 .toast.error { background: rgba(239,68,68,.95); }
 
-/* ======================================================== */
-/* ===== ANIMACJE SPECJALNE - TYLKO PO WŁĄCZENIU ===== */
-/* ======================================================== */
-
-body.special-anims #boot-screen {
-    background: radial-gradient(circle at center, #1a0033 0%, #000 100%);
-    animation: bootFade 7s forwards;
-}
+/* ANIMACJE SPECJALNE */
+body.special-anims #boot-screen { background: radial-gradient(circle at center, #1a0033 0%, #000 100%); animation: bootFade 7s forwards; }
 @keyframes bootFade { 0%, 85% { opacity: 1; } 100% { opacity: 0; pointer-events: none; visibility: hidden; } }
-
-body.special-anims #boot-logo {
-    animation: bootLogoAppear 1.5s ease-out, bootLogoFloat 3s ease-in-out infinite, bootLogoGlow 2s ease-in-out infinite;
-}
+body.special-anims #boot-logo { animation: bootLogoAppear 1.5s ease-out, bootLogoFloat 3s ease-in-out infinite, bootLogoGlow 2s ease-in-out infinite; }
 @keyframes bootLogoAppear { from { opacity: 0; transform: scale(0.5); } to { opacity: 1; transform: scale(1); } }
 @keyframes bootLogoFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
 @keyframes bootLogoGlow { 0%, 100% { filter: drop-shadow(0 0 20px rgba(168,85,247,.5)); } 50% { filter: drop-shadow(0 0 50px rgba(168,85,247,.9)); } }
-
 body.special-anims .boot-metal { animation: bootTextWave 4s ease-in-out infinite, bootTextGlow 3s ease-in-out infinite; }
 @keyframes bootTextWave { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
 @keyframes bootTextGlow { 0%, 100% { text-shadow: 0 0 20px rgba(255,255,255,.5); } 50% { text-shadow: 0 0 40px rgba(255,255,255,.8), 0 0 80px rgba(168,85,247,.6); } }
-
 body.special-anims .boot-newos { animation: bootSlideIn 1s ease-out, bootPulse 2s infinite, bootNewosGlow 3s ease-in-out infinite; }
 @keyframes bootSlideIn { from { opacity: 0; transform: translateX(50px); } to { opacity: 1; transform: translateX(0); } }
 @keyframes bootPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
 @keyframes bootNewosGlow { 0%, 100% { text-shadow: 0 0 10px rgba(192,132,252,.5); } 50% { text-shadow: 0 0 30px rgba(192,132,252,.9); } }
-
 body.special-anims .boot-particles { display: block; }
-body.special-anims .boot-particle {
-    position: absolute; width: 4px; height: 4px;
-    background: rgba(168,85,247,.6); border-radius: 50%;
-    animation: bootParticleFloat 15s linear infinite;
-    box-shadow: 0 0 10px rgba(168,85,247,.8);
-}
-@keyframes bootParticleFloat {
-    0% { transform: translateY(100vh); opacity: 0; }
-    10%, 90% { opacity: 1; }
-    100% { transform: translateY(-100px); opacity: 0; }
-}
-
+body.special-anims .boot-particle { position: absolute; width: 4px; height: 4px; background: rgba(168,85,247,.6); border-radius: 50%; animation: bootParticleFloat 15s linear infinite; box-shadow: 0 0 10px rgba(168,85,247,.8); }
+@keyframes bootParticleFloat { 0% { transform: translateY(100vh); opacity: 0; } 10%, 90% { opacity: 1; } 100% { transform: translateY(-100px); opacity: 0; } }
 body.special-anims .boot-ring { display: block; animation: bootRingExpand 4s ease-out infinite; }
 body.special-anims .boot-ring:nth-child(2) { animation-delay: 1s; }
 body.special-anims .boot-ring:nth-child(3) { animation-delay: 2s; }
 body.special-anims .boot-ring:nth-child(4) { animation-delay: 3s; }
 @keyframes bootRingExpand { 0% { transform: scale(0); opacity: 1; } 100% { transform: scale(3); opacity: 0; } }
-
-body.special-anims #desktop {
-    background-size: 400% 400%;
-    animation: desktopGradient 20s ease infinite;
-}
+body.special-anims #desktop { background-size: 400% 400%; animation: desktopGradient 20s ease infinite; }
 @keyframes desktopGradient { 0%, 100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
-
 body.special-anims #desktop.visible { animation: desktopAppear 1s ease-out; }
 @keyframes desktopAppear { from { opacity: 0; transform: scale(1.1); } to { opacity: 1; transform: scale(1); } }
-
 body.special-anims #desktop.animated-wallpaper { animation: animatedWallpaperShift 15s ease infinite; }
-@keyframes animatedWallpaperShift {
-    0% { background-position: 0% 50%; } 25% { background-position: 50% 0%; }
-    50% { background-position: 100% 50%; } 75% { background-position: 50% 100%; } 100% { background-position: 0% 50%; }
-}
-
+@keyframes animatedWallpaperShift { 0% { background-position: 0% 50%; } 25% { background-position: 50% 0%; } 50% { background-position: 100% 50%; } 75% { background-position: 50% 100%; } 100% { background-position: 0% 50%; } }
 body.special-anims .desktop-particles { display: block; }
-body.special-anims .desktop-particle {
-    position: absolute; width: 3px; height: 3px;
-    background: rgba(255,255,255,.4); border-radius: 50%;
-    animation: desktopParticleFloat 20s linear infinite;
-    box-shadow: 0 0 8px rgba(255,255,255,.6);
-}
-@keyframes desktopParticleFloat {
-    0% { transform: translateY(100vh); opacity: 0; }
-    10%, 90% { opacity: 0.8; }
-    100% { transform: translateY(-50px); opacity: 0; }
-}
-
-body.special-anims .desktop-icon {
-    transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-    animation: iconAppear 0.6s ease-out backwards;
-}
+body.special-anims .desktop-particle { position: absolute; width: 3px; height: 3px; background: rgba(255,255,255,.4); border-radius: 50%; animation: desktopParticleFloat 20s linear infinite; box-shadow: 0 0 8px rgba(255,255,255,.6); }
+@keyframes desktopParticleFloat { 0% { transform: translateY(100vh); opacity: 0; } 10%, 90% { opacity: 0.8; } 100% { transform: translateY(-50px); opacity: 0; } }
+body.special-anims .desktop-icon { transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55); animation: iconAppear 0.6s ease-out backwards; }
 body.special-anims .desktop-icon:nth-child(1) { animation-delay: 0.1s; }
 body.special-anims .desktop-icon:nth-child(2) { animation-delay: 0.2s; }
 body.special-anims .desktop-icon:nth-child(3) { animation-delay: 0.3s; }
-body.special-anims .desktop-icon:nth-child(4) { animation-delay: 0.4s; }
 @keyframes iconAppear { from { opacity: 0; transform: translateY(20px) scale(0.8); } to { opacity: 1; transform: translateY(0) scale(1); } }
-
 body.special-anims .desktop-icon:hover { transform: scale(1.15) translateY(-5px); box-shadow: 0 10px 30px rgba(168,85,247,.5); }
-body.special-anims .desktop-icon::before { content: ''; position: absolute; inset: 0; background: radial-gradient(circle, rgba(168,85,247,.3), transparent 70%); opacity: 0; transition: opacity 0.3s; }
-body.special-anims .desktop-icon:hover::before { opacity: 1; }
-
 body.special-anims .taskbar-btn { transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55); }
 body.special-anims .taskbar-btn:hover { transform: scale(1.2) translateY(-8px); box-shadow: 0 10px 30px rgba(168,85,247,.6); }
-body.special-anims .taskbar-btn::before { content: ''; position: absolute; inset: 0; background: radial-gradient(circle, rgba(168,85,247,.4), transparent); opacity: 0; transition: opacity 0.3s; }
-body.special-anims .taskbar-btn:hover::before { opacity: 1; }
-
 body.special-anims .app-window { animation: windowAppear 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55); }
 @keyframes windowAppear { from { opacity: 0; transform: scale(0.8) translateY(50px) rotate(-2deg); } to { opacity: 1; transform: scale(1) translateY(0) rotate(0); } }
-
-body.special-anims .window-header::before { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,.15), transparent); animation: windowShine 3s ease-in-out infinite; }
-@keyframes windowShine { 0% { left: -100%; } 50%, 100% { left: 100%; } }
-
 body.special-anims .window-close:hover { transform: rotate(90deg) scale(1.15); box-shadow: 0 0 20px rgba(239,68,68,.6); }
-
-body.special-anims .settings-tab.active { animation: tabPulse 2s infinite; }
-@keyframes tabPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
-
-body.special-anims .settings-option { animation: optionAppear 0.6s ease-out backwards; transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55); }
-body.special-anims .settings-option:nth-child(1) { animation-delay: 0.1s; }
-body.special-anims .settings-option:nth-child(2) { animation-delay: 0.2s; }
-body.special-anims .settings-option:nth-child(3) { animation-delay: 0.3s; }
-@keyframes optionAppear { from { opacity: 0; transform: translateX(-30px); } to { opacity: 1; transform: translateX(0); } }
-
-body.special-anims .settings-option:hover { transform: scale(1.03) translateX(10px); box-shadow: 0 5px 20px rgba(168,85,247,.4); }
-body.special-anims .settings-option::before { content: ''; position: absolute; top: 50%; left: 50%; width: 0; height: 0; background: radial-gradient(circle, rgba(168,85,247,.3), transparent); transform: translate(-50%, -50%); transition: width 0.6s, height 0.6s; border-radius: 50%; }
-body.special-anims .settings-option:hover::before { width: 400px; height: 400px; }
-
-body.special-anims .settings-option.locked::after { animation: lockShake 2s ease-in-out infinite; }
-@keyframes lockShake { 0%, 100% { transform: translateY(-50%) rotate(0); } 25% { transform: translateY(-50%) rotate(-5deg); } 75% { transform: translateY(-50%) rotate(5deg); } }
-
-body.special-anims .option-price { animation: pricePulse 2s infinite; }
-@keyframes pricePulse { 0%, 100% { box-shadow: 0 0 10px rgba(251,191,36,.3); } 50% { box-shadow: 0 0 25px rgba(251,191,36,.6); } }
-
-body.special-anims .search-result { animation: resultAppear 0.5s ease-out backwards; transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55); }
-body.special-anims .search-result:nth-child(1) { animation-delay: 0.1s; }
-body.special-anims .search-result:nth-child(2) { animation-delay: 0.2s; }
-@keyframes resultAppear { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-body.special-anims .search-result:hover { transform: scale(1.03) translateX(10px); box-shadow: 0 5px 20px rgba(168,85,247,.4); }
-body.special-anims .search-result::before { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(168,85,247,.2), transparent); transition: left 0.6s; }
-body.special-anims .search-result:hover::before { left: 100%; }
-
-body.special-anims .newos-block-header h1 { animation: titleGlow 3s infinite; }
-@keyframes titleGlow { 0%, 100% { text-shadow: 0 0 20px rgba(192,132,252,.5); } 50% { text-shadow: 0 0 40px rgba(192,132,252,.8); } }
-
-body.special-anims .metal-app-icon { animation: metalIconFloat 3s ease-in-out infinite; }
-@keyframes metalIconFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
-
 body.special-anims .modal { animation: modalAppear 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55); }
 @keyframes modalAppear { from { opacity: 0; } to { opacity: 1; } }
 body.special-anims .modal-box { animation: modalBoxAppear 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55); }
 @keyframes modalBoxAppear { from { transform: translateY(50px) rotate(-5deg) scale(0.8); } to { transform: translateY(0) rotate(0) scale(1); } }
-body.special-anims .modal-box::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(168,85,247,.15), transparent 70%); animation: modalGlow 4s ease-in-out infinite; }
-@keyframes modalGlow { 0%, 100% { transform: scale(1); opacity: 0.5; } 50% { transform: scale(1.2); opacity: 0.8; } }
-body.special-anims .modal-box h2 { animation: modalTitlePulse 2s infinite; }
-@keyframes modalTitlePulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
-
 body.special-anims .icon-emoji { animation: iconEmojiFloat 3s ease-in-out infinite; }
 @keyframes iconEmojiFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
-
-body.special-anims .livery-preview { animation: liveryPreviewShift 5s ease infinite; }
-@keyframes liveryPreviewShift { 0%, 100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
-
 body.special-anims #default-wallpaper .default-wall-text { animation: defaultTextGlow 3s ease-in-out infinite; }
 @keyframes defaultTextGlow { 0%, 100% { text-shadow: 0 0 30px rgba(168,85,247,.8), 0 0 60px rgba(168,85,247,.5); } 50% { text-shadow: 0 0 50px rgba(168,85,247,1), 0 0 100px rgba(168,85,247,.8), 0 0 150px rgba(239,68,68,.4); } }
 body.special-anims #default-wallpaper .heart { animation: heartBeat 1.5s ease-in-out infinite; }
 @keyframes heartBeat { 0%, 100% { transform: scale(1); } 25% { transform: scale(1.2); } 50% { transform: scale(1); } 75% { transform: scale(1.15); } }
 body.special-anims #default-wallpaper { background-size: 400% 400%; animation: defaultWallGradient 15s ease infinite; }
 @keyframes defaultWallGradient { 0%, 100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
-
 body.special-anims .toast.visible { animation: toastBounce 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55); }
 @keyframes toastBounce { 0% { transform: translateX(-50%) translateY(100px); } 50% { transform: translateX(-50%) translateY(-20px); } 100% { transform: translateX(-50%) translateY(0); } }
-
-body.special-anims .livery-app-icon-big { animation: liveryAppFloat 3s ease-in-out infinite; }
-@keyframes liveryAppFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
-
-body.special-anims .metal-app { transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55); animation: appAppear 0.6s ease-out backwards; }
-@keyframes appAppear { from { opacity: 0; transform: scale(0.8) rotate(-5deg); } to { opacity: 1; transform: scale(1) rotate(0); } }
-body.special-anims .metal-app:hover { transform: scale(1.1) translateY(-5px); box-shadow: 0 10px 30px rgba(168,85,247,.5); }
-
-body.special-anims .livery-item { transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55); }
-body.special-anims .livery-item:hover { transform: scale(1.08) translateY(-8px); box-shadow: 0 15px 40px rgba(168,85,247,.5); }
-
-body.special-anims .browser-input:focus { box-shadow: 0 0 20px rgba(168,85,247,.5), inset 0 0 10px rgba(168,85,247,.2); transform: scale(1.02); }
-body.special-anims .browser-btn::before { content: ''; position: absolute; top: 50%; left: 50%; width: 0; height: 0; background: rgba(255,255,255,.3); border-radius: 50%; transform: translate(-50%, -50%); transition: width 0.6s, height 0.6s; }
-body.special-anims .browser-btn:hover::before { width: 300px; height: 300px; }
-body.special-anims .browser-btn { position: relative; overflow: hidden; }
-
 body.special-anims #cmd-overlay.visible { animation: cmdAppear 0.5s ease-out; }
 @keyframes cmdAppear { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
 body.special-anims .cmd-output { text-shadow: 0 0 5px rgba(0,255,0,.5); }
@@ -399,7 +192,6 @@ body.special-anims .cmd-output { text-shadow: 0 0 5px rgba(0,255,0,.5); }
 
 <body>
 
-<!-- BOOT -->
 <div id="boot-screen">
     <div class="boot-particles" id="boot-particles"></div>
     <div class="boot-ring"></div>
@@ -412,15 +204,11 @@ body.special-anims .cmd-output { text-shadow: 0 0 5px rgba(0,255,0,.5); }
     </div>
 </div>
 
-<!-- PULPIT -->
 <div id="desktop">
-    <!-- DOMYŚLNA TAPETA "I love BootOS 3" -->
     <div id="default-wallpaper">
         <div class="default-wall-text">
             I <span class="heart">❤</span> BootOS 3
         </div>
-        <div class="default-wall-subtitle">Metal Nothing Edition</div>
-        <div class="default-wall-version">© 2026 Metal Nothing Corporation</div>
     </div>
 
     <div class="desktop-particles" id="desktop-particles"></div>
@@ -436,54 +224,35 @@ body.special-anims .cmd-output { text-shadow: 0 0 5px rgba(0,255,0,.5); }
     </div>
 </div>
 
-<!-- OKNA -->
 <div class="app-window" id="settings-window">
     <div class="window-header"><div class="window-title">⚙️ Ustawienia</div><button class="window-close" onclick="closeApp('settings')">✕</button></div>
-    <div class="window-content">
-        <div class="settings-tabs">
-            <div class="settings-tab active" onclick="switchSettingsTab(this, 'system')">System</div>
-            <div class="settings-tab" onclick="switchSettingsTab(this, 'appearance')">Wygląd</div>
-            <div class="settings-tab" onclick="switchSettingsTab(this, 'about')">O systemie</div>
-        </div>
-        <div class="settings-content" id="settings-content"></div>
-    </div>
+    <div class="window-content"><iframe id="settings-iframe" src="ustawieniadelplus.html"></iframe></div>
 </div>
 
 <div class="app-window" id="browser-window">
     <div class="window-header"><div class="window-title">🌐 Hyper Internet</div><button class="window-close" onclick="closeApp('browser')">✕</button></div>
-    <div class="browser-bar">
-        <input type="text" class="browser-input" id="browser-search" placeholder="Szukaj w internecie...">
-        <button class="browser-btn" onclick="performSearch()">Szukaj</button>
-    </div>
-    <div class="browser-content" id="browser-content">
-        <h2 style="margin-bottom:20px">Witaj w Hyper Internet!</h2>
-        <p style="opacity:0.7">Wpisz coś w wyszukiwarkę aby rozpocząć.</p>
-    </div>
+    <div class="window-content"><iframe id="browser-iframe" src="przegladarkadelplus.html"></iframe></div>
 </div>
 
 <div class="app-window" id="metalapp-window">
     <div class="window-header"><div class="window-title">🛡️ Metal App</div><button class="window-close" onclick="closeApp('metalapp')">✕</button></div>
-    <div class="window-content" id="metalapp-content">
-        <div class="metal-apps">
-            <div class="metal-app" onclick="openMetalSecurity()"><div class="metal-app-icon">🔒</div><div class="metal-app-name">Security</div></div>
-            <div class="metal-app"><div class="metal-app-icon">📊</div><div class="metal-app-name">Monitor</div></div>
-            <div class="metal-app"><div class="metal-app-icon">🔧</div><div class="metal-app-name">Narzędzia</div></div>
-            <div class="metal-app"><div class="metal-app-icon">📁</div><div class="metal-app-name">Pliki</div></div>
+    <div class="window-content">
+        <div style="padding:20px;color:white;text-align:center;">
+            <h2 style="margin-bottom:20px">🔒 Metal Security</h2>
+            <div style="padding:25px;background:rgba(168,85,247,.1);border:2px solid rgba(168,85,247,.3);border-radius:22px;cursor:pointer;" onclick="toggleMetalSecurity()">
+                <div style="font-size:2.8rem;margin-bottom:10px" id="metal-icon">✅</div>
+                <div style="font-weight:700;font-size:1.1rem" id="metal-text">Ochrona WŁĄCZONA</div>
+                <p style="opacity:0.7;margin-top:10px;font-size:0.9rem">Kliknij aby przełączyć</p>
+            </div>
         </div>
     </div>
 </div>
 
-<div class="app-window" id="livery-window">
-    <div class="window-header"><div class="window-title">🎨 Livery</div><button class="window-close" onclick="closeApp('livery')">✕</button></div>
-    <div class="window-content"><div class="livery-grid" id="livery-grid"></div></div>
-</div>
-
-<!-- MODALE -->
 <div class="modal" id="security-block-modal">
     <div class="modal-box">
         <h2>🛡️ Metal Security</h2>
         <p>Strona została zablokowana przez Metal Security.</p>
-        <p style="color:#fbbf24;margin-top:15px">Aby odblokować, wyłącz ochronę w Metal App → Security.</p>
+        <p style="color:#fbbf24;margin-top:15px">Aby odblokować, wyłącz ochronę w Metal App.</p>
         <button class="modal-btn" onclick="closeModal('security-block-modal')">OK</button>
     </div>
 </div>
@@ -496,30 +265,13 @@ body.special-anims .cmd-output { text-shadow: 0 0 5px rgba(0,255,0,.5); }
     </div>
 </div>
 
-<div class="modal" id="install-modal">
+<div class="modal" id="wallpaper-payment-modal">
     <div class="modal-box">
-        <h2>📥 Instalacja tapety</h2>
-        <p>Czy chcesz zainstalować tę animowaną tapetę Livery?</p>
-        <button class="modal-btn success" onclick="confirmInstall()">Zezwól na instalację</button>
-        <button class="modal-btn" onclick="closeModal('install-modal')">Anuluj</button>
-    </div>
-</div>
-
-<div class="modal" id="livery-settings-modal">
-    <div class="modal-box">
-        <h2>🎨 Livery Settings</h2>
-        <p>Wpłać symboliczne <strong>$3</strong> na rozwój projektu, aby odblokować Animowane Tapety w Ustawieniach.</p>
-        <button class="modal-btn success" onclick="startRegistryFlow()">Wpłać $3</button>
-        <button class="modal-btn" onclick="closeModal('livery-settings-modal')">Anuluj</button>
-    </div>
-</div>
-
-<div class="modal" id="registry-modal">
-    <div class="modal-box">
-        <h2>⚠️ Zmiana rejestru</h2>
-        <p>Ta operacja zmieni rejestr systemu. Kontynuować?</p>
-        <button class="modal-btn danger" onclick="acceptRegistryChange()">Akceptuję</button>
-        <button class="modal-btn" onclick="closeModal('registry-modal')">Anuluj</button>
+        <h2>🎬 Animowana Tapeta</h2>
+        <p>Odblokuj Animowane Tapety za <strong>$70</strong> jednorazowo.</p>
+        <p style="font-size:0.85rem;opacity:0.7;margin-top:10px">💡 Darmowa alternatywa: wpisz "newos block" w Hyper Internet</p>
+        <button class="modal-btn success" onclick="buyWallpaper()">Kup za $70</button>
+        <button class="modal-btn" onclick="closeModal('wallpaper-payment-modal')">Anuluj</button>
     </div>
 </div>
 
@@ -527,18 +279,31 @@ body.special-anims .cmd-output { text-shadow: 0 0 5px rgba(0,255,0,.5); }
 <div class="toast" id="toast"></div>
 
 <script>
-const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
-
 let state = {
-    metalSecurity: true,
-    wallpaperUnlocked: false,
-    liveryInstalled: false,
-    animatedWallpaperActive: false,
-    specialAnimations: false,
-    pendingInstall: null
+    metalSecurity: localStorage.getItem("newos_metalSecurity") !== "false",
+    wallpaperUnlocked: localStorage.getItem("newos_wallpaperUnlocked") === "true",
+    animatedWallpaperActive: localStorage.getItem("newos_animatedWallpaperActive") === "true",
+    specialAnimations: localStorage.getItem("newos_specialAnimations") === "true"
 };
 
-// Boot particles (tylko tworzone, nie widoczne bez special-anims)
+window.addEventListener("storage", (e) => {
+    if (e.key === "newos_metalSecurity") state.metalSecurity = e.newValue !== "false";
+    if (e.key === "newos_wallpaperUnlocked") state.wallpaperUnlocked = e.newValue === "true";
+    if (e.key === "newos_animatedWallpaperActive") state.animatedWallpaperActive = e.newValue === "true";
+    if (e.key === "newos_specialAnimations") {
+        state.specialAnimations = e.newValue === "true";
+        applySpecialAnims();
+    }
+    updateUI();
+});
+
+function saveState() {
+    localStorage.setItem("newos_metalSecurity", state.metalSecurity);
+    localStorage.setItem("newos_wallpaperUnlocked", state.wallpaperUnlocked);
+    localStorage.setItem("newos_animatedWallpaperActive", state.animatedWallpaperActive);
+    localStorage.setItem("newos_specialAnimations", state.specialAnimations);
+}
+
 function createBootParticles() {
     const c = document.getElementById("boot-particles");
     for (let i = 0; i < 40; i++) {
@@ -565,13 +330,22 @@ function createDesktopParticles() {
     }
 }
 
-// Po 7 sekundach ukryj boot i pokaż pulpit
 setTimeout(() => {
     document.getElementById("boot-screen").style.display = "none";
     document.getElementById("desktop").classList.add("visible");
+    applySpecialAnims();
+    updateUI();
 }, 7000);
 
-// Aktualizacja widoczności domyślnej tapety
+function applySpecialAnims() {
+    if (state.specialAnimations) {
+        document.body.classList.add("special-anims");
+        createDesktopParticles();
+    } else {
+        document.body.classList.remove("special-anims");
+    }
+}
+
 function updateDefaultWallpaper() {
     const defaultWall = document.getElementById("default-wallpaper");
     if (state.wallpaperUnlocked && state.animatedWallpaperActive) {
@@ -581,304 +355,38 @@ function updateDefaultWallpaper() {
     }
 }
 
-function addLiveryToDesktop() {
-    if (document.getElementById("livery-icon")) return;
-    const icons = document.getElementById("desktop-icons");
-    const tb = document.getElementById("taskbar");
-    const icon = document.createElement("div");
-    icon.className = "desktop-icon";
-    icon.id = "livery-icon";
-    icon.innerHTML = `<div class="icon-emoji">🎨</div><div class="icon-label">Livery</div>`;
-    icon.onclick = () => openApp('livery');
-    icons.appendChild(icon);
-    const btn = document.createElement("div");
-    btn.className = "taskbar-btn";
-    btn.innerHTML = "🎨";
-    btn.onclick = () => openApp('livery');
-    tb.appendChild(btn);
+function updateUI() {
+    updateDefaultWallpaper();
+    const metalIcon = document.getElementById("metal-icon");
+    const metalText = document.getElementById("metal-text");
+    if (metalIcon && metalText) {
+        metalIcon.textContent = state.metalSecurity ? '✅' : '❌';
+        metalText.textContent = state.metalSecurity ? 'Ochrona WŁĄCZONA' : 'Ochrona WYŁĄCZONA';
+    }
+    document.getElementById("desktop").classList.toggle("animated-wallpaper", state.animatedWallpaperActive);
 }
 
 function openApp(id) {
     document.getElementById(id + "-window").classList.add("visible");
-    if (id === "settings") {
-        const activeTab = document.querySelector(".settings-tab.active") || document.querySelector(".settings-tab");
-        switchSettingsTab(activeTab, "system");
-    }
-    if (id === "livery") renderLivery();
-    if (id === "metalapp") resetMetalApp();
 }
 
 function closeApp(id) {
     document.getElementById(id + "-window").classList.remove("visible");
 }
 
-// ===== USTAWIENIA =====
-function switchSettingsTab(el, tab) {
-    document.querySelectorAll(".settings-tab").forEach(t => t.classList.remove("active"));
-    el.classList.add("active");
-    const c = document.getElementById("settings-content");
-    
-    if (tab === "system") {
-        c.innerHTML = `
-            <div class="settings-option"><div class="option-title">🖥️ Nazwa komputera</div><div class="option-desc">${localStorage.getItem("newos_pc") || "NEW-PC"}</div></div>
-            <div class="settings-option"><div class="option-title">👤 Użytkownik</div><div class="option-desc">${localStorage.getItem("newos_user") || "User"}</div></div>
-            <div class="settings-option"><div class="option-title">💾 Subskrypcja</div><div class="option-desc">${localStorage.getItem("newos_plan") || "Normal"}</div></div>
-        `;
-    }
-    
-    if (tab === "appearance") {
-        c.innerHTML = `
-            <div class="settings-option ${state.specialAnimations ? 'enabled' : ''}" onclick="toggleSpecialAnims()">
-                <div class="option-title">✨ Animacje Specjalne</div>
-                <div class="option-desc">${state.specialAnimations ? 'Włączone - wszystkie efekty wizualne aktywne' : 'Wyłączone - kliknij aby włączyć zaawansowane animacje'}</div>
-            </div>
-            <div class="settings-option ${state.wallpaperUnlocked ? '' : 'locked'}" onclick="toggleAnimWallpaper()">
-                <div class="option-title">🎬 Animowana Tapeta</div>
-                <div class="option-desc">${state.wallpaperUnlocked ? 'Dynamiczne, animowane tło pulpitu' : 'Odblokuj przez Hyper Internet (newos block) lub Livery Settings'}</div>
-                ${!state.wallpaperUnlocked ? '<div class="option-price">$80</div>' : ''}
-            </div>
-            <div class="settings-option" onclick="openLiverySettingsModal()">
-                <div class="option-title">🎨 Livery Settings</div>
-                <div class="option-desc">Odblokuj tapety za symboliczne $3</div>
-            </div>
-        `;
-    }
-    
-    if (tab === "about") {
-        c.innerHTML = `
-            <div class="settings-option"><div class="option-title">📋 NewOS</div><div class="option-desc">Wersja: 3.0 BootOS</div></div>
-            <div class="settings-option"><div class="option-title">🏢 Metal Nothing Corporation</div><div class="option-desc">© 2026 Wszystkie prawa zastrzeżone</div></div>
-            <div class="settings-option"><div class="option-title">💻 System</div><div class="option-desc">BootOS 3 - Metal Nothing Edition</div></div>
-        `;
-    }
-}
-
-function toggleSpecialAnims() {
-    state.specialAnimations = !state.specialAnimations;
-    
-    if (state.specialAnimations) {
-        document.body.classList.add("special-anims");
-        createDesktopParticles();
-        showToast("✨ Animacje Specjalne WŁĄCZONE!");
-    } else {
-        document.body.classList.remove("special-anims");
-        showToast("Animacje Specjalne wyłączone.");
-    }
-    
-    const activeTab = document.querySelector(".settings-tab.active");
-    if (activeTab && activeTab.textContent.includes("Wygląd")) {
-        switchSettingsTab(activeTab, "appearance");
-    }
-}
-
-function toggleAnimWallpaper() {
-    if (!state.wallpaperUnlocked) {
-        showToast("🔒 Tapeta zablokowana. Użyj metody z przeglądarki lub Livery Settings.", true);
-        return;
-    }
-    state.animatedWallpaperActive = !state.animatedWallpaperActive;
-    document.getElementById("desktop").classList.toggle("animated-wallpaper", state.animatedWallpaperActive);
-    updateDefaultWallpaper();
-    showToast(state.animatedWallpaperActive ? "🎬 Tapeta animowana włączona!" : "🖼️ Domyślna tapeta przywrócona.");
-}
-
-function openLiverySettingsModal() {
-    document.getElementById("livery-settings-modal").classList.add("visible");
-}
-
-// ===== PRZEGLĄDARKA - NEWOS BLOCK =====
-function performSearch() {
-    const q = document.getElementById("browser-search").value.toLowerCase().trim();
-    const c = document.getElementById("browser-content");
-    
-    if (q.includes("newos block")) {
-        c.innerHTML = `
-            <h2 style="margin-bottom:20px">Wyniki dla: "${q}"</h2>
-            <div class="search-result" onclick="clickFirstLink()">
-                <div class="result-title">NewOS BLOCK - Oficjalna strona</div>
-                <div class="result-url">https://newos-block.official.com</div>
-                <div class="result-desc">Oficjalna strona NewOS BLOCK - tapety, Livery, ustawienia i więcej.</div>
-            </div>
-            <div class="search-result" onclick="clickSecondLink()">
-                <div class="result-title">Free Wallpaper Pack 2026</div>
-                <div class="result-url">https://free-wallpapers-2026.download/pack</div>
-                <div class="result-desc">Najnowsze tapety w wysokiej jakości. Pobierz teraz!</div>
-            </div>
-        `;
-    } else {
-        c.innerHTML = `<h2>Brak wyników dla "${q}"</h2><p style="opacity:0.7;margin-top:10px">Spróbuj wpisać: newos block</p>`;
-    }
-}
-
-document.getElementById("browser-search").addEventListener("keypress", e => {
-    if (e.key === "Enter") performSearch();
-});
-
-function clickFirstLink() {
-    if (state.metalSecurity) {
-        document.getElementById("security-block-modal").classList.add("visible");
-        return;
-    }
-    showNewOSBlockPage();
-}
-
-function clickSecondLink() {
-    if (state.metalSecurity) {
-        document.getElementById("virus-modal").classList.add("visible");
-    } else {
-        showToast("⚠️ Pobieranie pliku...", true);
-        setTimeout(() => {
-            showToast("🦠 Wykryto złośliwe oprogramowanie! System przywrócił ochronę.", true);
-            state.metalSecurity = true;
-        }, 2000);
-    }
-}
-
-// ===== STRONA NEWOS BLOCK (BEZ TAPET DO POBRANIA) =====
-function showNewOSBlockPage() {
-    const c = document.getElementById("browser-content");
-    c.innerHTML = `
-        <div class="newos-block-page">
-            <div class="newos-block-header">
-                <h1>🎨 NewOS BLOCK</h1>
-                <p>Oficjalna strona aplikacji Livery dla NewOS</p>
-            </div>
-
-            <!-- SEKCJA 1: LIVERY SETTINGS ($3) -->
-            <div class="newos-block-section">
-                <h2>⚙️ Livery Settings</h2>
-                <div class="livery-settings-box">
-                    <div class="livery-settings-info">
-                        <h3>Odblokuj Animowane Tapety w Ustawieniach</h3>
-                        <p>Wpłać symboliczne <strong>$3</strong> na rozwój projektu NewOS i odblokuj opcję Animowanej Tapety bezpośrednio w Ustawieniach → Wygląd.</p>
-                    </div>
-                    <button class="livery-settings-btn" onclick="openLiverySettingsModal()">Wpłać $3</button>
-                </div>
-            </div>
-
-            <!-- SEKCJA 2: LIVERY APP -->
-            <div class="newos-block-section">
-                <h2>📱 Livery App</h2>
-                <div class="livery-app-box">
-                    <div class="livery-app-icon-big">🎨</div>
-                    <div class="livery-app-info">
-                        <h3>Aplikacja Livery</h3>
-                        <p>Pobierz aplikację Livery aby zarządzać tapetami bezpośrednio z pulpitu. Aplikacja pojawi się na Twoim pulpicie po zainstalowaniu przez Livery Settings.</p>
-                        <button class="livery-app-btn ${state.liveryInstalled ? '' : 'disabled'}" onclick="${state.liveryInstalled ? "openApp('livery')" : ""}">
-                            ${state.liveryInstalled ? '✅ Otwórz Livery App' : '🔒 Użyj Livery Settings aby odblokować'}
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    `;
-}
-
-// ===== METAL APP =====
-function resetMetalApp() {
-    document.getElementById("metalapp-content").innerHTML = `
-        <div class="metal-apps">
-            <div class="metal-app" onclick="openMetalSecurity()"><div class="metal-app-icon">🔒</div><div class="metal-app-name">Security</div></div>
-            <div class="metal-app"><div class="metal-app-icon">📊</div><div class="metal-app-name">Monitor</div></div>
-            <div class="metal-app"><div class="metal-app-icon">🔧</div><div class="metal-app-name">Narzędzia</div></div>
-            <div class="metal-app"><div class="metal-app-icon">📁</div><div class="metal-app-name">Pliki</div></div>
-        </div>
-    `;
-}
-
-function openMetalSecurity() {
-    document.getElementById("metalapp-content").innerHTML = `
-        <h2 style="margin-bottom:20px">🔒 Metal Security</h2>
-        <div class="metal-app" onclick="toggleMetalSecurity()" style="cursor:pointer">
-            <div class="metal-app-icon">${state.metalSecurity ? '✅' : '❌'}</div>
-            <div class="metal-app-name">${state.metalSecurity ? 'Ochrona WŁĄCZONA' : 'Ochrona WYŁĄCZONA'}</div>
-            <p style="opacity:0.7;margin-top:10px;font-size:0.9rem">Kliknij aby przełączyć</p>
-        </div>
-    `;
-}
-
 function toggleMetalSecurity() {
-    if (state.metalSecurity) {
-        state.metalSecurity = false;
-        showToast("⚠️ Ochrona wyłączona!", true);
-    } else {
-        state.metalSecurity = true;
-        showToast("✅ Ochrona włączona");
-    }
-    openMetalSecurity();
+    state.metalSecurity = !state.metalSecurity;
+    saveState();
+    showToast(state.metalSecurity ? "✅ Ochrona włączona" : "⚠️ Ochrona wyłączona!", !state.metalSecurity);
+    updateUI();
 }
 
-// ===== LIVERY APP =====
-function renderLivery() {
-    if (!state.liveryInstalled) {
-        document.getElementById("livery-grid").innerHTML = "<p style='text-align:center;opacity:0.7;padding:40px'>Aplikacja Livery nie jest zainstalowana.<br>Użyj Livery Settings w Ustawieniach → Wygląd lub NewOS BLOCK w przeglądarce.</p>";
-        return;
-    }
-    document.getElementById("livery-grid").innerHTML = `
-        <div class="livery-item"><div class="livery-preview" style="background:linear-gradient(135deg,#667eea,#764ba2)"></div><div class="livery-name">Purple Dreams</div><button class="livery-btn" onclick="applyWall('linear-gradient(135deg, #667eea, #764ba2)')">Zastosuj</button></div>
-        <div class="livery-item"><div class="livery-preview" style="background:linear-gradient(135deg,#4facfe,#00f2fe)"></div><div class="livery-name">Ocean Waves</div><button class="livery-btn" onclick="applyWall('linear-gradient(135deg, #4facfe, #00f2fe)')">Zastosuj</button></div>
-        <div class="livery-item"><div class="livery-preview" style="background:linear-gradient(135deg,#fa709a,#fee140)"></div><div class="livery-name">Sunset Glow</div><button class="livery-btn" onclick="applyWall('linear-gradient(135deg, #fa709a, #fee140)')">Zastosuj</button></div>
-        <div class="livery-item"><div class="livery-preview" style="background:linear-gradient(135deg,#a8edea,#fed6e3)"></div><div class="livery-name">Forest Mist</div><button class="livery-btn" onclick="applyWall('linear-gradient(135deg, #a8edea, #fed6e3)')">Zastosuj</button></div>
-    `;
-}
-
-function applyWall(gradient) {
-    document.getElementById("desktop").style.background = gradient;
-    document.getElementById("desktop").style.backgroundSize = "400% 400%";
-    document.getElementById("desktop").style.animation = "animatedWallpaperShift 15s ease infinite";
-    document.getElementById("desktop").classList.add("animated-wallpaper");
-    state.animatedWallpaperActive = true;
-    updateDefaultWallpaper();
-    showToast("🎨 Tapeta zastosowana!");
-}
-
-// ===== LIVERY SETTINGS FLOW ($3) =====
-function startRegistryFlow() {
-    closeModal("livery-settings-modal");
-    document.getElementById("registry-modal").classList.add("visible");
-}
-
-function acceptRegistryChange() {
-    closeModal("registry-modal");
-    runUnlockCMD();
-}
-
-async function runUnlockCMD() {
-    const ov = document.getElementById("cmd-overlay");
-    const out = document.getElementById("cmd-output");
-    ov.classList.add("visible");
-    out.textContent = "";
-    
-    const cmds = [
-        "C:\\Windows\\System32> net stop WallpaperSvc", "Zatrzymano usługę.", "",
-        "C:\\> reg add \"HKLM\\SOFTWARE\\NewOS\\Wallpaper\" /v Enabled /t REG_DWORD /d 1 /f", "Operacja ukończona.", "",
-        "C:\\> reg add \"HKLM\\SOFTWARE\\NewOS\\Wallpaper\" /v LiveryInstalled /t REG_DWORD /d 1 /f", "Wartość zapisana.", "",
-        "C:\\> echo Odblokowano Animowane Tapety!", "Odblokowano Animowane Tapety!", "",
-        "C:\\> net start NewOSWallpaper", "Usługa uruchomiona.", "",
-        "C:\\> exit"
-    ];
-    
-    for (const l of cmds) {
-        out.textContent += l + "\n";
-        await wait(600);
-    }
-    
-    await wait(1500);
-    ov.classList.remove("visible");
-    
+function buyWallpaper() {
+    closeModal("wallpaper-payment-modal");
     state.wallpaperUnlocked = true;
-    state.liveryInstalled = true;
-    addLiveryToDesktop();
-    showToast("✅ Animowane Tapety i Livery App odblokowane!");
-}
-
-function confirmInstall() {
-    closeModal("install-modal");
-    state.liveryInstalled = true;
-    state.wallpaperUnlocked = true;
-    addLiveryToDesktop();
-    showToast(`✅ Livery App zainstalowana!`);
-    showNewOSBlockPage();
+    saveState();
+    updateUI();
+    showToast("✅ Animowane Tapety odblokowane! Włącz je w Ustawieniach → Wygląd.");
 }
 
 function closeModal(id) {
@@ -892,8 +400,56 @@ function showToast(text, error = false) {
     setTimeout(() => { t.className = "toast"; }, 3500);
 }
 
-// Inicjalizacja domyślnej tapety
-updateDefaultWallpaper();
+window.addEventListener("message", (e) => {
+    if (!e.data || !e.data.type) return;
+    
+    if (e.data.type === "showToast") showToast(e.data.text, e.data.error);
+    if (e.data.type === "openModal") document.getElementById(e.data.modalId).classList.add("visible");
+    if (e.data.type === "closeModal") document.getElementById(e.data.modalId).classList.remove("visible");
+    if (e.data.type === "getState") {
+        const iframe = document.getElementById(e.data.from);
+        if (iframe) iframe.contentWindow.postMessage({ type: "state", state: state }, "*");
+    }
+    if (e.data.type === "setState") {
+        Object.assign(state, e.data.state);
+        saveState();
+        updateUI();
+    }
+    if (e.data.type === "securityBlock") {
+        if (state.metalSecurity) {
+            document.getElementById("security-block-modal").classList.add("visible");
+        } else {
+            const iframe = document.getElementById("browser-iframe");
+            if (iframe) iframe.contentWindow.postMessage({ type: "openHypersklep" }, "*");
+        }
+    }
+    if (e.data.type === "virusDetected") {
+        if (state.metalSecurity) {
+            document.getElementById("virus-modal").classList.add("visible");
+        } else {
+            showToast("⚠️ Pobieranie pliku...", true);
+            setTimeout(() => {
+                showToast("🦠 Wykryto złośliwe oprogramowanie!", true);
+                state.metalSecurity = true;
+                saveState();
+                updateUI();
+            }, 2000);
+        }
+    }
+    if (e.data.type === "showCMD") {
+        document.getElementById("cmd-overlay").classList.add("visible");
+        document.getElementById("cmd-output").textContent = "";
+    }
+    if (e.data.type === "cmdLine") {
+        document.getElementById("cmd-output").textContent += e.data.line + "\n";
+    }
+    if (e.data.type === "hideCMD") {
+        document.getElementById("cmd-overlay").classList.remove("visible");
+    }
+});
+
+applySpecialAnims();
+updateUI();
 </script>
 </body>
 </html>
