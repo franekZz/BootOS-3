@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<title>Hypersklep - NewOS</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Segoe UI', Arial, sans-serif; background: linear-gradient(135deg, #0a0015 0%, #1a0033 50%, #2d1b69 100%); color: white; min-height: 100vh; overflow-y: auto; padding: 30px; }
+body::-webkit-scrollbar { width: 8px; }
+body::-webkit-scrollbar-track { background: rgba(0,0,0,.2); border-radius: 10px; }
+body::-webkit-scrollbar-thumb { background: rgba(168,85,247,.5); border-radius: 10px; }
+
+.store-header { text-align: center; margin-bottom: 40px; padding: 30px 20px; background: linear-gradient(135deg, rgba(168,85,247,.15), rgba(192,132,252,.1)); border: 2px solid rgba(168,85,247,.4); border-radius: 25px; }
+.store-header h1 { font-size: 3rem; background: linear-gradient(135deg, #a855f7, #c084fc, #e9d5ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 10px; letter-spacing: 2px; }
+.store-header p { opacity: 0.8; font-size: 1.1rem; }
+
+.store-section { margin-bottom: 40px; }
+.section-title { font-size: 1.8rem; margin-bottom: 20px; color: #c084fc; display: flex; align-items: center; gap: 12px; padding-bottom: 10px; border-bottom: 2px solid rgba(168,85,247,.3); }
+
+.sub-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; }
+.sub-card { background: rgba(30,10,55,.75); border: 2px solid rgba(168,85,247,.45); border-radius: 20px; padding: 25px; display: flex; flex-direction: column; gap: 10px; transition: all 0.3s ease; position: relative; overflow: hidden; }
+.sub-card:hover { border-color: white; transform: translateY(-6px); box-shadow: 0 15px 40px rgba(168,85,247,.4); }
+.sub-card.current { border-color: #22c55e; background: rgba(34,197,94,.1); }
+.sub-card.current::after { content: '✅ Aktualny plan'; position: absolute; top: 15px; right: 15px; background: #22c55e; color: white; padding: 5px 12px; border-radius: 15px; font-size: 0.8rem; font-weight: 700; }
+.sub-card h3 { font-size: 1.5rem; color: white; }
+.sub-price { font-size: 1.8rem; font-weight: 800; color: #c084fc; }
+.sub-price span { font-size: 0.9rem; opacity: 0.65; font-weight: 400; }
+.sub-desc { line-height: 1.45; opacity: 0.92; font-size: 0.95rem; }
+.sub-features { font-size: 0.9rem; color: #86efac; margin-top: 5px; }
+.sub-warn { font-size: 0.9rem; color: #fbbf24; }
+.sub-cons { font-size: 0.9rem; color: #fca5a5; }
+.sub-buy-btn { margin-top: auto; padding: 14px; border: none; border-radius: 15px; background: linear-gradient(135deg, #a855f7, #c084fc); color: white; font-size: 1rem; font-weight: 700; cursor: pointer; transition: all 0.3s ease; }
+.sub-buy-btn:hover { transform: scale(1.05); box-shadow: 0 5px 20px rgba(168,85,247,.6); }
+.sub-buy-btn:disabled { opacity: 0.5; cursor: not-allowed; background: rgba(168,85,247,.3); }
+
+.modal { position: fixed; inset: 0; background: rgba(0,0,0,.85); display: none; justify-content: center; align-items: center; z-index: 9999; backdrop-filter: blur(15px); }
+.modal.visible { display: flex; }
+.modal-box { width: 90%; max-width: 500px; padding: 40px; background: rgba(20,5,40,.95); border: 2px solid rgba(168,85,247,.7); border-radius: 28px; text-align: center; color: white; box-shadow: 0 20px 60px rgba(0,0,0,.7); }
+.modal-box h2 { margin-bottom: 20px; font-size: 1.8rem; }
+.modal-box p { margin-bottom: 20px; opacity: 0.85; line-height: 1.6; }
+.modal-btn { padding: 15px 40px; border: none; border-radius: 30px; background: linear-gradient(135deg, #a855f7, #c084fc); color: white; font-size: 1rem; font-weight: 800; cursor: pointer; transition: transform 0.2s ease; margin: 5px; }
+.modal-btn:hover { transform: scale(1.05); }
+.modal-btn.success { background: linear-gradient(135deg, #22c55e, #16a34a); }
+
+body.special-anims .store-header h1 { animation: titleGlow 3s infinite; }
+@keyframes titleGlow { 0%, 100% { filter: drop-shadow(0 0 10px rgba(168,85,247,.3)); } 50% { filter: drop-shadow(0 0 30px rgba(168,85,247,.8)); } }
+body.special-anims .sub-card { animation: cardAppear 0.6s ease-out backwards; }
+body.special-anims .sub-card:nth-child(1) { animation-delay: 0.1s; }
+body.special-anims .sub-card:nth-child(2) { animation-delay: 0.2s; }
+body.special-anims .sub-card:nth-child(3) { animation-delay: 0.3s; }
+body.special-anims .sub-card:nth-child(4) { animation-delay: 0.4s; }
+body.special-anims .sub-card:nth-child(5) { animation-delay: 0.5s; }
+@keyframes cardAppear { from { opacity: 0; transform: translateY(30px) scale(0.9); } to { opacity: 1; transform: translateY(0) scale(1); } }
+</style>
+</head>
+
+<body>
+
+<div class="store-header">
+    <h1>🛒 Hypersklep</h1>
+    <p>Oficjalny sklep NewOS - subskrypcje kont</p>
+</div>
+
+<div class="store-section">
+    <h2 class="section-title">💎 Subskrypcje</h2>
+    <div class="sub-grid" id="sub-grid"></div>
+</div>
+
+<div class="modal" id="payment-modal">
+    <div class="modal-box">
+        <h2 id="payment-title">💳 Płatność</h2>
+        <p id="payment-desc">Potwierdź zakup</p>
+        <button class="modal-btn success" onclick="confirmPayment()">Zapłać</button>
+        <button class="modal-btn" onclick="closeModal('payment-modal')">Anuluj</button>
+    </div>
+</div>
+
+<script>
+let state = {
+    currentPlan: localStorage.getItem("newos_plan") || "Normal",
+    specialAnimations: localStorage.getItem("newos_specialAnimations") === "true"
+};
+
+window.addEventListener("message", (e) => {
+    if (e.data && e.data.type === "state") { state = { ...state, ...e.data.state }; updateUI(); }
+});
+if (window.parent !== window) window.parent.postMessage({ type: "getState", from: "hypersklep" }, "*");
+window.addEventListener("storage", (e) => { if (e.key.startsWith("newos_")) { loadState(); updateUI(); } });
+
+function loadState() {
+    state.currentPlan = localStorage.getItem("newos_plan") || "Normal";
+    state.specialAnimations = localStorage.getItem("newos_specialAnimations") === "true";
+}
+
+function saveState() {
+    localStorage.setItem("newos_plan", state.currentPlan);
+}
+
+function updateUI() {
+    renderSubscriptions();
+    if (state.specialAnimations) document.body.classList.add("special-anims");
+    else document.body.classList.remove("special-anims");
+}
+
+const subscriptions = [
+    { id: "Normal", name: "Normal", price: 20, period: "/ start", desc: "Subskrypcja do pracy, grania i wyluzowania się. Po roku cena zmienia się na $50.", warn: "⚠️ Haczyk: jeśli temperatura procesora przekroczy 80°C, system wyrzuci Recovery Screen." },
+    { id: "Pro", name: "Pro", price: 500, period: "/ mies.", desc: "Bezpieczny plan stworzony z myślą o pracy, programowaniu i testowaniu.", features: ["✔ Sandbox", "✔ Zaawansowany antywirus"], cons: ["✘ Blokuje gry"] },
+    { id: "Pro+", name: "Pro+ 🎮", price: 700, period: "/ mies. (od)", desc: "Wersja bezkompromisowa: od kodu po najnowsze gry.", features: ["✔ Cena spada o $50/mies. aż do $100", "✔ Brak limitów temperatur", "✔ Pełna swoboda gamingu"] },
+    { id: "Ultimate+", name: "Ultimate+ 🚀", price: 1200, period: "/ mies.", desc: "Kompletny pakiet pod maksymalną wydajność.", features: ["✔ Praca i gry", "✔ Antywirus", "✔ Auto-optymalizacja", "✔ Darmowe programy"] },
+    { id: "Deluxe+", name: "Deluxe+ 👑", price: 2000, period: "/ mies.", desc: "Najwyższy plan - potęga wszystkich opcji.", features: ["✔ Sandboxy + darmowe programy", "✔ Brak błędu 80°C", "✔ Kręć CPU na maksa bez obaw"] }
+];
+
+function renderSubscriptions() {
+    document.getElementById("sub-grid").innerHTML = subscriptions.map(sub => {
+        const isCurrent = state.currentPlan === sub.id;
+        return `<div class="sub-card ${isCurrent?'current':''}">
+            <h3>${sub.name}</h3>
+            <div class="sub-price">$${sub.price} <span>${sub.period}</span></div>
+            <div class="sub-desc">${sub.desc}</div>
+            ${sub.features?'<div class="sub-features">'+sub.features.join('<br>')+'</div>':''}
+            ${sub.warn?'<div class="sub-warn">'+sub.warn+'</div>':''}
+            ${sub.cons?'<div class="sub-cons">'+sub.cons.join('<br>')+'</div>':''}
+            <button class="sub-buy-btn" onclick="buySubscription('${sub.id}',${sub.price},'${sub.name}')" ${isCurrent?'disabled':''}>${isCurrent?'✅ Aktualny plan':'Kup za $'+sub.price}</button>
+        </div>`;
+    }).join("");
+}
+
+let pendingPurchase = null;
+
+function buySubscription(id, price, name) {
+    pendingPurchase = { type: "subscription", id, name, price };
+    document.getElementById("payment-title").textContent = `💳 ${name}`;
+    document.getElementById("payment-desc").innerHTML = `Subskrypcja <strong>${name}</strong> za <strong>$${price}</strong>. Kontynuować?`;
+    document.getElementById("payment-modal").classList.add("visible");
+}
+
+function confirmPayment() {
+    if (!pendingPurchase) return;
+    closeModal("payment-modal");
+    
+    if (pendingPurchase.type === "subscription") {
+        state.currentPlan = pendingPurchase.id;
+        saveState();
+        if (window.parent !== window) {
+            window.parent.postMessage({ type: "setState", state: { currentPlan: state.currentPlan } }, "*");
+            window.parent.postMessage({ type: "showToast", text: `✅ ${pendingPurchase.name} aktywowana!` }, "*");
+        }
+    }
+    pendingPurchase = null;
+    updateUI();
+}
+
+function closeModal(id) { document.getElementById(id).classList.remove("visible"); }
+
+loadState();
+updateUI();
+</script>
+</body>
+</html>
