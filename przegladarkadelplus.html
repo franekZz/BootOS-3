@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Segoe UI', Arial, sans-serif; background: transparent; color: white; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+
+.browser-bar { padding: 15px; background: rgba(0,0,0,.5); display: flex; gap: 10px; border-bottom: 1px solid rgba(168,85,247,.3); flex-shrink: 0; }
+.browser-input { flex: 1; padding: 12px 20px; background: rgba(255,255,255,.1); border: 2px solid rgba(168,85,247,.4); border-radius: 25px; color: white; font-size: 1rem; transition: border-color 0.3s ease; }
+.browser-input:focus { outline: none; border-color: #a855f7; }
+.browser-btn { padding: 12px 25px; background: linear-gradient(135deg, #a855f7, #c084fc); border: none; border-radius: 25px; color: white; font-weight: 700; cursor: pointer; transition: transform 0.2s ease; }
+.browser-btn:hover { transform: scale(1.05); }
+
+.browser-content { flex: 1; padding: 30px; overflow-y: auto; }
+.browser-content::-webkit-scrollbar { width: 8px; }
+.browser-content::-webkit-scrollbar-track { background: rgba(0,0,0,.2); border-radius: 10px; }
+.browser-content::-webkit-scrollbar-thumb { background: rgba(168,85,247,.5); border-radius: 10px; }
+
+.search-result { padding: 20px; background: rgba(168,85,247,.1); border: 2px solid rgba(168,85,247,.3); border-radius: 18px; margin-bottom: 15px; cursor: pointer; transition: background 0.3s ease; }
+.search-result:hover { background: rgba(168,85,247,.2); border-color: #a855f7; }
+.result-title { font-size: 1.2rem; font-weight: 700; color: #c084fc; margin-bottom: 5px; }
+.result-url { font-size: 0.85rem; opacity: 0.6; margin-bottom: 10px; }
+.result-desc { font-size: 0.95rem; opacity: 0.8; }
+
+/* Hypersklep iframe */
+.hypersklep-frame { width: 100%; height: 100%; border: none; background: white; border-radius: 15px; }
+
+/* Animacje specjalne */
+body.special-anims .search-result { animation: resultAppear 0.5s ease-out backwards; transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55); }
+body.special-anims .search-result:nth-child(1) { animation-delay: 0.1s; }
+body.special-anims .search-result:nth-child(2) { animation-delay: 0.2s; }
+@keyframes resultAppear { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+body.special-anims .search-result:hover { transform: scale(1.03) translateX(10px); box-shadow: 0 5px 20px rgba(168,85,247,.4); }
+body.special-anims .search-result::before { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(168,85,247,.2), transparent); transition: left 0.6s; }
+body.special-anims .search-result:hover::before { left: 100%; }
+body.special-anims .search-result { position: relative; overflow: hidden; }
+body.special-anims .browser-input:focus { box-shadow: 0 0 20px rgba(168,85,247,.5), inset 0 0 10px rgba(168,85,247,.2); transform: scale(1.02); }
+body.special-anims .browser-btn { position: relative; overflow: hidden; }
+body.special-anims .browser-btn::before { content: ''; position: absolute; top: 50%; left: 50%; width: 0; height: 0; background: rgba(255,255,255,.3); border-radius: 50%; transform: translate(-50%, -50%); transition: width 0.6s, height 0.6s; }
+body.special-anims .browser-btn:hover::before { width: 300px; height: 300px; }
+</style>
+</head>
+<body>
+
+<div class="browser-bar">
+    <input type="text" class="browser-input" id="browser-search" placeholder="Szukaj w internecie...">
+    <button class="browser-btn" onclick="performSearch()">Szukaj</button>
+</div>
+<div class="browser-content" id="browser-content">
+    <h2 style="margin-bottom:20px">Witaj w Hyper Internet!</h2>
+    <p style="opacity:0.7">Wpisz coś w wyszukiwarkę aby rozpocząć.</p>
+</div>
+
+<script>
+let state = {};
+
+window.addEventListener("message", (e) => {
+    if (e.data && e.data.type === "state") {
+        state = e.data.state;
+        applySpecialAnims();
+    }
+    if (e.data && e.data.type === "openHypersklep") {
+        openHypersklep();
+    }
+});
+
+window.parent.postMessage({ type: "getState", from: "browser-iframe" }, "*");
+
+window.addEventListener("storage", (e) => {
+    if (e.key === "newos_specialAnimations") {
+        window.parent.postMessage({ type: "getState", from: "browser-iframe" }, "*");
+    }
+});
+
+function applySpecialAnims() {
+    if (state.specialAnimations) {
+        document.body.classList.add("special-anims");
+    } else {
+        document.body.classList.remove("special-anims");
+    }
+}
+
+function performSearch() {
+    const q = document.getElementById("browser-search").value.toLowerCase().trim();
+    const c = document.getElementById("browser-content");
+    
+    if (q.includes("newos block")) {
+        c.innerHTML = `
+            <h2 style="margin-bottom:20px">Wyniki dla: "${q}"</h2>
+            <div class="search-result" onclick="clickFirstLink()">
+                <div class="result-title">NewOS BLOCK - Oficjalna strona</div>
+                <div class="result-url">https://newos-block.official.com</div>
+                <div class="result-desc">Oficjalna strona NewOS BLOCK - Livery, ustawienia i więcej.</div>
+            </div>
+            <div class="search-result" onclick="clickSecondLink()">
+                <div class="result-title">Free Wallpaper Pack 2026</div>
+                <div class="result-url">https://free-wallpapers-2026.download/pack</div>
+                <div class="result-desc">Najnowsze tapety w wysokiej jakości. Pobierz teraz!</div>
+            </div>
+        `;
+    } else {
+        c.innerHTML = `<h2>Brak wyników dla "${q}"</h2><p style="opacity:0.7;margin-top:10px">Spróbuj wpisać: newos block</p>`;
+    }
+}
+
+document.getElementById("browser-search").addEventListener("keypress", e => {
+    if (e.key === "Enter") performSearch();
+});
+
+function clickFirstLink() {
+    // Wyślij do rodzica żeby sprawdził Metal Security
+    window.parent.postMessage({ type: "securityBlock" }, "*");
+}
+
+function clickSecondLink() {
+    window.parent.postMessage({ type: "virusDetected" }, "*");
+}
+
+function openHypersklep() {
+    const c = document.getElementById("browser-content");
+    c.innerHTML = `<iframe class="hypersklep-frame" src="hypersklep.html"></iframe>`;
+}
+</script>
+</body>
+</html>
